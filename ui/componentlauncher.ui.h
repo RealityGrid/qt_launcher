@@ -214,8 +214,10 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
     	sgsUserNameLineEdit->setText(QString(getenv("USER")));
 
       // Get the current date and time
-      QDateTime dt = QDateTime::currentDateTime();
-      sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate));
+      QDateTime dt = QDateTime::currentDateTime(Qt::UTC);
+      // We add a "Z" because that's what the XML schema date-time format
+      // uses to indicate a UTC date time.
+      sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate)+"Z");
       
       if(!mConfig->restart && !mConfig->migration){
         Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
@@ -327,6 +329,13 @@ void ComponentLauncher::accept(){
     mConfig->mJobData->mLaunchTime = sgsCreationTimeLineEdit->text();
     mConfig->mJobData->mSoftwareDescription = sgsSoftwarePackageLineEdit->text();
     mConfig->mJobData->mPurposeOfJob = tagTextEdit->text();
+    if(mConfig->mAppToLaunch->mIsViz){
+      mConfig->mJobData->mMachineName = mConfig->mTargetMachine->mName;
+    }
+    else{
+      mConfig->mJobData->mMachineName = mConfig->mTargetMachine->mName;
+    }
+    mConfig->mJobData->mNumProc = QString::number(mConfig->mNumberProcessors);
 
     done(1);
 }
