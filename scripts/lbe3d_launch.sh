@@ -40,9 +40,6 @@
 # Instead source the GUI generated configuration file
 . $1
 
-# Launching technique: cog, globus or ssh
-#ReG_LAUNCH=globus
-
 # Setup a few Variables for use later on...
 # Firstly: Get the time to run
 
@@ -138,11 +135,7 @@ echo "Transferring simulation input file..."
 
 if [ $CHECKPOINT_GSH ]
 then 
-# Build RSL
-#  echo "&(executable="/home/zzcgurp/RealityGrid/bin/rg-cp")(arguments="-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH")" > /tmp/rgcp.rsl
-#  echo "Calling MM's rgcpc script on Bezier..."
-#  $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun bezier.man.ac.uk jobmanager-fork /tmp/rgcp.rsl 
-${HOME}/RealityGrid/bin/rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+./rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
 fi
 
 case $ReG_LAUNCH in
