@@ -61,21 +61,6 @@ LauncherConfig::LauncherConfig(){
   vizTimeToRun = 30;
 
   mJobData = new JobMetaData;
-/*
-  topLevelRegistryGSH = "https://maise.mvc.mcc.ac.uk:50000/1023421312312932";
-  simComponentType = lb3d;
-  simTargetMachine = "fermat.cfs.ac.uk";
-  simNumberProcessors = 8;
-
-  vizComponentType = lb3dviz;
-  vizTargetMachine = "bezier.man.ac.uk";
-  vizNumberProcessors = 4;
-  vizNumberPipes = 1;
-  vizServer = true;
-
-  simTag = "here's some default sim tag text";
-  vizTag = "and here's some viz tag text";
-*/
 }
 
 LauncherConfig::LauncherConfig(QString file){
@@ -83,6 +68,7 @@ LauncherConfig::LauncherConfig(QString file){
 }
 
 LauncherConfig::~LauncherConfig(){
+	delete mJobData;
 }
 
 /** Method loads a configuration xml file, and parses it to
@@ -98,6 +84,7 @@ void LauncherConfig::readConfig(QString file){
   xmlNodePtr containers;
   xmlNodePtr targets;
   xmlNodePtr vizTargets;
+  xmlNodePtr applications;
 
   // Load it in and parse it with libxml2
   doc = xmlParseFile(file.latin1());
@@ -256,7 +243,6 @@ void LauncherConfig::readConfig(QString file){
         if (!xmlStrcmp(containers->name, (const xmlChar*)"container")){
           xmlChar *containerName = xmlNodeListGetString(doc, containers->xmlChildrenNode, 1);
           xmlChar *port = xmlGetProp(containers, (const xmlChar*)"port");
-          //containerList += (const char*)containerName;
           Container tContainer((const char*)containerName, QString((const char*)port).toInt());
           containerList += tContainer;
           xmlFree(containerName);
@@ -306,6 +292,32 @@ void LauncherConfig::readConfig(QString file){
     if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
       globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
     }
+
+    if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"applications")){
+
+      applications = childOfRoot->xmlChildrenNode;
+
+      while(applications != NULL){
+
+        if(!xmlStrcmp(applications->name, (const xmlChar*)"application")){
+          xmlChar *appName = xmlGetProp(applications, (const xmlChar*)"name");
+          xmlChar *appNumInputs = xmlGetProp(applications, (const xmlChar*)"inputs");
+          
+          Application tApplication((const char*)appName,
+                                   QString((const char*)appNumInputs).toInt());
+          applicationList += tApplication;
+
+          xmlFree(appName);
+          xmlFree(appNumInputs);
+        }
+
+        applications = applications->next;
+      }
+    }
+
+    //for ( int i = 0; i < applicationList.count(); i++ )
+    //    cout << applicationList[i].mAppName.latin1() << ", " <<
+    //            applicationList[i].mNumInputs << endl;
 
     childOfRoot = childOfRoot->next;
     

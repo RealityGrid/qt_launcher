@@ -79,6 +79,20 @@ class Container {
     ~Container(){}
 };
 
+class Application {
+
+  public:
+    QString mAppName;
+    int     mNumInputs;
+
+    Application(){};
+    Application(const QString aName, const int aNumInputs){
+      mAppName = aName;
+      mNumInputs = aNumInputs;
+    }
+    ~Application(){}
+};
+
 class LauncherConfig {
   public:
 
@@ -121,16 +135,15 @@ class LauncherConfig {
     int simTimeToRun;
     int vizTimeToRun;
     
-    //QStringList containerList;
     QValueList<Container> containerList;
     QStringList machineList;
     QStringList vizMachineList;
     QString selectedContainer;
     int containerPortNum;
-
     QString globusLocation;
+    QValueList<Application> applicationList;
 
-  // Methods
+    // Methods
 
     LauncherConfig();
     LauncherConfig(QString file);
