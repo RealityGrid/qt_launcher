@@ -71,6 +71,7 @@ xhost + $VIZ_HOSTNAME
 # Setup some variables
 
 REG_TMP_FILE=/tmp/reg_viz_remote.$$
+REG_RSL_FILE=/tmp/sim_stage.$$.rsl
 #REG_SGS_ADDRESS=$REG_VIS_GSH
 #export REG_SGS_ADDRESS VIZ_HOSTNAME REG_TMP_FILE
 export VIZ_HOSTNAME REG_TMP_FILE
@@ -120,9 +121,9 @@ fi
 
 # Build RSL
 
-echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$VIZ_STD_OUT_FILE)(stderr=$VIZ_STD_ERR_FILE)" > /tmp/viz_stage.rsl
+echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$VIZ_STD_OUT_FILE)(stderr=$VIZ_STD_ERR_FILE)" > $REG_RSL_FILE
 
-$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $VIZ_HOSTNAME jobmanager-fork /tmp/viz_stage.rsl $VIZ_USER
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $VIZ_HOSTNAME jobmanager-fork $REG_RSL_FILE $VIZ_USER
 
 if [ $? -gt "0" ]
 then
