@@ -179,7 +179,7 @@ void RegLauncher::migrateSimSlot()
     // we need to copy the selected/edited input file to the target machine
     QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
 
-    config.lb3dInputFileName = inputFileName;
+    config.mInputFileName = inputFileName;
 
     // and so we can launch the migration version of the component
     // launcher in order to find out where we're going to move the
@@ -229,8 +229,6 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   if (soap_call_tree__getInputFile(&soap, checkPointGSH, "", inputFileResponse))
     soap_print_fault(&soap, stderr);
   else{
-    //if (result == NULL)
-    //  result = new QString();
     result = inputFileResponse->_getInputFileReturn;
   }
 
@@ -295,21 +293,21 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
 void RegLauncher::patchNamdInputFileText(QString &inputFileText,
                                          QString &chkUIDString)
 {
-// NEEDS WRITING!
+  /* Get the filestem from the chkUIDString
 
-/* Get the filestem from the chkUIDString
-
-*/
+  chkUIDString = chkUIDString.SOMETHING;
+  */
+  
   // Generate the names of the three restart files
-  QString coordName = QString("bincoordinates");
+  QString coordName = QString("coordinates");
           coordName += "           " + chkUIDString + ".coor\n";
-  QString velName = QString("binvelocities");
+  QString velName = QString("velocities");
           velName += "           " + chkUIDString + ".vel\n";
   QString extSysName = QString("extendedSystem");
           extSysName += "           " + chkUIDString + ".xsc\n";
   
   int nextLine = 0;
-  int index = inputFileText.find("bincoordinates");
+  int index = inputFileText.find("coordinates");
   if(index > 0){
     // Replace exisiting line
     nextLine = inputFileText.find("\n", index);
@@ -326,7 +324,7 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     }
   }
 
-  index = inputFileText.find("binvelocities");
+  index = inputFileText.find("velocities");
   if(index > 0){
     // Replace exisiting line
     nextLine = inputFileText.find("\n", index);
@@ -342,7 +340,6 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
       inputFileText = inputFileText.left(nextLine) + "\n" + velName + inputFileText.right(nextLine);
     }
   }
-
 
   index = inputFileText.find("extendedSystem");
   if(index > 0){
@@ -361,6 +358,30 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     }
   }
 
+  // We're specifying velocities so we musn't try and specify a temperature
+  index = inputFileText.find("temperature");
+  if(!(index == 0 || inputFileText.at(index-1) == '#')){
+
+    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+  }
+
+  // We're specifying the basis vectors in a file so comment out if in input deck
+  index = inputFileText.find("cellBasisVector1");
+  if(!(index == 0 || inputFileText.at(index-1) == '#')){
+
+    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+  }
+  index = inputFileText.find("cellBasisVector2", ++index);
+  if(!(inputFileText.at(index-1) == '#')){
+
+    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+  }
+  index = inputFileText.find("cellBasisVector3", ++index);
+  if(!(inputFileText.at(index-1) == '#')){
+
+    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+  }
+  
   cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
 }
 
@@ -417,6 +438,23 @@ void RegLauncher::launchSimSlot()
     	consoleOutSlot("Failed to get UID of checkpoint from metadata");
      	return;
     }
+
+    // Work out which of the applications is being restarted
+    config.mAppToLaunch = NULL;
+    for(int i=0; i<config.applicationList.count(); i++){
+      // IMPORTANT - this will require more care if we want to match up
+      // version numbers rather than crudely checking the app name
+      if(appName.contains(config.applicationList[i].mAppName, FALSE) == 1){
+        config.mAppToLaunch = &(config.applicationList[i]);
+        break;
+      }
+    }
+    if(!config.mAppToLaunch){
+
+    	consoleOutSlot("Failed to match name of application used to create checkpoint"
+                     "with those listed in default.conf");
+     	return;
+    }
     
     if(appName.contains("lbe3d", FALSE) == 1){
       patchLb3dInputFileText(inputFileText, checkUIDString);
@@ -429,7 +467,7 @@ void RegLauncher::launchSimSlot()
     // we need to copy the selected/edited input file to the target machine
     QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
 
-    config.lb3dInputFileName = inputFileName;
+    config.mInputFileName = inputFileName;
 
     //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
 
@@ -458,7 +496,7 @@ void RegLauncher::launchSimSlot()
   
     componentLauncher->getInputFileTextEditText(&inputFileText);
     
-    QFile inputFile( config.lb3dInputFileName );
+    QFile inputFile( config.mInputFileName );
     if ( inputFile.open( IO_WriteOnly ) ) {
       QTextStream stream( &inputFile );
       stream << inputFileText;
@@ -508,10 +546,10 @@ void RegLauncher::commonLaunchCode(){
 
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
-      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
+      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.mInputFileName, config.treeTag);
     }
     else{
-      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
+      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.mInputFileName, "");
     }
       
     // Check that the sgs was created properly, if not die

@@ -207,9 +207,15 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
       // Get the current date and time
       QDateTime dt = QDateTime::currentDateTime();
       sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate));
-
-      Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
-      sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
+      
+      if(!mConfig->restart){
+        Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+        sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
+      }
+      else{
+        // If we're restarting then the application to launch is already set
+        sgsSoftwarePackageLineEdit->setText(mConfig->mAppToLaunch->mAppName);
+      }
     }
     else if(string == title(page(6))){
     
@@ -237,8 +243,11 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 void ComponentLauncher::accept(){
 
     // Store ptr to chosen application
-    mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
- 	  // Target machine
+    if(!mConfig->restart){
+      // If this is a restart then the app to launch is already set
+      mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
+    }
+    // Target machine
     mConfig->mTargetMachine = targetMachineListBox->currentText();
     // Number processors
     mConfig->mNumberProcessors = numProcLineEdit->text().toInt();
@@ -255,7 +264,7 @@ void ComponentLauncher::accept(){
 
 	  // Input file name
 	  if (mConfig->mAppToLaunch->mHasInputFile && simInputLineEdit->text().length() != 0){
-	    mConfig->lb3dInputFileName = simInputLineEdit->text();
+	    mConfig->mInputFileName = simInputLineEdit->text();
 	  }
 
 	  // Tree tag
