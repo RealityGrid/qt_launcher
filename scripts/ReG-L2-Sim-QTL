@@ -114,6 +114,8 @@ echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> /tmp/reg_sim_rem
 echo "chmod a+w .reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> /tmp/reg_sim_remote.$$
 echo "export UC_PROCESSORS" >> /tmp/reg_sim_remote.$$
+echo "TIME_TO_RUN=$TIME_TO_RUN" >> /tmp/reg_sim_remote.$$
+echo "export TIME_TO_RUN" >> /tmp/reg_sim_remote.$$
 echo "GS_INFILE=.reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 echo "export GS_INFILE" >> /tmp/reg_sim_remote.$$
 echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> /tmp/reg_sim_remote.$$
@@ -172,10 +174,10 @@ then
           globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -m $TIME_TO_RUN -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        fermat.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -m $TIME_TO_RUN -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        wren.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf -m $TIME_TO_RUN -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        *)
           globus-job-run $SIM_HOSTNAME/jobmanager-fork -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
