@@ -50,13 +50,19 @@ case $SIM_HOSTNAME in
 	$REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
 	exit
           ;;
-       lemieux.psc.edu)
-        # Specify our dedicated queue if launching on lemieux
-        echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=\"/usr/users/7/aporter/RealityGrid/out$$\")(stderr=\"/usr/users/7/aporter/RealityGrid/err$$\")(count=$SIM_PROCESSORS)(queue=\"escience\")" > $REG_RSL_FILE
-          ;;
+#       lemieux.psc.edu)
+#        # Specify our dedicated queue if launching on lemieux
+#        echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=\"/usr/users/7/aporter/RealityGrid/out$$\")(stderr=\"/usr/users/7/aporter/RealityGrid/err$$\")(count=$SIM_PROCESSORS)(queue=\"escience\")" > $REG_RSL_FILE
+#          ;;
        *)
-        # Otherwise don't specify any queue
-        echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))" > $REG_RSL_FILE
+        if [ "$HOST_QUEUE" != "none" ]
+        then
+          # Use named queue
+          echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(queue=\"$HOST_QUEUE\")(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))" > $REG_RSL_FILE
+        else
+          # Use default queue
+          echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))" > $REG_RSL_FILE
+        fi
           ;;
 esac
 

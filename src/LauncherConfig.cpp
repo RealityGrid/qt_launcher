@@ -263,15 +263,18 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *machineName = xmlGetProp(targets, (const xmlChar*)"name");
           xmlChar *machineOS = xmlGetProp(targets, (const xmlChar*)"os");
           xmlChar *machineJobManager = xmlGetProp(targets, (const xmlChar*)"jobmanager");
-
+          xmlChar *machineQueue = xmlGetProp(targets, (const xmlChar*)"queue");
+          
           Machine tMachine((const char*)machineName,
                            (const char*)machineJobManager,
-                           (const char*)machineOS);
+                           (const char*)machineOS,
+                           (const char*)machineQueue);
           machineList += tMachine;
 
           xmlFree(machineName);
           xmlFree(machineOS);
           xmlFree(machineJobManager);
+          xmlFree(machineQueue);
         }
 
         targets = targets->next;
@@ -288,15 +291,19 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *vizMachineName = xmlGetProp(vizTargets, (const xmlChar*)"name");
           xmlChar *vizMachineOS = xmlGetProp(vizTargets, (const xmlChar*)"os");
           xmlChar *vizMachineJobManager = xmlGetProp(vizTargets, (const xmlChar*)"jobmanager");
-
+          xmlChar *vizMachineQueue = xmlGetProp(vizTargets, (const xmlChar*)"queue");
+          
           Machine tMachine((const char*)vizMachineName,
                            (const char*)vizMachineJobManager,
-                           (const char*)vizMachineOS);
+                           (const char*)vizMachineOS,
+                           (const char*)vizMachineQueue);
+                           
           vizMachineList += tMachine;
           
           xmlFree(vizMachineName);
           xmlFree(vizMachineOS);
           xmlFree(vizMachineJobManager);
+          xmlFree(vizMachineQueue);
         }
 
         vizTargets = vizTargets->next;

@@ -130,10 +130,6 @@ else
    echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE" >> $REG_TMP_FILE
 fi
 
-# Build RSL
-
-#echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)" > $REG_RSL_FILE
-
 # Start the simulation using the script created above
 
 echo "Starting simulation..."

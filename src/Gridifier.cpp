@@ -299,6 +299,8 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
     fileText += "# Couldn't find a globus location in the default.conf\n# Going with the default environment if it is set\n";
   fileText += "SIM_HOSTNAME="+config.mTargetMachine->mName+"\n";
   fileText += "HOST_JOB_MGR="+config.mTargetMachine->mJobManager+"\n";
+  fileText += "HOST_QUEUE="+config.mTargetMachine->mQueue+"\n";
+  fileText += "export HOST_QUEUE\n";
   fileText += "SIM_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
   fileText += "SIM_INFILE="+config.mInputFileName+"\n\n";
   fileText += QString("SIM_USER=")+getenv("USER")+"\n";
