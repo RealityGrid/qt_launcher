@@ -48,7 +48,7 @@ case $ReG_LAUNCH in
     ;;
     cog)
      echo "Using COG globus"
-     $COG_INSTALL_PATH/bin/globusrun $5 -s -r $HOST/$JOBMGR -f $REG_RSL &
+     $COG_INSTALL_PATH/bin/globusrun -s -r $HOST/$JOBMGR -f $REG_RSL &
     ;;
     ssh)
         chmod a+x $REG_TMP_FILE
@@ -56,6 +56,6 @@ case $ReG_LAUNCH in
         ssh -f $USER@$HOST $REG_TMP_FILE
     ;;
     *)
-     echo "Usage: ./reg_globusrun  host jobmanager -f file.rsl"
+     echo "Usage: ./reg_globusrun host jobmanager file.rsl"
     ;;
 esac
