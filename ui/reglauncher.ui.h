@@ -293,6 +293,12 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
           velName += "           " + chkUIDString + ".vel\n";
   QString extSysName = QString("extendedSystem");
           extSysName += "           " + chkUIDString + ".xsc\n";
+  // structure file
+  QString structName = QString("structure");
+          structName += "           " + chkUIDString + ".psf\n";
+  // parameters file
+  QString paramName = QString("parameters");
+          paramName += "           " + chkUIDString + ".inp\n";
   
   int nextLine = 0;
   int index = inputFileText.find("coordinates");
@@ -369,7 +375,43 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
 
     inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
   }
-  
+
+  // structure file
+  index = inputFileText.find("structure");
+  if(index > 0){
+    // Replace exisiting line
+    nextLine = inputFileText.find("\n", index);
+    if (nextLine > index){
+      inputFileText = inputFileText.left(index) + structName + inputFileText.right(inputFileText.length() - nextLine - 1);
+    }
+  }
+  else{
+    // Insert new line
+    index = inputFileText.find("coordinates");
+    if(index > 0){
+      nextLine = inputFileText.find("\n", index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + structName + inputFileText.right(nextLine);
+    }
+  }
+
+  // parameters file
+  index = inputFileText.find("parameters");
+  if(index > 0){
+    // Replace exisiting line
+    nextLine = inputFileText.find("\n", index);
+    if (nextLine > index){
+      inputFileText = inputFileText.left(index) + paramName + inputFileText.right(inputFileText.length() - nextLine - 1);
+    }
+  }
+  else{
+    // Insert new line
+    index = inputFileText.find("coordinates");
+    if(index > 0){
+      nextLine = inputFileText.find("\n", index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + paramName + inputFileText.right(nextLine);
+    }
+  }
+
   cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
 }
 
