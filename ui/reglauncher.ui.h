@@ -22,6 +22,7 @@
 #include "LauncherConfig.h"
 #include "JobStatusThread.h"
 #include "ProgressBarThread.h"
+#include "launcherstatusbar.h"
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
@@ -29,9 +30,9 @@
 // gSoap
 #include "checkPointTreeH.h"
 
-
 using namespace std;
 
+LauncherStatusBar *mStatusBar = NULL;
 QProcess *proxyStatus = NULL;
 LauncherConfig config;
 CheckPointTree *cpt = NULL;
@@ -44,6 +45,7 @@ int checkPointTreeListViewPreviousSelection = -1;
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
+  mStatusBar = new LauncherStatusBar(this, "Launcher Status Bar");
 }
 
 void RegLauncher::setApplication(QApplication *aApplication){
@@ -457,7 +459,8 @@ void RegLauncher::commonLaunchCode(){
                                 config);
     }
     
-    JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.simulationGSH);
+    JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, mStatusBar,
+                                                            config.simulationGSH);
     aJobStatusThread->start();
 
   }
