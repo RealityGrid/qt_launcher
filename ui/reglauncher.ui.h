@@ -571,8 +571,6 @@ void RegLauncher::commonLaunchCode(){
   if (config.mAppToLaunch->mNumInputs == 0){
   
     // No data sources....
-    
-    consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
