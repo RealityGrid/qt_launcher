@@ -3,7 +3,7 @@
 # This script assumes that you want the windows to appear back on the machine you ran it from
 # $1 is the maximum amount of time you want in minutes
 
-DISP=$HOSTNAME:0.0
+DISP=${HOSTNAME}${DISPLAY}
 echo $DISP
 
 if [ $# -ne 4 ]; then
