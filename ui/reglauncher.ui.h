@@ -45,6 +45,14 @@ int checkPointTreeListViewPreviousSelection = -1;
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
+
+  // Cludge - hide the status bar that comes with the main
+  // window by default (unfortunately we lose our menu-item tool tips)...
+  // (I think that to do this properly would require generating a sub-class
+  // of QMainWindow and making its status bar a LauncherStatusBar.)
+  statusBar()->hide();
+  // ...and make our own to accept custom events that we post
+  // from the JobStatusThread
   mStatusBar = new LauncherStatusBar(this, "Launcher Status Bar");
 }
 
