@@ -104,13 +104,16 @@ class Machine {
     QString mName;
     QString mJobManager;
     QString mOS;
+    QString mQueue;
     
     Machine(){};
-    Machine(const QString aName, const QString aJobManager, const QString aOS){
+    Machine(const QString aName, const QString aJobManager,
+            const QString aOS, const QString aQ){
       mName = aName;
       mJobManager = aJobManager;
       mOS = aOS;
-      //cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << endl;
+      mQueue = aQ;
+      cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << " queue="<< aQ << endl;
     }
     ~Machine(){}
 };

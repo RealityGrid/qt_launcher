@@ -48,6 +48,7 @@
 #include "qmdcodec.h"
 #include <qdom.h>
 #include <qfile.h>
+#include <qmessagebox.h>
 
 using namespace std;
 
@@ -265,6 +266,16 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *machineJobManager = xmlGetProp(targets, (const xmlChar*)"jobmanager");
           xmlChar *machineQueue = xmlGetProp(targets, (const xmlChar*)"queue");
           
+          if(!machineQueue){
+
+            QMessageBox::warning( NULL, "Error parsing configuration file",
+                    "No queue associated with machine "+QString((char*)machineName)+": you have "
+                    "an old default.conf file.\nAssuming queue=\"none\" for this machine.\n\n",
+                    QMessageBox::Ok, 0, 0 );
+                    machineQueue = (xmlChar*)xmlMalloc(8);
+                    sprintf((char *)machineQueue, "none");
+          }
+ 
           Machine tMachine((const char*)machineName,
                            (const char*)machineJobManager,
                            (const char*)machineOS,
