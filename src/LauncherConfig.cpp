@@ -130,7 +130,14 @@ void LauncherConfig::readConfig(QString file){
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"topLevelRegistry"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           topLevelRegistryGSH = QString((const char*)key);
-		      xmlFree(key);
+	  xmlFree(key);
+        }
+
+	// CheckpointTreeFactory address
+        if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"checkPointTreeFactory"))) {
+          xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
+          checkPointTreeFactoryGSH = QString((const char*)key);
+	  xmlFree(key);
         }
 
         // Registry of Factories

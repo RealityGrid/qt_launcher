@@ -113,7 +113,7 @@ class Machine {
       mJobManager = aJobManager;
       mOS = aOS;
       mQueue = aQ;
-      cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << " queue="<< aQ << endl;
+      //cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << " queue="<< aQ << endl;
     }
     ~Machine(){}
 };
@@ -125,6 +125,7 @@ class LauncherConfig {
   
     // Grid Service Handles for the various components
     QString topLevelRegistryGSH;
+    QString checkPointTreeFactoryGSH;
     QString registryOfFactoriesGSH;
     QString SGSFactoryGSH;
     QString SGSGSH;

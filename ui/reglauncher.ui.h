@@ -756,7 +756,7 @@ void RegLauncher::discoverySlot()
   checkPointTreeListView->clearSelection();
   consoleOutSlot("Searching for CheckPoint Trees");
   
-  cpt = new CheckPointTree(checkPointTreeListView);
+  cpt = new CheckPointTree(checkPointTreeListView, config.checkPointTreeFactoryGSH);
   //cpt->start();
 }
 
