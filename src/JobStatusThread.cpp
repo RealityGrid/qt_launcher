@@ -41,16 +41,18 @@
 
 #include "qprocess.h"
 
-JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH)
+JobStatusThread::JobStatusThread(QApplication *aApp, LauncherStatusBar *aStatusBar, const QString &aGSH)
 : done(false)
 {
   mainWindowStatusBar = aStatusBar;
   mGSH = aGSH;
+  mApp = aApp;
   
   // Set the lifespan of the thread to 15 seconds.
   // This isn't currently used - some jobs could sit
   // in a queue for hours on end.
   lifespan = 15000000;
+
 }
 
 void JobStatusThread::run(){
@@ -81,30 +83,51 @@ void JobStatusThread::getJobStatus(){
 
   jobStatusProcess.start();
 
-  // We're in a thread - so no big worries about sitting waiting for this process to finish
+  // We're in a thread - so no big worries about sitting waiting for
+  // this process to finish
   while (jobStatusProcess.isRunning()){
     usleep(50000);
-    mainWindowStatusBar->updateGeometry();
   }
 
   // Get the output, and simply grep for the desired results
   QString results = jobStatusProcess.readStdout();
 
+  // Generate an event to send to the status bar (have to do it this way
+  // because the gui thread must be the one to do the update)
+  QCustomEvent *aUpdateEvent = new QCustomEvent(QEvent::User+1);
+
   // need to think about having a timeout function
   if (results.find("NOT_STARTED")>=0){
-    mainWindowStatusBar->message("Job is Queued");
+    StatusMessageData *aData = new StatusMessageData("Job is Queued", 0);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    
   } else if (results.find("RUNNING")>=0){
-    mainWindowStatusBar->message("Job is Running", 2500);
+    StatusMessageData *aData = new StatusMessageData("Job is Running", 2500);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
     done = true;
+    
   } else if (results.find("STOPPING")>=0){
-    mainWindowStatusBar->message("Job is Stopping");
+    StatusMessageData *aData = new StatusMessageData("Job is Stopping", 0);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    
   } else if (results.find("STOPPED")>=0){
-    mainWindowStatusBar->message("Job has Stopped", 2000);
+    StatusMessageData *aData = new StatusMessageData("Job has Stopped", 2000);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
     done = true;
+    
   } else if (results.find("PAUSED")>=0){
-    mainWindowStatusBar->message("Job is Paused");
+    StatusMessageData *aData = new StatusMessageData("Job is Paused", 0);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    
   } else {
-    mainWindowStatusBar->message("No such job");
+    StatusMessageData *aData = new StatusMessageData("No such job", 0);
+    aUpdateEvent->setData(aData);
+    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
   }
   
 }
