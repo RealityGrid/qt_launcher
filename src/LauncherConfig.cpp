@@ -52,13 +52,11 @@ LauncherConfig::LauncherConfig(){
   // Some default values for testing
   simComponentType = notused;
   vizComponentType = notused;
-  selectedComponentType = notused;
 
-  migration = false;
-  restart = false;
-  newTree = false;
-  simTimeToRun = 30;
-  vizTimeToRun = 30;
+  migration  = false;
+  restart    = false;
+  newTree    = false;
+  mTimeToRun = 30;
 
   mJobData = new JobMetaData;
 }
@@ -80,7 +78,9 @@ void LauncherConfig::readConfig(QString file){
   xmlNodePtr root;
   xmlNodePtr childOfRoot;
   xmlNodePtr aGSH;
-  xmlNodePtr aComponent;
+  //Don't read component info at the moment - ARP
+  //Not sure we'll ever need to...
+  //xmlNodePtr aComponent;
   xmlNodePtr containers;
   xmlNodePtr targets;
   xmlNodePtr vizTargets;
@@ -159,80 +159,80 @@ void LauncherConfig::readConfig(QString file){
     }
 
     // Retrieve the target machine information
-    if ((!xmlStrcmp(childOfRoot->name, (const xmlChar *)"component"))){
-
-      // for code visibility purposes
-      aComponent = childOfRoot;
-
-      xmlChar *key = xmlGetProp(aComponent, (xmlChar*)"type");
-      
-      if (!xmlStrcmp(key, (const xmlChar*)"lb3d")){
-        simComponentType = lb3d;
-        
-        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-        simTargetMachine = QString((const char*)target);
-        xmlFree(target);
-
-        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-        simNumberProcessors = atoi((const char*)processors);
-        xmlFree(processors);
-
-        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-        simTag = QString((const char*)tag);
-        xmlFree(tag);
-      }
-      if (!xmlStrcmp(key, (const xmlChar*)"lb3dviz")){
-        vizComponentType = lb3dviz;
-        
-        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-        vizTargetMachine = QString((const char*)target);
-        xmlFree(target);
-
-        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-        vizNumberProcessors = atoi((const char*)processors);
-        xmlFree(processors);
-
-        xmlChar *pipes = xmlGetProp(aComponent, (xmlChar*)"numberPipes");
-        vizNumberPipes = atoi((const char*)pipes);
-        xmlFree(pipes);
-
-        xmlChar *vizServerChoice = xmlGetProp(aComponent, (xmlChar*)"vizServer");
-        if (!xmlStrcmp(vizServerChoice, (const xmlChar*)"yes")){
-         vizServer = true;
-         // if we're using vizServer then there can only be one graphics pipe - enforce this
-         vizNumberPipes = 1;
-        }
-        else {
-         vizServer = false;
-        }
-        xmlFree(vizServerChoice);
-
-        xmlChar *vizTypeStr = xmlGetProp(aComponent, (xmlChar*)"type");
-        vizType = atoi((const char*)vizTypeStr);
-        xmlFree(vizTypeStr);
-
-        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-        vizTag = QString((const char*)tag);
-        xmlFree(tag);
-      }
-      if (!xmlStrcmp(key, (const xmlChar*)"miniapp")){
-        simComponentType = miniapp;
-        
-        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-        simTargetMachine = QString((const char*)target);
-        xmlFree(target);
-
-        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-        simNumberProcessors = atoi((const char*)processors);
-        xmlFree(processors);
-
-        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-        simTag = QString((const char*)tag);
-        xmlFree(tag);
-      }
-
-      xmlFree(key);
-    }
+//    if ((!xmlStrcmp(childOfRoot->name, (const xmlChar *)"component"))){
+//
+//      // for code visibility purposes
+//      aComponent = childOfRoot;
+//
+//      xmlChar *key = xmlGetProp(aComponent, (xmlChar*)"type");
+//
+//      if (!xmlStrcmp(key, (const xmlChar*)"lb3d")){
+//        simComponentType = lb3d;
+//
+//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
+//        simTargetMachine = QString((const char*)target);
+//        xmlFree(target);
+//
+//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
+//        simNumberProcessors = atoi((const char*)processors);
+//        xmlFree(processors);
+//
+//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
+//        simTag = QString((const char*)tag);
+//        xmlFree(tag);
+//      }
+//      if (!xmlStrcmp(key, (const xmlChar*)"lb3dviz")){
+//        vizComponentType = lb3dviz;
+//
+//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
+//        vizTargetMachine = QString((const char*)target);
+//        xmlFree(target);
+//
+//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
+//        vizNumberProcessors = atoi((const char*)processors);
+//        xmlFree(processors);
+//
+//        xmlChar *pipes = xmlGetProp(aComponent, (xmlChar*)"numberPipes");
+//        vizNumberPipes = atoi((const char*)pipes);
+//        xmlFree(pipes);
+//
+//        xmlChar *vizServerChoice = xmlGetProp(aComponent, (xmlChar*)"vizServer");
+//        if (!xmlStrcmp(vizServerChoice, (const xmlChar*)"yes")){
+//         vizServer = true;
+//         // if we're using vizServer then there can only be one graphics pipe - enforce this
+//         vizNumberPipes = 1;
+//        }
+//        else {
+//         vizServer = false;
+//        }
+//        xmlFree(vizServerChoice);
+//
+//        xmlChar *vizTypeStr = xmlGetProp(aComponent, (xmlChar*)"type");
+//        vizType = atoi((const char*)vizTypeStr);
+//        xmlFree(vizTypeStr);
+//
+//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
+//        vizTag = QString((const char*)tag);
+//        xmlFree(tag);
+//      }
+//      if (!xmlStrcmp(key, (const xmlChar*)"miniapp")){
+//        simComponentType = miniapp;
+//
+//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
+//        simTargetMachine = QString((const char*)target);
+//        xmlFree(target);
+//
+//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
+//        simNumberProcessors = atoi((const char*)processors);
+//        xmlFree(processors);
+//
+//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
+//        simTag = QString((const char*)tag);
+//        xmlFree(tag);
+//      }
+//
+//      xmlFree(key);
+//    }
 
     // Retrieve the container information
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"containers"))){
@@ -296,7 +296,7 @@ void LauncherConfig::readConfig(QString file){
     if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"applications")){
 
       applications = childOfRoot->xmlChildrenNode;
-      bool lHasFile, lCanRestart;
+      bool lHasFile, lCanRestart, lIsViz;
       
       while(applications != NULL){
 
@@ -305,6 +305,7 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *appNumInputs = xmlGetProp(applications, (const xmlChar*)"inputs");
           xmlChar *appHasFile = xmlGetProp(applications, (const xmlChar*)"hasInputFile");
           xmlChar *appRestartable = xmlGetProp(applications, (const xmlChar*)"restartable");
+          xmlChar *appIsViz = xmlGetProp(applications, (const xmlChar*)"isViz");
           
           if(!xmlStrcmp(appHasFile, (const xmlChar*)"yes") ||
              !xmlStrcmp(appHasFile, (const xmlChar*)"Yes")){
@@ -321,15 +322,25 @@ void LauncherConfig::readConfig(QString file){
           else{
             lCanRestart = false;
           }
+
+          if(!xmlStrcmp(appIsViz, (const xmlChar*)"yes") ||
+             !xmlStrcmp(appIsViz, (const xmlChar*)"Yes")){
+            lIsViz = true;
+          }
+          else{
+            lIsViz = false;
+          }
           
           Application tApplication((const char*)appName,
                                    QString((const char*)appNumInputs).toInt(),
-                                   lHasFile, lCanRestart);
+                                   lHasFile, lCanRestart, lIsViz);
           applicationList += tApplication;
 
           xmlFree(appName);
           xmlFree(appNumInputs);
           xmlFree(appHasFile);
+          xmlFree(appRestartable);
+          xmlFree(appIsViz);
         }
 
         applications = applications->next;
@@ -382,39 +393,40 @@ void LauncherConfig::writeConfig(QString file){
   SGS = xmlNewTextChild(SGSs, NULL, (const xmlChar*)"SGS", NULL);
   xmlNewProp(SGS, (const xmlChar*)"value", (const xmlChar*)SGSGSH.latin1());
 
-  if (simComponentType == lb3d){
-    simComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
-    xmlNewProp(simComponent, (const xmlChar*)"type", (const xmlChar*)"lb3d");
-    xmlNewProp(simComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)simTargetMachine.latin1());
-    sprintf(buff, "%d", simNumberProcessors);
-    xmlNewProp(simComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
-    xmlNewProp(simComponent, (const xmlChar*)"tag", (const xmlChar*)simTag.latin1());
-  }
-  else if (simComponentType == miniapp){
-    simComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
-    xmlNewProp(simComponent, (const xmlChar*)"type", (const xmlChar*)"miniapp");
-    xmlNewProp(simComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)simTargetMachine.latin1());
-    sprintf(buff, "%d", simNumberProcessors);
-    xmlNewProp(simComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
-    xmlNewProp(simComponent, (const xmlChar*)"tag", (const xmlChar*)simTag.latin1());
-  }
-
-  if (vizComponentType == lb3dviz){
-    vizComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
-    xmlNewProp(vizComponent, (const xmlChar*)"type", (const xmlChar*)"lb3dviz");
-    xmlNewProp(vizComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)vizTargetMachine.latin1());
-    sprintf(buff, "%d", vizNumberProcessors);
-    xmlNewProp(vizComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
-    sprintf(buff, "%d", vizNumberPipes);
-    xmlNewProp(vizComponent, (const xmlChar*)"numberPipes", (const xmlChar*)buff);
-    if (vizServer)
-      xmlNewProp(vizComponent, (const xmlChar*)"vizServer", (const xmlChar*)"yes");
-    else
-      xmlNewProp(vizComponent, (const xmlChar*)"vizServer", (const xmlChar*)"no");
-    xmlNewProp(vizComponent, (const xmlChar*)"tag", (const xmlChar*)vizTag.latin1());
-    sprintf(buff, "%d", vizType);
-    xmlNewProp(vizComponent, (const xmlChar*)"type", (const xmlChar*)buff);
-  }
+// Don't bother with component info for now - ARPDBG
+//  if (simComponentType == lb3d){
+//    simComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
+//    xmlNewProp(simComponent, (const xmlChar*)"type", (const xmlChar*)"lb3d");
+//    xmlNewProp(simComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)simTargetMachine.latin1());
+//    sprintf(buff, "%d", simNumberProcessors);
+//    xmlNewProp(simComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
+//    xmlNewProp(simComponent, (const xmlChar*)"tag", (const xmlChar*)simTag.latin1());
+//  }
+//  else if (simComponentType == miniapp){
+//    simComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
+//    xmlNewProp(simComponent, (const xmlChar*)"type", (const xmlChar*)"miniapp");
+//    xmlNewProp(simComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)simTargetMachine.latin1());
+//    sprintf(buff, "%d", simNumberProcessors);
+//    xmlNewProp(simComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
+//    xmlNewProp(simComponent, (const xmlChar*)"tag", (const xmlChar*)simTag.latin1());
+//  }
+//
+//  if (vizComponentType == lb3dviz){
+//    vizComponent = xmlNewTextChild(root, NULL, (const xmlChar*)"component", NULL);
+//    xmlNewProp(vizComponent, (const xmlChar*)"type", (const xmlChar*)"lb3dviz");
+//    xmlNewProp(vizComponent, (const xmlChar*)"targetMachineName", (const xmlChar*)vizTargetMachine.latin1());
+//    sprintf(buff, "%d", vizNumberProcessors);
+//    xmlNewProp(vizComponent, (const xmlChar*)"numberProcessors", (const xmlChar*)buff);
+//    sprintf(buff, "%d", vizNumberPipes);
+//    xmlNewProp(vizComponent, (const xmlChar*)"numberPipes", (const xmlChar*)buff);
+//    if (vizServer)
+//      xmlNewProp(vizComponent, (const xmlChar*)"vizServer", (const xmlChar*)"yes");
+//    else
+//      xmlNewProp(vizComponent, (const xmlChar*)"vizServer", (const xmlChar*)"no");
+//    xmlNewProp(vizComponent, (const xmlChar*)"tag", (const xmlChar*)vizTag.latin1());
+//    sprintf(buff, "%d", vizType);
+//    xmlNewProp(vizComponent, (const xmlChar*)"type", (const xmlChar*)buff);
+//  }
 
   containers = xmlNewTextChild(root, NULL, (const xmlChar*)"containers", NULL);
   for ( QValueList<Container>::Iterator it = containerList.begin(); it != containerList.end(); ++it ) {

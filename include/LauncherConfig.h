@@ -86,14 +86,16 @@ class Application {
     int     mNumInputs;
     bool    mHasInputFile;
     bool    mIsRestartable;
-
+    bool    mIsViz;
+    
     Application(){};
     Application(const QString aName, const int aNumInputs, const bool aHasFile,
-                const bool aIsRestartable){
+                const bool aIsRestartable, const bool aIsViz){
       mAppName = aName;
       mNumInputs = aNumInputs;
       mHasInputFile = aHasFile;
       mIsRestartable = aIsRestartable;
+      mIsViz = aIsViz;
     }
     ~Application(){}
 };
@@ -116,30 +118,33 @@ class LauncherConfig {
     // Non GSH data
     int simComponentType;
     int vizComponentType;
-    int selectedComponentType;
+//    int selectedComponentType;
     
-    QString simTargetMachine;
-    QString vizTargetMachine;
-    QString simTag;
-    QString vizTag;
-    QString treeTag;
-    int simNumberProcessors;
-    int vizNumberProcessors;
-    int vizNumberPipes;
-    bool vizServer;
-    bool multicast;
+    //QString simTargetMachine;
+    //QString vizTargetMachine;
+    //QString simTag;
+    //QString vizTag;
+    //int simNumberProcessors;
+    //int vizNumberProcessors;
+    //int vizNumberPipes;
+    
+    bool    vizServer;
+    bool    multicast;
     QString multicastAddress;
-    bool migration;
-    bool restart;
-    bool newTree;
-    int vizType;
+    bool    migration;
+    bool    restart;
+    bool    newTree;
+    int     vizType;
     QString lb3dInputFileName;
 
+    QString mTargetMachine;
+    QString treeTag;
+    int     mNumberProcessors;
+    int     mNumberPipes;
+    int     mTimeToRun;
+    
     JobMetaData *mJobData;
-    
-    int simTimeToRun;
-    int vizTimeToRun;
-    
+
     QValueList<Container> containerList;
     QStringList machineList;
     QStringList vizMachineList;
@@ -147,6 +152,7 @@ class LauncherConfig {
     int containerPortNum;
     QString globusLocation;
     QValueList<Application> applicationList;
+    Application *mAppToLaunch;
 
     // Methods
 
