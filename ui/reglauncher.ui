@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>RegLauncher</class>
 <widget class="QMainWindow">
     <property name="name">
@@ -143,6 +143,9 @@
         <action name="proxyInitAction"/>
         <action name="proxyDestroyAction"/>
     </item>
+    <item text="&amp;Coupled model" name="Coupled_model">
+        <action name="coupledModelCreateGlobalParamAction"/>
+    </item>
 </menubar>
 <toolbars>
 </toolbars>
@@ -259,6 +262,23 @@
             <string>Ctrl+D</string>
         </property>
     </action>
+    <action>
+        <property name="name">
+            <cstring>coupledModelCreateGlobalParamAction</cstring>
+        </property>
+        <property name="on">
+            <bool>false</bool>
+        </property>
+        <property name="text">
+            <string>Create global parameter</string>
+        </property>
+        <property name="menuText">
+            <string>Create &amp;global parameter</string>
+        </property>
+        <property name="accel">
+            <string>Ctrl+G</string>
+        </property>
+    </action>
 </actions>
 <connections>
     <connection>
@@ -351,6 +371,12 @@
         <receiver>RegLauncher</receiver>
         <slot>checkPointListViewClickedSlot(QListViewItem*)</slot>
     </connection>
+    <connection>
+        <sender>coupledModelCreateGlobalParamAction</sender>
+        <signal>activated()</signal>
+        <receiver>RegLauncher</receiver>
+        <slot>coupledModelCreateGlobalParamSlot()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>discoveryButton</tabstop>
@@ -393,6 +419,7 @@
     <slot>contextMenuRequestedSlot( QListViewItem * listViewItem, const QPoint &amp; pnt, int column )</slot>
     <slot>contextMenuItemSelectedSlot( int itemId )</slot>
     <slot>parseChkPtMetaData( const QString &amp; chkMetaData, QString &amp; appName, QString &amp; chkUID, QStringList &amp; fileNames )</slot>
+    <slot>coupledModelCreateGlobalParamSlot()</slot>
 </slots>
 <functions>
     <function>setApplication( QApplication * aApplication )</function>

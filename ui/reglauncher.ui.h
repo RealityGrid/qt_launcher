@@ -16,6 +16,7 @@
 
 #include "componentlauncher.h"
 #include "RunningJobsDialog.h"
+#include "GlobalParamConstructionForm.h"
 #include "textviewdialog.h"
 #include "CheckPointTreeItem.h"
 #include "Gridifier.h"
@@ -1207,7 +1208,7 @@ void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
 */
 //}
 
-/* Parse the checkpoint meta-data obtained from a node in the checkpoint
+/** Parse the checkpoint meta-data obtained from a node in the checkpoint
    tree in order to get the name of the application and the UID of
    the checkpoint
  */
@@ -1279,3 +1280,22 @@ void RegLauncher::customEvent( QCustomEvent *e )
   // know about the associated data so we delete that.
   delete msg;
 }
+
+void RegLauncher::coupledModelCreateGlobalParamSlot()
+{
+  QString selectedGSH;
+  RunningJobsDialog rjd;
+
+  rjd.setConfig(&config);
+  // Read the note at the RunningJobsDialog::setResultString implementation
+  rjd.setResultString(&selectedGSH);
+  if (rjd.exec() == QDialog::Rejected){
+    return;
+  }
+  cout << "result string = " << selectedGSH << endl;
+  GlobalParamConstructionForm globalDlg;
+  globalDlg.setConfig(&config);
+  globalDlg.setParentGSH(selectedGSH);
+  globalDlg.exec();
+}
+
