@@ -46,6 +46,14 @@
 echo $1
 . $1
 
+# Optionally get the multicast address we're to use
+#if [ $# -eq 2 ]
+#then
+#MULTICAST_ADDRESS=$2
+#else
+#MULTICAST_ADDRESS=""
+#fi
+
 # Ascertain whether we have a valid grid-proxy 
 
 if [ $SSH -eq 0 ]
@@ -123,8 +131,13 @@ export REG_SGS_ADDRESS
    echo "export REG_CONNECTOR_HOSTNAME" >> /tmp/reg_viz_remote.$$
    echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> /tmp/reg_viz_remote.$$
    echo "export REG_SGS_ADDRESS" >> /tmp/reg_viz_remote.$$
+if [ $MULTICAST_ADDRESS ]
+then 
+   echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE $MULTICAST_ADDRESS" >> /tmp/reg_viz_remote.$$
+else
    echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE" >> /tmp/reg_viz_remote.$$
-   
+fi
+
    # Submit job into lsf batch system on bezier
    #   globus-job-run $VIZ_HOSTNAME/jobmanager-lsf -x "(jobtype=single)" -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -np $VIZ_PROCESSORS -s /tmp/reg_viz_remote.$$ &
 #   globus-job-run $VIZ_HOSTNAME/jobmanager-fork -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
