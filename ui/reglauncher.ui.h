@@ -27,6 +27,8 @@
 // gSoap
 #include "checkPointTreeH.h"
 
+using namespace std;
+
 
 //Gridifier gridifier;
 
@@ -150,12 +152,6 @@ void RegLauncher::migrateSimSlot()
     // we need to copy the selected/edited input file to the target machine
     QString inputFileName = "/tmp/ReG_tmp_input_file";
 
-    QFile inputFile( inputFileName );
-    if ( inputFile.open( IO_WriteOnly ) ) {
-      QTextStream stream( &inputFile );
-      stream << inputFileText;
-      inputFile.close();
-    }
     config.lb3dInputFileName = inputFileName;
 
     // and so we can launch the migration version of the component
@@ -164,6 +160,7 @@ void RegLauncher::migrateSimSlot()
 
     ComponentLauncher *migrater = new ComponentLauncher();
     config.migration = true;
+    config.newTree = false;
     migrater->setConfig(&config);
     migrater->setApplication(this);
     
@@ -176,6 +173,15 @@ void RegLauncher::migrateSimSlot()
 
     if (!wizardOk)
       return;
+
+    migrater->getInputFileTextEditText(&inputFileText);
+
+    QFile inputFile( inputFileName );
+    if ( inputFile.open( IO_WriteOnly ) ) {
+      QTextStream stream( &inputFile );
+      stream << inputFileText;
+      inputFile.close();
+    }
 
     // now launch!
     commonLaunchCode();    
@@ -300,44 +306,36 @@ void RegLauncher::launchSimSlot()
     componentLauncher->setCheckPointGSH(tGSH);
 
     // and then go get the input file associated with the selected checkpoint,
-    {
-      getInputFileFromCheckPoint(tGSH, &inputFileText);
+    getInputFileFromCheckPoint(tGSH, &inputFileText);
 
-      if (inputFileText.length() != 0){
-        QString checkPointDataText;
-        getDataFileFromCheckPoint(tGSH, &checkPointDataText);
+    if (inputFileText.length() != 0){
+      QString checkPointDataText;
+      getDataFileFromCheckPoint(tGSH, &checkPointDataText);
           
-        // cache the checkpoint data on disk - we'll use it later
-        QFile checkPointDataFile("checkPointDataCache.xml");
-        if ( checkPointDataFile.open(IO_WriteOnly) ){
-          QTextStream stream(&checkPointDataFile);
-            stream << checkPointDataText;
-          checkPointDataFile.close();
-        }
-
-        // patch it
-        patchInputFileText(inputFileText, checkPointDataText);
-        
-        // cache it
-        // we need to copy the selected/edited input file to the target machine
-        QString inputFileName = "/tmp/ReG_tmp_input_file";
-
-        QFile inputFile( inputFileName );
-        if ( inputFile.open( IO_WriteOnly ) ) {
-          QTextStream stream( &inputFile );
-          stream << inputFileText;
-          inputFile.close();
-        }
-        config.lb3dInputFileName = inputFileName;
-
-        //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
-
-        // and insert it into the wizard's text edit box
-        componentLauncher->setInputFileTextEdit(inputFileText);
-        
+      // cache the checkpoint data on disk - we'll use it later
+      QFile checkPointDataFile("checkPointDataCache.xml");
+      if ( checkPointDataFile.open(IO_WriteOnly) ){
+        QTextStream stream(&checkPointDataFile);
+          stream << checkPointDataText;
+        checkPointDataFile.close();
       }
 
+      // patch it
+      patchInputFileText(inputFileText, checkPointDataText);
+        
+      // cache it
+      // we need to copy the selected/edited input file to the target machine
+      QString inputFileName = "/tmp/ReG_tmp_input_file";
+
+      config.lb3dInputFileName = inputFileName;
+
+      //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
+
+      // and insert it into the wizard's text edit box
+      componentLauncher->setInputFileTextEdit(inputFileText);
+       
     }
+
     config.newTree = false;
   } // : if restarting from checkpoint
   else {
@@ -353,6 +351,18 @@ void RegLauncher::launchSimSlot()
 
   if (!wizardOk)
     return;
+
+  // this is lb3d only... do we really ever want to launch miniapp?
+  if (config.selectedComponentType == lb3d){
+    componentLauncher->getInputFileTextEditText(&inputFileText);
+    QFile inputFile( config.lb3dInputFileName );
+    if ( inputFile.open( IO_WriteOnly ) ) {
+      QTextStream stream( &inputFile );
+      stream << inputFileText;
+      inputFile.close();
+    }
+  }
+
 
   // now launch!
   commonLaunchCode();
@@ -402,19 +412,17 @@ void RegLauncher::commonLaunchCode(){
     consoleOutSlot(QString("SGS is "+config.simulationGSH).stripWhiteSpace());
 
     // Now launch the job
+
+    gridifier.makeReGScriptConfig("./sim.conf", config);
+
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
-      gridifier.makeReGScriptConfig("./sim.conf", config);
-
       gridifier.launchSimScript("./sim.conf", "./checkPointDataCache.xml");
       
       // then start the job
     }
     else {
-
-      gridifier.makeReGScriptConfig("./sim.conf", config);
-
       gridifier.launchSimScript("./sim.conf");
 
     }

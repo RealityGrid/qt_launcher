@@ -46,6 +46,8 @@
 #include <iostream>
 #include "libxml/parser.h"
 
+using namespace std;
+
 LauncherConfig::LauncherConfig(){
   // Some default values for testing
   simComponentType = notused;
@@ -271,6 +273,10 @@ void LauncherConfig::readConfig(QString file){
 
         targets = targets->next;
       }
+    }
+
+    if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
+      globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
     }
 
     childOfRoot = childOfRoot->next;

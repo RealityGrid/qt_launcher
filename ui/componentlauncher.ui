@@ -561,6 +561,7 @@
     <slot>gshTagSelectedSlot( int row, int col, int button, const QPoint &amp; mousePos )</slot>
     <slot>setCheckPointGSH( const QString &amp; checkPointGSH )</slot>
     <slot>setInputFileTextEdit( const QString &amp; text )</slot>
+    <slot>getInputFileTextEditText( QString * )</slot>
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
 </slots>
 <pixmapinproject/>

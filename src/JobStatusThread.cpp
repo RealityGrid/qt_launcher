@@ -41,6 +41,7 @@
 
 #include "qprocess.h"
 
+
 JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aContainer, const QString &aGSH)
 : done(false)
 {
@@ -72,11 +73,12 @@ void JobStatusThread::getJobStatus(){
   //      potentially the best way forward - but a bit of a botch also
   //  * just wrap around a script
   //      quickest way to progress - hence chosen - the deadline is fast approaching.
-  
-  QProcess *jobStatusProcess = new QProcess(QString("jobStatus.pl"));
+
+  QProcess *jobStatusProcess = new QProcess(QString("./jobStatus.pl"));
   jobStatusProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_perl_launcher/"));
   jobStatusProcess->addArgument(mContainer);
   jobStatusProcess->addArgument(mGSH);
+
   jobStatusProcess->start();
 
   // We're in a thread - so no big worries about sitting waiting for this process to finish

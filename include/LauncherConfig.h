@@ -102,6 +102,8 @@ class LauncherConfig {
     QStringList machineList;
     QString selectedContainer;
 
+    QString globusLocation;
+
   // Methods
 
     LauncherConfig();

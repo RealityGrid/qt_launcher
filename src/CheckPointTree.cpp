@@ -44,7 +44,7 @@
 #include "soapRealityGridTree.nsmap"
 #include "qdom.h"
 
-
+using namespace std;
 
 CheckPointTree::CheckPointTree(QListView *_parent) : rootAddress("http://vermont.mvc.mcc.ac.uk:50000/Session/RealityGridTree/factory"){
   parent = _parent;

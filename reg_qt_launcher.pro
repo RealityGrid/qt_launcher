@@ -11,4 +11,4 @@ CONFIG	+= qt warn_on release thread
 DBFILE	= reg_qt_launcher.db
 LANGUAGE	= C++
 INCLUDEPATH = include /usr/include/libxml2 ${HOME}/RealityGrid/reg_gsoap_build ${REG_STEER_HOME}/include
-LIBS += -lxml2 -L${HOME}/RealityGrid/reg_gsoap_build -lREGgsoap -L${HOME}/RealityGrid/reg_steer_lib/lib32 -lReG_Steer
+LIBS += -lxml2 -L${HOME}/RealityGrid/reg_gsoap_build -lREGgsoap -L${REG_STEER_HOME}/lib32 -lReG_Steer

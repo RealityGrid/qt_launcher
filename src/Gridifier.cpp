@@ -46,6 +46,8 @@
 
 #include "qfile.h"
 
+using namespace std;
+
 /** Constructors
  */
 Gridifier::Gridifier(){
@@ -127,7 +129,7 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
   // this functionality is left in a seperate slot since it could be better
   // to allow the standard qt events to handle it, rather than sitting in the
   // above loop
-  result = makeSGSFactoryProcessEnded();
+  result = makeSGSFactoryProcessEnded().stripWhiteSpace();
 
   return result;
 }
@@ -135,17 +137,16 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
 QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &checkPointGSH, const QString &inputFileName, const QString &optionalChkPtTag){
   QString result;
   
-  makeSimSGSProcess = new QProcess(QString("make_sgs.pl"));
+  makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
   makeSimSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_perl_launcher/"));
   makeSimSGSProcess->addArgument(factory);
+  // need to make certain that the tag is handled correctly if it contains spaces
   makeSimSGSProcess->addArgument(tag);
   makeSimSGSProcess->addArgument(topLevelRegistry);
-  if (checkPointGSH.length() == 0)
-    makeSimSGSProcess->addArgument("' '");
-  else
-    makeSimSGSProcess->addArgument(checkPointGSH);
+  makeSimSGSProcess->addArgument(checkPointGSH);
   makeSimSGSProcess->addArgument(inputFileName);
-  makeSimSGSProcess->addArgument(optionalChkPtTag);
+  if (optionalChkPtTag.length() > 0)
+    makeSimSGSProcess->addArgument(optionalChkPtTag);
 cout << makeSimSGSProcess->arguments().join(" ") << endl;
   makeSimSGSProcess->start();
 
@@ -156,7 +157,7 @@ cout << makeSimSGSProcess->arguments().join(" ") << endl;
   // this functionality is left in a seperate slot since it could be better
   // to allow the standard qt events to handle it, rather than sitting in the
   // above loop
-  result = makeSimSGSProcessEnded();
+  result = makeSimSGSProcessEnded().stripWhiteSpace();
 
   return result;
 }
@@ -164,7 +165,7 @@ cout << makeSimSGSProcess->arguments().join(" ") << endl;
 QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &simSGS){
   QString result;
 
-  makeVizSGSProcess = new QProcess(QString("make_vis_sgs.pl"));
+  makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
   makeVizSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_perl_launcher/"));
   makeVizSGSProcess->addArgument(factory);
   makeVizSGSProcess->addArgument(tag);
@@ -177,7 +178,7 @@ QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const 
     usleep(10000);
   }
 
-  result = makeVizSGSProcessEnded();
+  result = makeVizSGSProcessEnded().stripWhiteSpace();
 
   return result;
 }
@@ -271,7 +272,10 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "#!/bin/sh\n\n";
   fileText += "OGSI\n\n";
   fileText += "CONTAINER="+config.selectedContainer+"\n";
-  fileText += "GLOBUS_LOCATION=/opt/globus2\n";
+  if (config.globusLocation.length() > 0)
+    fileText += "GLOBUS_LOCATION="+config.globusLocation+"\n";
+  else
+    fileText += "# Couldn't find a globus location in the default.conf\n# Going with the default environment if it is set\n";
   fileText += "SIM_HOSTNAME="+config.simTargetMachine+"\n";
   fileText += "SIM_PROCESSORS="+QString::number(config.simNumberProcessors)+"\n";
   fileText += "SIM_INFILE="+config.lb3dInputFileName+"\n\n";
@@ -374,13 +378,16 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName){
 }
 
 
+
 /** Method calls Mark McKeown's rgcpc perl script, which
  *  copies the relevant files over to the relevant remote
  *  machine. We don't need to pass a parameter since we
  *  can use the pre-retrieved CheckPointData cache file.
  */
+//////// NOT USED //////////
 void Gridifier::copyCheckPointFiles(const QString &host){
-  QProcess *rgcpcProcess = new QProcess(QString("rgcpc.pl"));
+  QProcess *rgcpcProcess = new QProcess(QString("./rgcpc.pl"));
+  rgcpcProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   rgcpcProcess->addArgument("-t");
   rgcpcProcess->addArgument(host);
   rgcpcProcess->addArgument("-f");
@@ -415,7 +422,7 @@ void Gridifier::gsiFtp(const QString &aFile, const QString &aDestination){
 
 
 QString Gridifier::checkPointAndStop(const QString &sgsGSH){
-  QProcess *checkPointAndStopProcess = new QProcess(QString("checkpoint_and_stop.pl"));
+  QProcess *checkPointAndStopProcess = new QProcess(QString("./checkpoint_and_stop.pl"));
   checkPointAndStopProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_perl_launcher/"));
   checkPointAndStopProcess->addArgument(sgsGSH);
   checkPointAndStopProcess->start();

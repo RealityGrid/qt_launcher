@@ -329,6 +329,10 @@ void ComponentLauncher::setInputFileTextEdit(const QString &text){
   inputFileTextEdit->setText(text);  
 }
 
+void ComponentLauncher::getInputFileTextEditText(QString *returnPtr){
+  *returnPtr = inputFileTextEdit->text();
+}
+
 
 // ????????????????????
 // not used - remove //
