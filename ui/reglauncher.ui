@@ -379,6 +379,7 @@
     <slot>patchNamdInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString, QStringList &amp; fileNames )</slot>
     <slot>launchSimSlot()</slot>
     <slot>commonLaunchCode()</slot>
+    <slot>coupledModelLaunchCode()</slot>
     <slot>discoverySlot()</slot>
     <slot>steerSlot()</slot>
     <slot>readSteerStdoutSlot()</slot>

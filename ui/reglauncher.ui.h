@@ -17,7 +17,6 @@
 #include "componentlauncher.h"
 #include "RunningJobsDialog.h"
 #include "textviewdialog.h"
-
 #include "CheckPointTreeItem.h"
 #include "Gridifier.h"
 #include "LauncherConfig.h"
@@ -26,15 +25,20 @@
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
-
 // gSoap
 #include "checkPointTreeH.h"
 
+/** @file reglauncher.ui.h
+    @brief Main class for the GUI side of launcher
+*/
+
 using namespace std;
 
-QProcess *proxyStatus = NULL;
-LauncherConfig config;
-CheckPointTree *cpt = NULL;
+QProcess           *proxyStatus = NULL;
+/** Variables to hold the configuration of the first
+    and, optionally, second components to be launched */
+LauncherConfig      config, config2;
+CheckPointTree     *cpt = NULL;
 CheckPointTreeItem *rightMouseCheckPointTreeItem = NULL;
 int checkPointTreeListViewPreviousSelection = -1;
 
@@ -42,8 +46,11 @@ int checkPointTreeListViewPreviousSelection = -1;
   * and tweaks the way the checkpoint tree is displayed
   */
 void RegLauncher::init(){
-  config.readConfig("default.conf");
+  QString homeDir = QString(getenv("HOME"));
+  config.readConfig(homeDir + "/.reg_launcher/default.conf");
+  config2.readConfig(homeDir + "/.reg_launcher/default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
+  gridifier.setScriptsDirectory(config.mScriptsDirectory);
 }
 
 void RegLauncher::setApplication(QApplication *aApplication){
@@ -145,6 +152,7 @@ void RegLauncher::migrateSimSlot()
     // Work out which of the applications is being migrated
     config.mAppToLaunch = NULL;
     for(unsigned int i=0; i<config.applicationList.count(); i++){
+      // ARPDBG
       // IMPORTANT - this will require more care if we want to match up
       // version numbers rather than crudely checking the app name
       if(appName.contains(config.applicationList[i].mAppName, FALSE) == 1){
@@ -208,7 +216,7 @@ void RegLauncher::migrateSimSlot()
   
 }
 
-// Consider sticking these two methods in a seperate soap class
+/// Consider sticking this method in a separate soap class
 QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
 {
   QString result;
@@ -226,6 +234,7 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   return result;
 }
 
+/// Consider sticking this method in a separate soap class
 QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 {
   QString result;
@@ -276,8 +285,8 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
   }
 }
 
-/* Method to patch NAMD input file such that it is suitable for
-   performing a restart from the specified checkpoint
+/** Method to patch NAMD input file such that it is suitable for
+    performing a restart from the specified checkpoint
  */
 void RegLauncher::patchNamdInputFileText(QString &inputFileText,
                                          QString &chkUIDString,
@@ -614,8 +623,26 @@ void RegLauncher::launchSimSlot()
     }
   }
   
-  // now launch!
-  commonLaunchCode();
+  if(config.mIsCoupledModel){
+    config2.restart = false;
+    config2.newTree = true;
+    config2.mIsCoupledModel = true;
+    config2.mTimeToRun = config.mTimeToRun;
+    // Turn off again for future launches
+    config.mIsCoupledModel = false;
+
+    ComponentLauncher *componentLauncher2 = new ComponentLauncher();
+    componentLauncher2->setConfig(&config2);
+    wizardOk = componentLauncher2->exec();
+
+    if (!wizardOk) return;
+
+    coupledModelLaunchCode();
+  }
+  else{
+    // Launch single component
+    commonLaunchCode();
+  }
 }
 
 void RegLauncher::commonLaunchCode(){
@@ -630,11 +657,14 @@ void RegLauncher::commonLaunchCode(){
 
   // First find a factory, and if we don't have one - make one
   QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
-					      config.selectedContainer);
+					      config.selectedContainer,
+					      QString("sgs"));
 
   if (factory.length() == 0){
-    consoleOutSlot("There's no factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
+    consoleOutSlot("No factories to be had - I'd better make one");
+    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", 
+						  config.topLevelRegistryGSH,
+						  QString("sgs"));
       
     if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
       factory = posFactory;
@@ -673,12 +703,12 @@ void RegLauncher::commonLaunchCode(){
     consoleOutSlot(QString("SGS is "+config.simulationGSH).stripWhiteSpace());
 
     // Create xml job description and save to file
-    QFile jobFile("tmp/job.xml");
-    jobFile.open( IO_WriteOnly );
+    //QFile jobFile("tmp/job.xml");
+    //jobFile.open( IO_WriteOnly );
 
-    QTextStream filestream(&jobFile);
-    filestream << config.toXML();
-    jobFile.close();
+    //QTextStream filestream(&jobFile);
+    //filestream << config.toXML();
+    //jobFile.close();
 
     // Launch job using remote web service and the xml job description
     //consoleOutSlot("Submitting job to web service...");
@@ -749,6 +779,122 @@ void RegLauncher::commonLaunchCode(){
   }
 }
 
+/** Launch a two-component coupled model */
+void RegLauncher::coupledModelLaunchCode(){
+
+  QString parentMetaSGS_GSH, firstChildMetaSGS_GSH, secondChildMetaSGS_GSH;
+  LauncherConfig tmpConfig;
+
+  consoleOutSlot("Starting two components...");
+
+  // First find a factory, and if we don't have one - make one
+  QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
+					      config.selectedContainer,
+					      QString("msgs"));
+  if (factory.length() == 0){
+    consoleOutSlot("No factories to be had - I'd better make one");
+    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", 
+						  config.topLevelRegistryGSH,
+						  QString("msgs"));
+      
+    if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
+      factory = posFactory;
+        
+    else{
+      consoleOutSlot("Sorry! - couldn't start a factory");
+      return;
+    }     
+  }
+
+  // Second factory for second MetaSGS
+  QString factory2 = gridifier.getSGSFactories(config2.topLevelRegistryGSH, 
+					      config2.selectedContainer,
+					      QString("msgs"));
+  if (factory2.length() == 0){
+    consoleOutSlot("No factories to be had - I'd better make one");
+    QString posFactory = gridifier.makeSGSFactory("http://"+config2.selectedContainer+":"+QString::number(config2.containerPortNum)+"/", 
+						  config2.topLevelRegistryGSH,
+						  QString("msgs"));
+      
+    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+QString::number(config2.containerPortNum)+"/"))
+      factory2 = posFactory;
+        
+    else{
+      consoleOutSlot("Sorry! - couldn't start a factory");
+      return;
+    }     
+  }
+
+  consoleOutSlot(QString("MetaSGS Factories are "+factory+"\n and "+factory2).stripWhiteSpace());
+
+  // Now create the parent MetaSGS
+
+  ComponentLauncher *componentLauncher = new ComponentLauncher();
+  componentLauncher->toggleCollectJobMetaDataOnly(true);
+  tmpConfig.mAppToLaunch = config.mAppToLaunch;
+  tmpConfig.migration = false;
+  tmpConfig.restart = false;
+  tmpConfig.newTree = false;
+  componentLauncher->setConfig(&tmpConfig);
+  componentLauncher->showPage(componentLauncher->page(7));
+  componentLauncher->exec();
+
+  tmpConfig.treeTag = "";
+  tmpConfig.topLevelRegistryGSH = config.topLevelRegistryGSH;
+  tmpConfig.currentCheckpointGSH = config.currentCheckpointGSH;
+  tmpConfig.mInputFileName = "";
+  tmpConfig.mTimeToRun = config.mTimeToRun;
+
+  parentMetaSGS_GSH = gridifier.makeMetaSGS(factory, tmpConfig, "");
+      
+  // Check that the sgs was created properly, if not die
+  if (parentMetaSGS_GSH.length()==0 || !parentMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory+") valid?");
+    return;
+  }
+
+  // Create the first child
+  firstChildMetaSGS_GSH = gridifier.makeMetaSGS(factory, config, 
+						parentMetaSGS_GSH);
+  // Check that the sgs was created properly, if not die
+  if (firstChildMetaSGS_GSH.length()==0 || !firstChildMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory+") valid?");
+    return;
+  }
+  // Copy the value to the config
+  config.simulationGSH = firstChildMetaSGS_GSH;
+  consoleOutSlot(QString("1st MetaSGS is "+config.simulationGSH).stripWhiteSpace());
+
+  // Create the second child
+  secondChildMetaSGS_GSH = gridifier.makeMetaSGS(factory2, config2, 
+						 parentMetaSGS_GSH);
+  // Check that the sgs was created properly, if not die
+  if (secondChildMetaSGS_GSH.length()==0 || !secondChildMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory2+") valid?");
+    return;
+  }
+  // Copy the value to the config
+  config2.simulationGSH = secondChildMetaSGS_GSH;
+  consoleOutSlot(QString("2nd MetaSGS is "+config2.simulationGSH).stripWhiteSpace());
+
+  // Now launch the jobs themselves
+  gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", 
+				config);
+  gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
+			    config);
+  gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", 
+				config2);
+  gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
+			    config2);
+
+  JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
+							  parentMetaSGS_GSH);
+  aJobStatusThread->start();
+
+}
+
+/** Searches for checkpoint trees using the root address specified in
+    the default.conf configuration file */
 void RegLauncher::discoverySlot()
 {
   launchButton->setText("Launch");
@@ -772,9 +918,7 @@ void RegLauncher::steerSlot()
     return;
 #endif  
   // create an instance of the RealityGrid QT Steerer for the current GSH
-  // bear in mind that his requires that the Steerer environment variables
-  // have already been set
-  steerer = new QProcess(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts/steerer_wrapper"));
+  steerer = new QProcess(QString(config.mScriptsDirectory+"/steerer_wrapper"));
   if (config.simulationGSH.length() != 0){    
     steerer->addArgument(config.simulationGSH);
     steerer->setCommunication(QProcess::Stdout|QProcess::Stderr|QProcess::DupStderr);
@@ -870,6 +1014,12 @@ void RegLauncher::proxyInfoProcessEnded()
 {
   if (proxyStatus == NULL)
       return;
+
+  // Only bother checking if we're actually using globus for
+  // launching
+  QString launchMethod = QString(getenv("ReG_LAUNCH"));
+  if(launchMethod.contains("ssh") > 0)return;
+
   if (0 == proxyStatus->exitStatus()){
     consoleOutSlot("Proxy Initialised");
   }
@@ -886,9 +1036,6 @@ void RegLauncher::proxyInfoProcessEnded()
 
 void RegLauncher::consoleOutSlot(const QString &text)
 {
-//  textOutListBox->insertItem(text);
-//  textOutListBox->setBottomItem(textOutListBox->count()-1);
-
   textOutTextEdit->insertParagraph(text, -1);
 }
 

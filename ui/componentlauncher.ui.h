@@ -6,6 +6,10 @@
 ** a constructor, and a destroy() slot in place of a destructor.
 *****************************************************************************/
 
+/** @file componentlauncher.ui.h
+    @brief UI file for launching wizard.
+  */
+
 #include "qfiledialog.h"
 #include "qprogressbar.h"
 
@@ -16,18 +20,22 @@ using namespace std;
 #include <qmessagebox.h>
 
 Gridifier mGridifier;
+bool      mCollectMetaDataOnly;
 
 void ComponentLauncher::init(){
     // set the appropriate default pages correctly
     // page(0) is component selection (plus input file & run time)
-    setAppropriate(page(1), false); // Select sim GSH
-    setAppropriate(page(2), false); // Edit input file
-    setAppropriate(page(3), true); // Select target machine
-    setAppropriate(page(4), false); // Select visualization type
-    setAppropriate(page(5), true); // Select container
-    setAppropriate(page(6), true); // Enter job meta-data
-    setAppropriate(page(7), false); // Enter tag for new Chk tree
-    
+    setAppropriate(page(1), false); // 2nd component for coupled model
+    setAppropriate(page(2), false); // Select sim GSH
+    setAppropriate(page(3), false); // Edit input file
+    setAppropriate(page(4), true);  // Select target machine
+    setAppropriate(page(5), false); // Select visualization type
+    setAppropriate(page(6), true);  // Select container
+    setAppropriate(page(7), true);  // Enter job meta-data
+    setAppropriate(page(8), false); // Enter tag for new Chk tree
+    setFinishEnabled(page(8), true);// Finish enabled by default
+                                    // since default is not to create a Chk tree
+
     // hide the horizontal header in the gshTagTable
     gshTagTable->verticalHeader()->hide();
     gshTagTable->setLeftMargin(0);
@@ -37,6 +45,7 @@ void ComponentLauncher::init(){
     // turn off the multicast address input box by default
     mcastAddrLineEdit->setEnabled(false);
 
+    mCollectMetaDataOnly = false;
 }
 
 void ComponentLauncher::componentSelectedSlot()
@@ -50,42 +59,21 @@ void ComponentLauncher::componentSelectedSlot()
     simInputLineEdit->setEnabled(chosenApp->mHasInputFile);
     simInputPushButton->setEnabled(chosenApp->mHasInputFile);
 
-    // Page 1: GSH of data source (other component)
-    setAppropriate(page(1), (chosenApp->mNumInputs > 0));
-    // Page 2: Edit input file (only when restarting?)
-    setAppropriate(page(2),
+    // Page 2: GSH of data source (other component)
+    setAppropriate(page(2), (chosenApp->mNumInputs > 0));
+    // Page 3: Edit input file (only when restarting?)
+    setAppropriate(page(3),
          ((mConfig->migration || mConfig->restart) && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
-    // Page 3: Select input file
-	  //setAppropriate(page(4),
-	  //     (!(mConfig->migration || mConfig->restart) && (chosenApp->mHasInputFile)));
-    // Page 3: Select target machine (inc. num px, pipes, vizserver & multicast)
-	  setAppropriate(page(3), true);
-    // Page 4: Select type of viz (iso, cut etc.)
-	  setAppropriate(page(4), chosenApp->mIsViz);
-    // Page 5: Select container for SGS - always used
-    // Page 6: Job description (used to be just a tag) - always used
-    // Page 7: Tag for new checkpoint tree
-    /*
-	  if (chosenApp->mIsRestartable && mConfig->newTree){
-	    setAppropriate(page(7), true);
-	  }
-	  else{
-	    setAppropriate(page(7), false);
-    }
-    */
-    setAppropriate(page(7), (chosenApp->mIsRestartable && mConfig->newTree));
-}
+    // Page 4: Select target machine (inc. num px, pipes, vizserver & multicast)
+	  setAppropriate(page(4), true);
+    // Page 5: Select type of viz (iso, cut etc.)
+	  setAppropriate(page(5), chosenApp->mIsViz);
+    // Page 6: Select container for SGS - always used
+    // Page 7: Job description (used to be just a tag) - always used
+    // Page 8: Tag for new checkpoint tree
+    setAppropriate(page(8), (chosenApp->mIsRestartable && mConfig->newTree));
 
-
-
-void ComponentLauncher::sgsSoftwarePackageChanged( const QString & )
-{
-    
-}
-
-void ComponentLauncher::sgsOrgChanged( const QString & )
-{
-    
+    mConfig->mAppToLaunch = chosenApp;
 }
 
 void ComponentLauncher::sgsTagEntered()
@@ -102,7 +90,8 @@ void ComponentLauncher::sgsTagEntered()
     }
 }
 
-
+/** Used to force user to enter a description of the new checkpoint
+    tree that they are about to create */
 void ComponentLauncher::treeTagEntered()
 {
     if (mConfig->newTree){
@@ -133,17 +122,17 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     // Things are a bit different if we're migrating
     if (mConfig->migration || mConfig->restart){
 	    setAppropriate(page(0), true); // Choose component (only need runtime)
-	    setAppropriate(page(1), false); // Select sim. GSH
-	    setAppropriate(page(2), true); // Edit input file
-	    setAppropriate(page(3), true); // Select target machine
-	    setAppropriate(page(4), false); // Select viz type
+	    setAppropriate(page(2), false); // Select sim. GSH
+	    setAppropriate(page(3), true); // Edit input file
+	    setAppropriate(page(4), true); // Select target machine
+	    setAppropriate(page(5), false); // Select viz type
 	    // force page 0 to be the first that's displayed
 	    showPage(page(0));
     }
     
     // Make the user enter a tag if a new tree is being created
     if (mConfig->newTree){
-	    setAppropriate(page(7), true);
+	    setAppropriate(page(8), true);
     }
 
     // Set up the drop-down list of available apps using the list
@@ -153,43 +142,7 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
       list += mConfig->applicationList[i].mAppName;
 
     componentComboBox->insertStringList(list, 0);
-}
-
-
-
-void ComponentLauncher::vizServerSlot()
-{
-    
-}
-
-void ComponentLauncher::simNumProcessorsSlot()
-{
-    
-}
-
-void ComponentLauncher::simTargetMachineSlot()
-{
-    
-}
-
-void ComponentLauncher::vizNumberPipesSlot()
-{
-    
-}
-
-void ComponentLauncher::vizNumProcessorsSlot()
-{
-    
-}
-
-void ComponentLauncher::vizTargetMachineSlot()
-{
-    
-}
-
-void ComponentLauncher::containerSelectedSlot()
-{
-    
+    componentComboBox2->insertStringList(list, 0);
 }
 
 /** Slot is called whenever the user changes the page
@@ -198,7 +151,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 {
     if (string == title(page(0))){
 
-    	// If restarting or migrating then we're only using the first page
+      // If restarting or migrating then we're only using the first page
       // to set the max runtime
       if(mConfig->restart || mConfig->migration){
         componentComboBox->setEnabled(false);
@@ -206,10 +159,21 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
         simInputLineEdit->setEnabled(false);
         simInputPushButton->setEnabled(false);
       }
+
+      // If this is the second component of a coupled model then
+      // disable the coupled model checkbox and the runtime (take
+      // this as being same as first component).
+      if(mConfig->mIsCoupledModel){
+	coupledModelCheckBox->setEnabled(false);
+	runTimeLineEdit->setText(QString::number(mConfig->mTimeToRun));
+	runTimeLineEdit->setEnabled(false);
+	textLabel2->setEnabled(false);
+	textLabel1_4->setEnabled(false);
+      }
     }
     // Automatically generate as much of the meta data for the job
     // as possible
-    else if (string == title(page(6))){
+    else if (string == title(page(7))){
     	// Find out who we are - could query our certificate at this stage
     	sgsUserNameLineEdit->setText(QString(getenv("USER")));
 
@@ -219,6 +183,15 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
       // uses to indicate a UTC date time.
       sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate)+"Z");
       
+      if(mConfig->mAppToLaunch){
+        // If we're restarting then the application to launch is already set
+        sgsSoftwarePackageLineEdit->setText(mConfig->mAppToLaunch->mAppName);
+      }
+      else{
+        Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+        sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
+      }
+      /*
       if(!mConfig->restart && !mConfig->migration){
         Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
         sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
@@ -227,8 +200,9 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
         // If we're restarting then the application to launch is already set
         sgsSoftwarePackageLineEdit->setText(mConfig->mAppToLaunch->mAppName);
       }
+      */
     }
-    else if(string == title(page(3))){
+    else if(string == title(page(4))){
     
       Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
       if(!chosenApp->mIsViz){
@@ -261,8 +235,15 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
  */
 void ComponentLauncher::accept(){
 
+  if(!mCollectMetaDataOnly){
     // Store ptr to chosen application
+  /*
     if(!mConfig->restart && !mConfig->migration){
+      // If this is a restart or migration then the app to launch is already set
+      mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
+    }
+  */
+    if(!mConfig->mAppToLaunch){
       // If this is a restart or migration then the app to launch is already set
       mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
     }
@@ -322,24 +303,25 @@ void ComponentLauncher::accept(){
         mConfig->simulationGSH = simulationGSHLineEdit->text();
       }
     }
-        
-    // Store meta-data about this job
-    mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
-    mConfig->mJobData->mOrganisation = sgsOrganisationLineEdit->text();
-    mConfig->mJobData->mLaunchTime = sgsCreationTimeLineEdit->text();
-    mConfig->mJobData->mSoftwareDescription = sgsSoftwarePackageLineEdit->text();
-    mConfig->mJobData->mPurposeOfJob = tagTextEdit->text();
-    if(mConfig->mAppToLaunch->mIsViz){
-      mConfig->mJobData->mMachineName = mConfig->mTargetMachine->mName;
-    }
-    else{
-      mConfig->mJobData->mMachineName = mConfig->mTargetMachine->mName;
-    }
+  }
+
+  // Store meta-data about this job
+  mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
+  mConfig->mJobData->mOrganisation = sgsOrganisationLineEdit->text();
+  mConfig->mJobData->mLaunchTime = sgsCreationTimeLineEdit->text();
+  mConfig->mJobData->mSoftwareDescription = sgsSoftwarePackageLineEdit->text();
+  mConfig->mJobData->mPurposeOfJob = tagTextEdit->text();
+  if(mCollectMetaDataOnly){
+    mConfig->mJobData->mMachineName = QString("various");
+    mConfig->mJobData->mNumProc = QString("0");
+  }
+  else{
+    mConfig->mJobData->mMachineName = mConfig->mTargetMachine->mName;
     mConfig->mJobData->mNumProc = QString::number(mConfig->mNumberProcessors);
+  }
 
-    done(1);
+  done(1);
 }
-
 
 /** Bring up a file input selection dialog to choose the input for an lb3d
  *  simulation. Put the result into the accompanying line edit box
@@ -472,3 +454,67 @@ void ComponentLauncher::next()
   QWizard::next();
 }
 
+
+void ComponentLauncher::simInputPushButton2_clicked()
+{
+    QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+"/realityGrid/reg_qt_launcher", "Input file (*)", this, "open file dialog" "Choose a file" );
+    simInputLineEdit2->setText(s);
+}
+
+
+void ComponentLauncher::coupledModelCheckBox_toggled(bool isOn)
+{
+    mConfig->mIsCoupledModel = isOn;
+
+    //setAppropriate(page(1), isOn); // 2nd component for coupled model
+}
+
+void ComponentLauncher::newCheckPtTreeCheckBox_toggled(bool isOn)
+{
+  treeTagTextEdit->setEnabled(isOn);
+  setFinishEnabled(currentPage(), !isOn); // We can enable the finish
+                                          // button if the user isn't 
+                                          // creating a new tree
+  mConfig->newTree = isOn;
+}
+
+
+void ComponentLauncher::component2Selected( const QString &inString )
+{
+    Application *chosenApp = &(mConfig->applicationList[componentComboBox2->currentItem()]);
+
+    // The pages of the launching wizard are as follows:
+    // Page 0: type of app to launch + input file + max runtime - page is
+    // always used but en/disable the input-file selection as appropriate
+    textLabelInputFile->setEnabled(chosenApp->mHasInputFile);
+    simInputLineEdit->setEnabled(chosenApp->mHasInputFile);
+    simInputPushButton->setEnabled(chosenApp->mHasInputFile);
+
+    // Page 2: GSH of data source (other component)
+    setAppropriate(page(2), (chosenApp->mNumInputs > 0));
+    // Page 3: Edit input file (only when restarting?)
+    setAppropriate(page(3),
+         ((mConfig->migration || mConfig->restart) && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
+    // Page 4: Select target machine (inc. num px, pipes, vizserver & multicast)
+	  setAppropriate(page(4), true);
+    // Page 5: Select type of viz (iso, cut etc.)
+	  setAppropriate(page(5), chosenApp->mIsViz);
+    // Page 6: Select container for SGS - always used
+    // Page 7: Job description (used to be just a tag) - always used
+    // Page 8: Tag for new checkpoint tree
+    setAppropriate(page(8), (chosenApp->mIsRestartable && mConfig->newTree));
+}
+
+/** Use to switch wizard into mode where only page 7 (job metadata)
+    is used */
+void ComponentLauncher::toggleCollectJobMetaDataOnly( bool isOn )
+{
+  mCollectMetaDataOnly = isOn;
+
+  for(int i=0; i<7; i++){
+    setAppropriate(page(i), false);
+  }
+  setAppropriate(page(7), true);
+  setBackEnabled(page(7), false);
+  setAppropriate(page(8), false);
+}
