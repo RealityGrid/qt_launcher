@@ -47,7 +47,7 @@
 
 class JobStatusThread: public QThread {
   public:
-    JobStatusThread(QStatusBar *aStatusBar, const QString &aContainer, const QString &aGSH);
+    JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH);
     ~JobStatusThread();
 
   protected:
@@ -55,7 +55,6 @@ class JobStatusThread: public QThread {
 
   private:
     QStatusBar *mainWindowStatusBar;
-    QString mContainer;
     QString mGSH;
     bool done;
     long age;

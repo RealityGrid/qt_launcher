@@ -42,11 +42,10 @@
 #include "qprocess.h"
 
 
-JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aContainer, const QString &aGSH)
+JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH)
 : done(false)
 {
   mainWindowStatusBar = aStatusBar;
-  mContainer = aContainer;
   mGSH = aGSH;
   
   // Set the lifespan of the thread to 15 seconds.
@@ -83,7 +82,6 @@ void JobStatusThread::getJobStatus(){
   // That way QT doesn't have to worry about garbage collecting it
   QProcess jobStatusProcess(QString("./jobStatus.pl"));
   jobStatusProcess.setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
-  jobStatusProcess.addArgument(mContainer);
   jobStatusProcess.addArgument(mGSH);
 
   jobStatusProcess.start();

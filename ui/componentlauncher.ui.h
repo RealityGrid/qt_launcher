@@ -59,7 +59,11 @@ void ComponentLauncher::componentSelectedSlot()
       setAppropriate(page(6), false);
       setAppropriate(page(7), false);
       setAppropriate(page(9), true);
-      setAppropriate(page(11), false);
+      if (mConfig->newTree)
+        setAppropriate(page(11), true);
+      else
+        setAppropriate(page(11), false);
+
 
       break;
       
@@ -74,7 +78,10 @@ void ComponentLauncher::componentSelectedSlot()
       setAppropriate(page(6), false);
       setAppropriate(page(7), false);
       setAppropriate(page(9), true);
-      setAppropriate(page(11), false);
+      if (mConfig->newTree)
+        setAppropriate(page(11), true);
+      else
+        setAppropriate(page(11), false);
 
       break;
       
@@ -258,6 +265,9 @@ void ComponentLauncher::accept(){
 
     // Time to run
     mConfig->simTimeRoRun = runTimeLineEdit->text().toInt();
+
+    // Container port number
+    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
   }
   // Viz test
   else if (componentType == lb3dviz){
@@ -296,6 +306,9 @@ void ComponentLauncher::accept(){
     // Multicast
     mConfig->multicast = mcastCheckBox->isChecked();
     mConfig->multicastAddress = mcastAddrLineEdit->text();
+
+    // Container port number
+    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
   }
 
   // Deal with the tag

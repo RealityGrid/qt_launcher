@@ -173,12 +173,23 @@ void Gridifier::getSGSiesProcessEnded(){
   result = QStringList::split("\n", processOutput);
 
   for (unsigned int i=0; i<result.count(); i++){
+    int firstSpace = result[i].find(" ");
+    QString tSGS = result[i].left(firstSpace);
+    QString tag = result[i].right(result[i].length() - firstSpace);
+    if (tSGS.startsWith("http://")){
+      mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, tSGS);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, tag);
+    }
+/*
+    // Here's a problem - this
     QStringList temp = QStringList::split(" ", result[i]);
     if (temp.count() == 2){
       mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, temp[0]);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, temp[1]);
     }
+*/
   }
 
 
@@ -193,6 +204,8 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
   makeSGSFactoryProcess->addArgument(container);
   makeSGSFactoryProcess->addArgument(topLevelRegistry);
 
+  cout << makeSGSFactoryProcess->arguments().join(" ") << endl;
+  
   makeSGSFactoryProcess->start();
 
   while (makeSGSFactoryProcess->isRunning()){
@@ -342,7 +355,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   file.flush();
 
   file.close();
-}
+  }
 
 
 /** Method calls Robin's ReG-L2-Sim-QTL script to
@@ -355,8 +368,6 @@ void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToR
   launchSimScriptProcess->addArgument(QString::number(timeToRun));
   if (checkPointGSH != NULL)
     launchSimScriptProcess->addArgument(checkPointGSH);
-
-  cout << launchSimScriptProcess->arguments().join(" ") << endl;
             
   launchSimScriptProcess->start();
 

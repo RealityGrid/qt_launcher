@@ -107,6 +107,7 @@ class LauncherConfig {
     QStringList machineList;
     QStringList vizMachineList;
     QString selectedContainer;
+    int containerPortNum;
 
     QString globusLocation;
 

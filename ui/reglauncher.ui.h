@@ -391,9 +391,9 @@ void RegLauncher::commonLaunchCode(){
     // and the system will choose a different one entirely
     
     if (factory.length() == 0){
-      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":50000/", config.topLevelRegistryGSH);
+      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
       
-      if (posFactory.startsWith("http://"+config.selectedContainer+":50000/"))
+      if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
         factory = posFactory;
         
       else{
@@ -438,10 +438,9 @@ void RegLauncher::commonLaunchCode(){
     }
     else {
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
-
     }
 
-    JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.selectedContainer+":50000/", config.simulationGSH);
+    JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.simulationGSH);
     aJobStatusThread->start();
 
   }
@@ -454,9 +453,9 @@ void RegLauncher::commonLaunchCode(){
 
     if (factory.length() == 0){
       consoleOutSlot("There's no factories to be had - I'd better make one");
-      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":50000/", config.topLevelRegistryGSH);
+      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
 
-      if (posFactory.startsWith("http://"+config.selectedContainer+":50000/"))
+      if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
         factory = posFactory;
 
       else{
