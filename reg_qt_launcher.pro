@@ -5,7 +5,7 @@ unix {
   MOC_DIR = .moc
   OBJECTS_DIR = .obj
 }
-FORMS	= ui/reglauncher.ui ui/componentlauncher.ui ui/RunningJobsDialog.ui
+FORMS	= ui/reglauncher.ui ui/componentlauncher.ui ui/RunningJobsDialog.ui ui/textviewdialog.ui
 TEMPLATE	= app
 CONFIG	+= qt warn_on release thread
 DBFILE	= reg_qt_launcher.db
