@@ -56,42 +56,53 @@ QString JobMetaData::toXML(){
 	QDomDocument *doc = new QDomDocument();
 	
   // Get root node
-  QDomElement root = doc->createElement( "componentContent");
+  QDomElement root = doc->createElement( "registryEntry");
   doc->appendChild(root);
+
+  // Type of service
+  QDomElement eType = doc->createElement( "serviceType");
+  root.appendChild(eType);
+
+  QDomText tServiceType = doc->createTextNode("SGS");
+  eType.appendChild(tServiceType);
+  
+  // Component description
+  QDomElement eContent = doc->createElement( "componentContent");
+  root.appendChild(eContent);
 
   // Date/time job launched
   // Create element
   QDomElement eTime = doc->createElement( "componentStartDateTime" );
   // Append element to root node
-  root.appendChild(eTime);
+  eContent.appendChild(eTime);
  
 	QDomText tnodeTime = doc->createTextNode(mLaunchTime);
   eTime.appendChild(tnodeTime);
 
   // Who launched it
   QDomElement ePerson = doc->createElement("componentCreatorName");
-  root.appendChild(ePerson);
+  eContent.appendChild(ePerson);
 
   QDomText tnodePerson = doc->createTextNode(mPersonLaunching);
   ePerson.appendChild(tnodePerson);
 
   // What organisation they belong to
   QDomElement eOrg = doc->createElement( "componentCreatorGroup" );
-  root.appendChild(eOrg);
+  eContent.appendChild(eOrg);
 
   QDomText tnodeOrg = doc->createTextNode(mOrganisation);
   eOrg.appendChild(tnodeOrg);
 
   // What the software is
   QDomElement eSoftware = doc->createElement("componentSoftwarePackage");
-  root.appendChild(eSoftware);
+  eContent.appendChild(eSoftware);
 
   QDomText tnodeSoftware = doc->createTextNode(mSoftwareDescription);
   eSoftware.appendChild(tnodeSoftware);
 
   // What the job is doing
   QDomElement ePurpose = doc->createElement("componentTaskDescription");
-  root.appendChild(ePurpose);
+  eContent.appendChild(ePurpose);
 
   QDomText tnodePurpose = doc->createTextNode(mPurposeOfJob);
   ePurpose.appendChild(tnodePurpose);
