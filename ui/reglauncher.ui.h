@@ -367,9 +367,11 @@ void RegLauncher::launchSimSlot()
   if (!wizardOk)
     return;
 
-  // this is lb3d only... do we really ever want to launch miniapp?
-  if (config.selectedComponentType == lb3d && restartingFromCheckPoint){
+  // If we're restarting a job and have had to edit the input file...
+  if (config.mAppToLaunch->mHasInputFile && restartingFromCheckPoint){
+  
     componentLauncher->getInputFileTextEditText(&inputFileText);
+    
     QFile inputFile( config.lb3dInputFileName );
     if ( inputFile.open( IO_WriteOnly ) ) {
       QTextStream stream( &inputFile );
@@ -378,20 +380,18 @@ void RegLauncher::launchSimSlot()
     }
   }
 
-
   // now launch!
   commonLaunchCode();
 }
 
 void RegLauncher::commonLaunchCode(){
-// lockup debug
-cout << "Common Launch Code" << endl;
+
   bool restartingFromCheckpoint = checkPointTreeListView->selectedItem()!=NULL;
   if (config.migration)
     restartingFromCheckpoint = true;
 
   // First up determine if we're starting a sim or a viz
-  if (config.selectedComponentType == lb3d || config.selectedComponentType == miniapp){
+  if (!config.mAppToLaunch->mIsViz){
     // It's a sim
     consoleOutSlot("Starting a simulation component");
 
@@ -411,25 +411,20 @@ cout << "Common Launch Code" << endl;
       else{
         consoleOutSlot("Sorry! - couldn't start a factory");
         return;
-      }
-        
+      }     
     }
 
     consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
-
-    QString jobDescriptionTxt = config.mJobData->toXML();
 
     // Now use the factory to create an SGS
     QString sgs;
     
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
-      //sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
-      sgs = gridifier.makeSimSGS(factory, jobDescriptionTxt, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
+      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
     }
     else{
-      //sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
-      sgs = gridifier.makeSimSGS(factory, jobDescriptionTxt, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
+      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
     }
       
     // Check that the sgs was created properly, if not die
@@ -455,20 +450,21 @@ cout << "Common Launch Code" << endl;
 
       ProgressBarThread *test = new ProgressBarThread();
       test->start();
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeToRun, config.currentCheckpointGSH);
-      //QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
+                                config);
       test->kill();
       consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeToRun);
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
+                                config);
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.simulationGSH);
     aJobStatusThread->start();
 
   }
-  else if (config.selectedComponentType == lb3dviz){
+  else{
     // It's a viz
     consoleOutSlot("Starting a visualization component");
 
@@ -496,7 +492,7 @@ cout << "Common Launch Code" << endl;
     // Remember to fill in the config.simulationGSH during the wizard stage - or we'll have problems!
     // for the time being though - if we make sure we create a simulation before creating a visualization
     // then we'll be ok for testing purposes
-    sgs = gridifier.makeVizSGS(factory, config.vizTag, config.topLevelRegistryGSH, config.simulationGSH);
+    sgs = gridifier.makeVizSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.simulationGSH);
 
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){
@@ -511,18 +507,17 @@ cout << "Common Launch Code" << endl;
 
     // At this point we want to specialise for the Argonne Cluster.
     // Check to see where we are rendering and act accordingly
-    if (config.vizTargetMachine == "tg-master.uc.teragrid.org"){
+    if (config.mTargetMachine == "tg-master.uc.teragrid.org"){
       gridifier.launchArgonneViz(config);
     }
     else {
       gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
 
-      gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf");
+      gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
     }
     
   }
   
-
 }
 
 void RegLauncher::discoverySlot()

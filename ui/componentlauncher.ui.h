@@ -23,12 +23,11 @@ void ComponentLauncher::init(){
     // set the appropriate default pages correctly
     // temporarily disable the checkPointGSHLineEdit page
     setAppropriate(page(1), false);
-    // setAppropriate(page(1), true);
     setAppropriate(page(2), false);
     setAppropriate(page(3), false);
     setAppropriate(page(4), true);
-    setAppropriate(page(5), true);
-    setAppropriate(page(6), false);
+    setAppropriate(page(5), false);
+    setAppropriate(page(6), true);
     setAppropriate(page(7), false);
     setAppropriate(page(9), true);
     setAppropriate(page(11), false);
@@ -60,15 +59,14 @@ void ComponentLauncher::componentSelectedSlot()
     // Page 4: Select input file
 	  setAppropriate(page(4),
 	       (!inputFileEditFlag && (chosenApp->mHasInputFile)));
-    // Page 5: Select target machine (& num px)
-	  setAppropriate(page(5), (chosenApp->mNumInputs == 0));
+    // Page 5: Select target machine (& num px) - USE PAGE 6 INSTEAD NOW
+	  setAppropriate(page(5), false);
     // Page 6: Select target viz machine (inc. num px, pipes, vizserver & multicast)
-	  setAppropriate(page(6), (chosenApp->mNumInputs > 0));
+	  setAppropriate(page(6), true);
     // Page 7: Select type of viz (iso, cut etc.)
-	  setAppropriate(page(7), (chosenApp->mNumInputs > 0));
+	  setAppropriate(page(7), chosenApp->mIsViz);
     // Page 8: Select container for SGS - always used
-    // Page 9: Max run time - currently only for 'sims'
-    setAppropriate(page(9), (chosenApp->mNumInputs == 0));
+    // Page 9: Max run time - always used
     // Page 10: Job description (used to be just a tag) - always used
     // Page 11: Tag for new checkpoint tree
 	  if (chosenApp->mIsRestartable && mConfig->newTree){
@@ -160,7 +158,9 @@ void ComponentLauncher::sgsOrgChanged( const QString & )
 
 void ComponentLauncher::sgsTagEntered()
 {
-    if (!mConfig->newTree || componentComboBox->currentItem() == lb3dviz){
+    Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+
+    if (!mConfig->newTree || (chosenApp->mNumInputs > 0)){
 	    setNextEnabled(currentPage(), false);
 	    setFinishEnabled(currentPage(), true);
     }
@@ -185,9 +185,10 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
 	    containerListBox->insertItem(mConfig->containerList[i].mContainer);
     }
     // and the simTargetListBox too
-    simTargetListBox->insertStringList((mConfig->machineList));
+    //simTargetListBox->insertStringList((mConfig->machineList));
+    
     // and the vizTargetListBox too
-    vizTargetListBox->insertStringList((mConfig->vizMachineList));
+    //targetMachineListBox->insertStringList((mConfig->vizMachineList));
     
     // populate the viz's simulation gsh entry box with a good default
     simulationGSHLineEdit->setText(mConfig->simulationGSH);
@@ -200,27 +201,27 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     // Test to see if we're doing a migration
     // Things are a bit different if we're migrating
     if (mConfig->migration || mConfig->restart){
-	setAppropriate(page(0), false);
-	setAppropriate(page(1), false);
-	setAppropriate(page(2), false);
-	setAppropriate(page(3), true);
-	setAppropriate(page(4), false);
-	// force page 3 to be the first that's displayed
-	showPage(page(3));
+	    setAppropriate(page(0), false);
+	    setAppropriate(page(1), false);
+	    setAppropriate(page(2), false);
+	    setAppropriate(page(3), true);
+	    setAppropriate(page(4), false);
+	    // force page 3 to be the first that's displayed
+	    showPage(page(3));
     }
     
     // Make the user enter a tag if a new tree is being created
     if (mConfig->newTree){
-	setAppropriate(page(11), true);
+	    setAppropriate(page(11), true);
     }
 
-  // Set up the drop-down list of available apps
-  QStringList list;
-  for ( int i = 0; i < (int)mConfig->applicationList.count(); i++ )
-    list += mConfig->applicationList[i].mAppName;
+    // Set up the drop-down list of available apps using the list
+    // we got from the configuration file
+    QStringList list;
+    for ( int i = 0; i < (int)mConfig->applicationList.count(); i++ )
+      list += mConfig->applicationList[i].mAppName;
 
-  componentComboBox->insertStringList(list, 0);
-
+    componentComboBox->insertStringList(list, 0);
 }
 
 
@@ -264,13 +265,10 @@ void ComponentLauncher::containerSelectedSlot()
  */
 void ComponentLauncher::pageSelectedSlot(const QString &string)
 {
-    // Make a check in case the user left the componentSelection combo box on
-    // on the default slot, hence didn't create an event for us to pick up
-    //if (pageName == title(page(1))){
-    //  componentSelectedSlot();
-    //}
-    
     //cout << string << endl;
+
+    // Automatically generate as much of the meta data for the job
+    // as possible
     if (string == title(page(10))){
     	// Find out who we are - could query our certificate at this stage
     	sgsUserNameLineEdit->setText(QString(getenv("USER")));
@@ -279,16 +277,25 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
       QDateTime dt = QDateTime::currentDateTime();
       sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate));
 
-      // What is it we're launching?
-      switch (componentComboBox->currentItem()){
+      Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+      sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
+    }
+    else if(string == title(page(6))){
+    
+      Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+      if(!chosenApp->mIsViz){
+        vizServerCheckBox->setEnabled(false);
+        mcastCheckBox->setEnabled(false);
+        mcastAddrLineEdit->setEnabled(false);
+        vizPipesLineEdit->setEnabled(false);
 
-      case lb3d:
-        sgsSoftwarePackageLineEdit->setText(QString("lb3d"));
-        break;
-      case lb3dviz:
-        sgsSoftwarePackageLineEdit->setText(QString("Viz for lb3d"));
-        break;
+        // List of available machines depends on whether app. is a viz.
+        // or not
+        targetMachineListBox->insertStringList((mConfig->machineList));
       }
+      else{
+        targetMachineListBox->insertStringList((mConfig->vizMachineList));
+      } 
     }
 }
 
@@ -297,106 +304,163 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
  *  and enter them into the LauncherConfig data object.
  */
 void ComponentLauncher::accept(){
-    
-    // Check if it's a Sim or Viz
-    int componentType = componentComboBox->currentItem();
-    mConfig->selectedComponentType = componentType;
-    
-    // Sim test
-    if (componentType == lb3d || componentType == miniapp){
-	    mConfig->simComponentType = componentType;
-	
-	    // Target machine
-			mConfig->simTargetMachine = simTargetListBox->currentText();
-	
-      // Number processors
-	    mConfig->simNumberProcessors = simNumProcLineEdit->text().toInt();
-	
-	    // Container
-	    mConfig->selectedContainer = containerListBox->currentText();
-	
-	    // sgs Tag
-	    mConfig->simTag = tagTextEdit->text();
-	
-	    // CheckPoint GSH - note that this is entirely optional if we're not migrating
-	    if (!mConfig->migration){
-	      if (checkPointGSHLineEdit->text().length() == 0)
-		      mConfig->currentCheckpointGSH = "";
-	      else
-		      mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
-	    }
-	
-	    // LB3D Input file name
-	    if (componentType == lb3d && simInputLineEdit->text().length() != 0){
-	      mConfig->lb3dInputFileName = simInputLineEdit->text();
-	    }
-	
-	    // Tree tag
-	    if (mConfig->newTree){
-	      mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
-	    }
-	
-	    // Time to run
-	    mConfig->simTimeToRun = runTimeLineEdit->text().toInt();
-	
-	    // Container port number
-	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
-    }
-    // Viz test
-    else if (componentType == lb3dviz){
-	    mConfig->vizComponentType = componentType;
-	
-	    // Target machine
-	    mConfig->vizTargetMachine = vizTargetListBox->currentText();
-	
-	    // Number processors
-	    mConfig->vizNumberProcessors = vizNumProcLineEdit->text().toInt();
-	
+
+    // Store ptr to chosen application
+    mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
+ 	  // Target machine
+    mConfig->mTargetMachine = targetMachineListBox->currentText();
+    // Number processors
+    mConfig->mNumberProcessors = numProcLineEdit->text().toInt();
+ 	  // Container
+	  mConfig->selectedContainer = containerListBox->currentText();
+
+    // CheckPoint GSH - note that this is entirely optional if we're not migrating
+	  if (!mConfig->migration){
+	    if (checkPointGSHLineEdit->text().length() == 0)
+		    mConfig->currentCheckpointGSH = "";
+	    else
+		    mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
+	  }
+
+	  // Input file name
+	  if (mConfig->mAppToLaunch->mHasInputFile && simInputLineEdit->text().length() != 0){
+	    mConfig->lb3dInputFileName = simInputLineEdit->text();
+	  }
+
+	  // Tree tag
+	  if (mConfig->newTree){
+	    mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
+	  }
+
+	  // Time to run
+	  mConfig->mTimeToRun = runTimeLineEdit->text().toInt();
+
+	  // Container port number
+	  mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+
+	  if(mConfig->mAppToLaunch->mIsViz){
 	    // Number pipes
-	    mConfig->vizNumberPipes = vizPipesLineEdit->text().toInt();
-	
+	    mConfig->mNumberPipes = vizPipesLineEdit->text().toInt();
+
 	    // VizServer
 	    mConfig->vizServer = vizServerCheckBox->isChecked();
-	
-	    // Container
-	    mConfig->selectedContainer = containerListBox->currentText();
-	
-    	// Job meta data
-	    mConfig->vizTag = tagTextEdit->text();
-	
-	    // Visualization type
-	    mConfig->vizType = vizTypeComboBox->currentItem();
-	
-	    // Simulation GSH
-	    if (simulationGSHLineEdit->text().length() == 0){
-	      // if the user's not entered anything - then use the value from the config
-	    }
-	    else
-	      // otherwise replace the config value with what the user wants
-	      // be aware that this should really need to happen
-	      mConfig->simulationGSH = simulationGSHLineEdit->text();
-	
+	  
 	    // Multicast
 	    mConfig->multicast = mcastCheckBox->isChecked();
 	    mConfig->multicastAddress = mcastAddrLineEdit->text();
-	
-	    // Container port number
-	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
-	
-	    // Time to run
-	    mConfig->vizTimeToRun = runTimeLineEdit->text().toInt();
+
+	    // Visualization type
+	    mConfig->vizType = vizTypeComboBox->currentItem();
+    }
+
+	  // GSH of data source
+	  if(mConfig->mAppToLaunch->mNumInputs > 0){
+
+	  	if (simulationGSHLineEdit->text().length() == 0){
+	    	// if the user's not entered anything - then use the value from the config
+	  	}
+	  	else{
+	      // otherwise replace the config value with what the user wants
+	      // be aware that this should really need to happen
+	      mConfig->simulationGSH = simulationGSHLineEdit->text();
+	    }
     }
     
+    // Check if it's a Sim or Viz
+//    int componentType = componentComboBox->currentItem();
+//    mConfig->selectedComponentType = componentType;
+//
+//    if (chosenApp->mNumInputs == 0){
+//	    mConfig->simComponentType = componentType;
+//
+//	    // Target machine
+//			mConfig->simTargetMachine = simTargetListBox->currentText();
+//
+//      // Number processors
+//	    mConfig->simNumberProcessors = simNumProcLineEdit->text().toInt();
+//
+//	    // Container
+//	    mConfig->selectedContainer = containerListBox->currentText();
+//
+//	    // CheckPoint GSH - note that this is entirely optional if we're not migrating
+//	    if (!mConfig->migration){
+//	      if (checkPointGSHLineEdit->text().length() == 0)
+//		      mConfig->currentCheckpointGSH = "";
+//	      else
+//		      mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
+//	    }
+//
+//	    // Input file name
+//	    if (chosenApp->mHasInputFile && simInputLineEdit->text().length() != 0){
+//	     mConfig->lb3dInputFileName = simInputLineEdit->text();
+//	    }
+//
+//	    // Tree tag
+//	    if (mConfig->newTree){
+//	      mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
+//	    }
+//
+//	    // Time to run
+//	    mConfig->simTimeToRun = runTimeLineEdit->text().toInt();
+//
+//	    // Container port number
+//	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+//    }
+//    // Viz test
+//    else{
+//	    mConfig->vizComponentType = componentType;
+//
+//	    // Target machine
+//	    mConfig->vizTargetMachine = vizTargetListBox->currentText();
+//
+//	    // Number processors
+//	    mConfig->vizNumberProcessors = vizNumProcLineEdit->text().toInt();
+//
+//	    // Number pipes
+//	    mConfig->vizNumberPipes = vizPipesLineEdit->text().toInt();
+//
+//	    // VizServer
+//	    mConfig->vizServer = vizServerCheckBox->isChecked();
+//
+//	    // Container
+//	    mConfig->selectedContainer = containerListBox->currentText();
+//
+//    	// Job meta data
+//	    mConfig->vizTag = tagTextEdit->text();
+//
+//	    // Visualization type
+//	    mConfig->vizType = vizTypeComboBox->currentItem();
+//
+//	    // Simulation GSH
+//	    if (simulationGSHLineEdit->text().length() == 0){
+//	      // if the user's not entered anything - then use the value from the config
+//	    }
+//	    else
+//	      // otherwise replace the config value with what the user wants
+//	      // be aware that this should really need to happen
+//	      mConfig->simulationGSH = simulationGSHLineEdit->text();
+//
+//	    // Multicast
+//	    mConfig->multicast = mcastCheckBox->isChecked();
+//	    mConfig->multicastAddress = mcastAddrLineEdit->text();
+//
+//	    // Container port number
+//	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+//
+//	    // Time to run
+//	    mConfig->vizTimeToRun = runTimeLineEdit->text().toInt();
+//    }
+    
     // Deal with the tag
-    if (tagTextEdit->length()!=0){
-	
-	    if (mConfig->simComponentType == lb3d || mConfig->simComponentType == miniapp){
-	      mConfig->simTag = tagTextEdit->text();
-	    }
-	    else if (mConfig->vizComponentType == lb3dviz){
-	      mConfig->vizTag = tagTextEdit->text();
-	    }
-    }
+//    if (tagTextEdit->length()!=0){
+//
+//	    if (mConfig->simComponentType == lb3d || mConfig->simComponentType == miniapp){
+//	      mConfig->simTag = tagTextEdit->text();
+//	    }
+//	    else if (mConfig->vizComponentType == lb3dviz){
+//	      mConfig->vizTag = tagTextEdit->text();
+//	    }
+//    }
     
     // Store meta-data about this job
 	  mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
@@ -468,25 +532,25 @@ void ComponentLauncher::setApplication(RegLauncher *aRegLauncher){
  */
 void ComponentLauncher::multicastToggleSlot()
 {
-    if (vizTargetListBox->currentText() == "tg-master.uc.teragrid.org"){
-	// Argonne must use multicast - don't let the user turn it off
-	mcastCheckBox->setChecked(true);
-	mcastAddrLineEdit->setEnabled(true);
-	// don't let the user try a vizserver either
-	vizServerCheckBox->setChecked(false);
-	vizServerCheckBox->setEnabled(false);
-	// and pretend we're setting 9 nodes for the viz
-	vizNumProcLineEdit->setText("8");
-	vizNumProcLineEdit->setEnabled(false);
-	vizPipesLineEdit->setText("4");
-	vizPipesLineEdit->setEnabled(false);
-	return;
+    if (targetMachineListBox->currentText() == "tg-master.uc.teragrid.org"){
+	    // Argonne must use multicast - don't let the user turn it off
+	    mcastCheckBox->setChecked(true);
+	    mcastAddrLineEdit->setEnabled(true);
+	    // don't let the user try a vizserver either
+	    vizServerCheckBox->setChecked(false);
+	    vizServerCheckBox->setEnabled(false);
+	    // and pretend we're setting 9 nodes for the viz
+	    numProcLineEdit->setText("8");
+	    numProcLineEdit->setEnabled(false);
+	    vizPipesLineEdit->setText("4");
+	    vizPipesLineEdit->setEnabled(false);
+	    return;
     }
     
     if (mcastCheckBox->isChecked())
-	mcastAddrLineEdit->setEnabled(true);
+   	  mcastAddrLineEdit->setEnabled(true);
     else
-	mcastAddrLineEdit->setEnabled(false);
+	    mcastAddrLineEdit->setEnabled(false);
 }
 
 
@@ -497,19 +561,11 @@ void ComponentLauncher::multicastToggleSlot()
 void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
 {
     if (selectedMachine != NULL & selectedMachine->text() == "tg-master.uc.teragrid.org"){
-	// check the multicast toggle, turn on the time to run page
-	mcastCheckBox->setChecked(true);
-	multicastToggleSlot();
+	    // check the multicast toggle, turn on the time to run page
+	    mcastCheckBox->setChecked(true);
+	    multicastToggleSlot();
 	
-	setAppropriate(page(9), true);
-    }
-    else {
-	vizServerCheckBox->setEnabled(true);
-	setAppropriate(page(9), false);
-	vizNumProcLineEdit->setText("1");
-	vizNumProcLineEdit->setEnabled(true);
-	vizPipesLineEdit->setText("1");
-	vizPipesLineEdit->setEnabled(true);
+	    setAppropriate(page(9), true);
     }
 }
 
@@ -519,21 +575,17 @@ void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
 void ComponentLauncher::containerListBoxSelectedSlot( QListBoxItem *selectedContainer )
 {
     if (selectedContainer != NULL){
-	int containerIndex = containerListBox->index(selectedContainer);
-	int selectedPortNum = mConfig->containerList[containerIndex].mPort;
-	containerPortNumLineEdit->setText(QString::number(selectedPortNum));
+	    int containerIndex = containerListBox->index(selectedContainer);
+	    int selectedPortNum = mConfig->containerList[containerIndex].mPort;
+	    containerPortNumLineEdit->setText(QString::number(selectedPortNum));
     }
 }
-
-
 
 
 void ComponentLauncher::sgsCreationTimeChanged( const QString & )
 {
     
 }
-
-
 
 
 void ComponentLauncher::sgsUserNameChanged( const QString & )

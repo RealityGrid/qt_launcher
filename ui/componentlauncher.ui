@@ -221,7 +221,7 @@
             <cstring>selectTargetMachine</cstring>
         </property>
         <attribute name="title">
-            <string>Select Target Machine</string>
+            <string>Select Target Machine Old</string>
         </attribute>
         <grid>
             <property name="name">
@@ -286,7 +286,7 @@
             <cstring>selectVizTarget</cstring>
         </property>
         <attribute name="title">
-            <string>Select Target Visualization Machine</string>
+            <string>Select Target Machine</string>
         </attribute>
         <grid>
             <property name="name">
@@ -356,7 +356,7 @@
                     </widget>
                     <widget class="QLineEdit">
                         <property name="name">
-                            <cstring>vizNumProcLineEdit</cstring>
+                            <cstring>numProcLineEdit</cstring>
                         </property>
                         <property name="sizePolicy">
                             <sizepolicy>
@@ -428,7 +428,7 @@
             </widget>
             <widget class="QListBox" row="0" column="0" rowspan="1" colspan="3">
                 <property name="name">
-                    <cstring>vizTargetListBox</cstring>
+                    <cstring>targetMachineListBox</cstring>
                 </property>
             </widget>
             <widget class="QLayoutWidget" row="0" column="3">
@@ -860,7 +860,7 @@
         <slot>multicastToggleSlot()</slot>
     </connection>
     <connection>
-        <sender>vizTargetListBox</sender>
+        <sender>targetMachineListBox</sender>
         <signal>currentChanged(QListBoxItem*)</signal>
         <receiver>ComponentLauncher</receiver>
         <slot>vizTargetSelectedSlot(QListBoxItem*)</slot>
@@ -912,9 +912,9 @@
     <tabstop>simTargetListBox</tabstop>
     <tabstop>simNumProcLineEdit</tabstop>
     <tabstop>mcastAddrLineEdit</tabstop>
-    <tabstop>vizNumProcLineEdit</tabstop>
+    <tabstop>numProcLineEdit</tabstop>
     <tabstop>vizPipesLineEdit</tabstop>
-    <tabstop>vizTargetListBox</tabstop>
+    <tabstop>targetMachineListBox</tabstop>
     <tabstop>vizServerCheckBox</tabstop>
     <tabstop>mcastCheckBox</tabstop>
     <tabstop>vizTypeComboBox</tabstop>
