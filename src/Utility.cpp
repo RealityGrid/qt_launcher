@@ -44,6 +44,9 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <iostream>
+
+using namespace std;
 
 
 QString Utility::getHostName(){
@@ -64,5 +67,24 @@ QString Utility::getHostName(){
   
   return result;
 }
+
+QString Utility::getDisplayEnvironmentVariable(){
+  return QString(getenv("DISPLAY"));
+}
+
+QString Utility::getCurrentDisplay(){
+  QString host = getHostName();
+  QString tDisplay = getDisplayEnvironmentVariable();
+  QString result;
+
+  int colonLocation = tDisplay.find(":");
+  result = host+tDisplay.right(tDisplay.length() - colonLocation);
+
+  cout << result << endl;
+  
+  return result;
+}
+
+
 
 

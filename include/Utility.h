@@ -42,6 +42,8 @@
 class Utility{
 public:
   static QString getHostName();
+  static QString getDisplayEnvironmentVariable();
+  static QString getCurrentDisplay();
 };
 
 
