@@ -302,27 +302,27 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
       // 'section' splits string according to specified separator,
       //  '-1' asks for the right-most portion
       coordName +=  (*file).section('/', -1) + "\n";
-      cout << "ARPDBG coor: " << coordName << endl;
+      //cout << "ARPDBG coor: " << coordName << endl;
     }
     else if((*file).endsWith(".vel")){
     
       velName += (*file).section('/', -1) + "\n";
-      cout << "ARPDBG vel: " << velName << endl;
+      //cout << "ARPDBG vel: " << velName << endl;
     }
     else if((*file).endsWith(".xsc")){
 
       extSysName += (*file).section('/', -1) + "\n";
-      cout << "ARPDBG xsc: " << extSysName << endl;
+      //cout << "ARPDBG xsc: " << extSysName << endl;
     }
     else if((*file).endsWith(".psf")){
 
       structName += (*file).section('/', -1) + "\n";
-      cout << "ARPDBG struct: " << structName << endl;
+      //cout << "ARPDBG struct: " << structName << endl;
     }
     else if((*file).endsWith(".inp")){
 
       paramName += (*file).section('/', -1) + "\n";
-      cout << "ARPDBG param: " << paramName << endl;
+      //cout << "ARPDBG param: " << paramName << endl;
     }
     
 	  ++file;
@@ -440,7 +440,7 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     }
   }
 
-  cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
+  //cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
 }
 
 /** Slot launches a simulation or visualization component.
@@ -623,6 +623,20 @@ void RegLauncher::commonLaunchCode(){
 
     consoleOutSlot(QString("SGS is "+config.simulationGSH).stripWhiteSpace());
 
+    // Create xml job description and save to file
+    QFile jobFile("tmp/job.xml");
+    jobFile.open( IO_WriteOnly );
+
+    QTextStream filestream(&jobFile);
+    filestream << config.toXML();
+    jobFile.close();
+
+    // Launch job using remote web service and the xml job description
+    //consoleOutSlot("Submitting job to web service...");
+    //gridifier.webServiceJobSubmit(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/job.xml");
+    //consoleOutSlot("...done job submission");
+    //return;//ARPDBG
+    
     // Now launch the job
 
     gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
@@ -844,7 +858,8 @@ void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
 
     // Be nice and tell the user what's going to happen if they click the launch button
     launchButton->setText("Launch");
-    
+    config.currentCheckpointGSH = "";
+   
     return;
   }
 
@@ -853,20 +868,22 @@ void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
     // toggle the status
     if (launchButton->text() == "Launch"){
       launchButton->setText("Restart");
+      config.currentCheckpointGSH = ((CheckPointTreeItem*)selectedItem)->getCheckPointGSH();
     }
     else {
       checkPointTreeListView->clearSelection();
 
       // Be nice and tell the user what's going to happen if they click the launch button
       launchButton->setText("Launch");
+      config.currentCheckpointGSH = "";
     }
   }
   else {
     checkPointTreeListViewPreviousSelection = checkPointTreeListView->itemPos(selectedItem);
-    config.currentCheckpointGSH = ((CheckPointTreeItem*)selectedItem)->getCheckPointGSH();
 
     // Be nice and tell the user what's going to happen if they click the launch button
     launchButton->setText("Restart");
+    config.currentCheckpointGSH = ((CheckPointTreeItem*)selectedItem)->getCheckPointGSH();
   }
   
 }
