@@ -322,7 +322,7 @@ void ComponentLauncher::accept(){
  */
 void ComponentLauncher::simInputButtonPushedSlot()
 {
-    QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+"/realityGrid/reg_qt_launcher", "LB3D input file (*)", this, "open file dialog" "Choose a file" );
+    QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+"/realityGrid/reg_qt_launcher", "Input file (*)", this, "open file dialog" "Choose a file" );
     simInputLineEdit->setText(s);
 }
 
