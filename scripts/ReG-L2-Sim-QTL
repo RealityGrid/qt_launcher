@@ -53,10 +53,12 @@ TIME_TO_RUN=$2
 # Optionally get the checkpoint data file name from the command line args
 if [ $# -eq 3 ]
 then
-CHECKPOINT_DATA_FILE=$3
+CHECKPOINT_GSH=$3
 else
-CHECKPOINT_DATA_FILE=""
+CHECKPOINT_GSH=""
 fi
+
+echo "Checkpoint GSH = $CHECKPOINT_GSH"
 
 # Ascertain whether we have a valid grid-proxy 
 
@@ -132,22 +134,36 @@ echo "\$HOME/RealityGrid/bin/lbe3d" >> /tmp/reg_sim_remote.$$
 echo "Transferring simulation input file..."
 
 
-if [ $CHECKPOINT_DATA_FILE ]
+if [ $CHECKPOINT_GSH ]
 then 
 #  Transfer the checkpoint data files to target machine
 #   do this by calling Mark McKeown's rgcpc script
-echo "Calling Mark McKeown's rgcpc script on Vermont"
-#./rgcpc.pl -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
-globus-job-run vermont.mvc.mcc.ac.uk /opt/globus/bin/rg-cp -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
+echo "Calling Mark McKeown's rgcpc script on Bezier"
+  case $SIM_HOSTNAME in
+       iam764.psc.edu)
+          # Pittsburgh has a special ftp server
+	  globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -t gsiftp://panhead.psc.edu/~/ -g $CHECKPOINT_GSH
+	  ;;
+      *)
+	  globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+	  ;;
+  esac
 echo "Done calling script"
 fi
 
 if [ $SSH -eq 0 ]
 then
-#globus-url-copy file:$PWD/$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
-globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
+  case $SIM_HOSTNAME in
+      iam764.psc.edu)
+          # Pittsburgh has a special ftp server
+	  globus-url-copy file:$SIM_INFILE gsiftp://panhead.psc.edu/~/RealityGrid/scratch/.reg.input-file.$$
+          ;;
+      *)
+	  globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
+	  ;;
+  esac
 else
-scp $PWD/$SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file.$$
+  scp $PWD/$SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file.$$
 fi
 
 if [ $? -gt "0" ]
