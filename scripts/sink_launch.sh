@@ -133,6 +133,10 @@ then
        wren.cfs.ac.uk)
           globus-job-run wren.cfs.ac.uk/jobmanager-lsf -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
+       localhost)
+	  chmod a+x /tmp/reg_sim_remote.$$
+          /tmp/reg_sim_remote.$$ &> ${HOME}/${SIM_STD_ERR_FILE} &
+          ;;
        *)
           globus-job-run $SIM_HOSTNAME/jobmanager-fork -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
 #          globus-job-run $SIM_HOSTNAME/jobmanager-fork -stdout $SIM_STD_OUT_FILE -stderr /home/bezier1/zzcgurp/$SIM_STD_ERR_FILE -s /tmp/reg_sim_remote.$$ &
