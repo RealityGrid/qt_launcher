@@ -148,6 +148,9 @@ void LauncherConfig::readConfig(QString file){
 
           xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
 	  mScratchDirectory = QString((const char*)val);
+	  // Use this value to set an environment variable so our
+	  // various perl scripts know where scratch is
+	  setenv("REG_SCRATCH_DIRECTORY", mScratchDirectory.ascii(), 1);
 	  xmlFree(val);
 	}
 
