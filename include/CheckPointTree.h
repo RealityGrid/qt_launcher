@@ -37,6 +37,10 @@
     
 ---------------------------------------------------------------------------*/
 
+/** @file CheckPointTree.h
+    @brief Header file for class for handling the CheckPointTree
+ */
+
 #ifndef _CHECKPOINTTREE_H_
 #define _CHECKPOINTTREE_H_
 
@@ -47,10 +51,9 @@
 
 class CheckPointTreeItem;
 
-
-class CheckPointTree{//: public QThread {
+/** Class containing methods for querying a checkpoint tree */
+class CheckPointTree{
   public:
-  //CheckPointTree(QListView *parent);
     CheckPointTree(QListView *parent, const QString &address);
     ~CheckPointTree();
 
