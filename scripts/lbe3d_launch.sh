@@ -136,9 +136,25 @@ echo "\$HOME/RealityGrid/bin/lbe3d" >> $REG_TMP_FILE
 
 echo "Transferring simulation input file..."
 
+# Cope with fact that lemieux is not the frontend for file-transfer at PSC
+GRIDFTP_HOSTNAME=$SIM_HOSTNAME
+
+if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+then
+  GRIDFTP_HOSTNAME="knucklehead.psc.edu"
+
+elif [ "$SIM_HOSTNAME" == "fermat.cfs.ac.uk"  ]
+then
+  GRIDFTP_HOSTNAME="wren.cfs.ac.uk"
+
+elif [ "$SIM_HOSTNAME" == "green.cfs.ac.uk"  ]
+then
+  GRIDFTP_HOSTNAME="wren.cfs.ac.uk"
+fi
+
 if [ $CHECKPOINT_GSH ]
 then 
-./rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+./rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$GRIDFTP_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
 fi
 
 case $ReG_LAUNCH in
@@ -146,7 +162,7 @@ case $ReG_LAUNCH in
       scp $SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file.$$
           ;;
       *)
-      $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
+      $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
 	  ;;
 esac
 

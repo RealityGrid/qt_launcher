@@ -127,17 +127,29 @@ GRIDFTP_HOSTNAME=$SIM_HOSTNAME
 if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
 then
   GRIDFTP_HOSTNAME="knucklehead.psc.edu"
+
+elif [ "$SIM_HOSTNAME" == "fermat.cfs.ac.uk"  ]
+then
+  GRIDFTP_HOSTNAME="wren.cfs.ac.uk"
+
+elif [ "$SIM_HOSTNAME" == "green.cfs.ac.uk"  ]
+then
+  GRIDFTP_HOSTNAME="wren.cfs.ac.uk"
+fi
+
+# On lemieux, the compute node can't even see the disk to which gridftp
+# writes the files...
+if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+then
+
   echo "/usr/psc/bin/far get RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
-  
-#  if [ "$CHECKPOINT_GSH" == "" ]
-#  then 
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
-    echo "/usr/psc/bin/far get RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
-#  fi
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/far get RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
+
 else
 
   # Check that input file has arrived - don't do this for PSC since files
