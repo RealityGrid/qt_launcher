@@ -36,6 +36,7 @@
 #------------------------------------------------------------------------
 
 echo "Job manager is: $HOST_JOB_MGR"
+echo "Remote machine is: $SIM_HOSTNAME"
 
 # Build the RSL file
 REG_RSL_FILE=/tmp/sim_stage.$$.rsl
@@ -87,8 +88,8 @@ case $ReG_LAUNCH in
     ;;
     ssh)
         chmod a+x $REG_TMP_FILE
-        scp $REG_TMP_FILE $USER@$HOST:$REG_TMP_FILE
-        ssh -f $USER@$HOST $REG_TMP_FILE
+        scp $REG_TMP_FILE $USER@$SIM_HOSTNAME:$REG_TMP_FILE
+        ssh -f $USER@$SIM_HOSTNAME $REG_TMP_FILE
     ;;
     *)
      echo "ReG_LAUNCH must be set to one of 'globus', 'cog' or 'ssh'"
