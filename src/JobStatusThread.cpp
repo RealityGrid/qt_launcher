@@ -38,16 +38,29 @@
 ---------------------------------------------------------------------------*/
 
 #include "JobStatusThread.h"
-
 #include "qprocess.h"
+#include <iostream>
 
-JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, const QString &aGSH)
+/** @file JobStatusThread.cpp
+    @brief Implementation of class for monitoring inital status of job.
+  */
+
+using namespace std;
+
+JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
+				 const QString &aGSH)
 : done(false)
 {
   mMainWin = aMainWindow;
   mGSH = aGSH;
   mApp = aApp;
   
+  int index = mGSH.find("/service", 0, true);
+  mNameSpace = mGSH.left(index);
+  index = mNameSpace.findRev("/", index, true);
+  mNameSpace = mNameSpace.right(mNameSpace.length() - index - 1);
+  cout << "ARPDBG Namespace = " << mNameSpace << endl;
+
   // Set the lifespan of the thread to 15 seconds.
   // This isn't currently used - some jobs could sit
   // in a queue for hours on end.
@@ -63,22 +76,23 @@ void JobStatusThread::run(){
 }
 
 void JobStatusThread::getJobStatus(){
-  // Unfortunately this needs to be done by calling a script, rather than using gsoap directly from c++
-  //
-  // The reason for this is that the reg_steer_lib uses gsoap from c++, as does the library for the
-  // checkpoint tree discovery. The issue is that we then have multiply defined functions and the linker
-  // bails. There are three possible solutions:
-  //  * combine the reg_steer_lib with the checkpoint tree discovery lib
-  //      no good, since this would interfere with the encapsulation of both libs
-  //  * use c++ namespaces for the checkpoint tree lib
-  //      potentially the best way forward - but a bit of a botch also
-  //  * just wrap around a script
-  //      quickest way to progress - hence chosen - the deadline is fast approaching.
+  /// Unfortunately this needs to be done by calling a script, rather than using gsoap directly from c++
+  ///
+  /// The reason for this is that the reg_steer_lib uses gsoap from c++, as does the library for the
+  /// checkpoint tree discovery. The issue is that we then have multiply defined functions and the linker
+  /// bails. There are three possible solutions:
+  ///  * combine the reg_steer_lib with the checkpoint tree discovery lib
+  ///      no good, since this would interfere with the encapsulation of both libs
+  ///  * use c++ namespaces for the checkpoint tree lib
+  ///      potentially the best way forward - but a bit of a botch also
+  ///  * just wrap around a script
+  ///      quickest way to progress - hence chosen - the deadline is fast approaching.
 
-  // It's better that we run this process in stackspace rather than heapspace
-  // That way QT doesn't have to worry about garbage collecting it
+  /// It's better that we run this process in stackspace rather than heapspace
+  /// That way QT doesn't have to worry about garbage collecting it
   QProcess jobStatusProcess(QString("./jobStatus.pl"));
   jobStatusProcess.setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  jobStatusProcess.addArgument(mNameSpace);
   jobStatusProcess.addArgument(mGSH);
 
   jobStatusProcess.start();
@@ -95,6 +109,7 @@ void JobStatusThread::getJobStatus(){
   // Generate an event to send to the status bar (have to do it this way
   // because the gui thread must be the one to do the update)
   QCustomEvent *aUpdateEvent = new QCustomEvent(QEvent::User+1);
+  //QCustomEvent aUpdateEvent(QEvent::User+1);
 
   // need to think about having a timeout function
   if (results.find("NOT_STARTED")>=0){
