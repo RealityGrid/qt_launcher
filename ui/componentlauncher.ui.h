@@ -17,8 +17,6 @@ using namespace std;
 
 Gridifier mGridifier;
 
-//bool inputFileEditFlag = false;
-
 void ComponentLauncher::init(){
     // set the appropriate default pages correctly
     // temporarily disable the checkPointGSHLineEdit page
@@ -56,11 +54,9 @@ void ComponentLauncher::componentSelectedSlot()
     // Page 3: Edit input file (only when restarting?)
     setAppropriate(page(3),
          ((mConfig->migration || mConfig->restart) && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
-         //(inputFileEditFlag && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
     // Page 4: Select input file
 	  setAppropriate(page(4),
 	       (!(mConfig->migration || mConfig->restart) && (chosenApp->mHasInputFile)));
-	       //(!inputFileEditFlag && (chosenApp->mHasInputFile)));
     // Page 5: Select target machine (& num px) - USE PAGE 6 INSTEAD NOW
 	  setAppropriate(page(5), false);
     // Page 6: Select target viz machine (inc. num px, pipes, vizserver & multicast)
@@ -199,7 +195,6 @@ void ComponentLauncher::containerSelectedSlot()
  */
 void ComponentLauncher::pageSelectedSlot(const QString &string)
 {
-
     // Automatically generate as much of the meta data for the job
     // as possible
     if (string == title(page(10))){
@@ -348,7 +343,6 @@ void ComponentLauncher::setCheckPointGSH(const QString &checkPointGSH)
     // edit the input file.  This may be overridden if the user has
     // chosen to launch an app that's not restartable (i.e. wasn't
     // used to generate the checkpoint tree in the first place).
-    //inputFileEditFlag = true;
     setAppropriate(page(3), true);
     // don't allow them to select their own file
     setAppropriate(page(4), false);
