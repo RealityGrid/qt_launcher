@@ -40,11 +40,6 @@
 #ifndef _LAUNCHERCONFIG_H_
 #define _LAUNCHERCONFIG_H_
 
-
-#define lb3d 0
-#define miniapp 1
-#define lb3dviz 2
-
 #define notused -1
 
 #define isosurface 0
@@ -118,15 +113,6 @@ class LauncherConfig {
     // Non GSH data
     int simComponentType;
     int vizComponentType;
-//    int selectedComponentType;
-    
-    //QString simTargetMachine;
-    //QString vizTargetMachine;
-    //QString simTag;
-    //QString vizTag;
-    //int simNumberProcessors;
-    //int vizNumberProcessors;
-    //int vizNumberPipes;
     
     bool    vizServer;
     bool    multicast;
