@@ -98,6 +98,9 @@ void RegLauncher::migrateSimSlot()
   //  * allow the user to select a new machine
   //  * copy the data and input files to that new machine
   //  * start the new job
+  
+  // Check that user has a valid proxy
+  this->proxyInfo();
 
   RunningJobsDialog rjd;
 
@@ -495,6 +498,9 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
  */
 void RegLauncher::launchSimSlot()
 {
+  // Check that user has a valid proxy
+  this->proxyInfo();
+  
   bool restartingFromCheckPoint = checkPointTreeListView->selectedItem()!=NULL;
   config.migration = false;
 
@@ -874,6 +880,11 @@ void RegLauncher::proxyInfoProcessEnded()
   }
   else{
     consoleOutSlot("Proxy error or proxy does not exist");
+    
+    QMessageBox::warning( NULL, "Configuration error",
+                    "Proxy error or proxy does not exist - is GLOBUS_LOCATION\n"
+                    "set and do you have a valid proxy?\n\n",
+                    QMessageBox::Ok, 0, 0 );
   }
 }
 

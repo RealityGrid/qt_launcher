@@ -137,7 +137,7 @@ void LauncherConfig::readConfig(QString file){
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"checkPointTreeFactory"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           checkPointTreeFactoryGSH = QString((const char*)key);
-	  xmlFree(key);
+	        xmlFree(key);
         }
 
         // Registry of Factories
@@ -165,82 +165,6 @@ void LauncherConfig::readConfig(QString file){
       }
       
     }
-
-    // Retrieve the target machine information
-//    if ((!xmlStrcmp(childOfRoot->name, (const xmlChar *)"component"))){
-//
-//      // for code visibility purposes
-//      aComponent = childOfRoot;
-//
-//      xmlChar *key = xmlGetProp(aComponent, (xmlChar*)"type");
-//
-//      if (!xmlStrcmp(key, (const xmlChar*)"lb3d")){
-//        simComponentType = lb3d;
-//
-//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-//        simTargetMachine = QString((const char*)target);
-//        xmlFree(target);
-//
-//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-//        simNumberProcessors = atoi((const char*)processors);
-//        xmlFree(processors);
-//
-//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-//        simTag = QString((const char*)tag);
-//        xmlFree(tag);
-//      }
-//      if (!xmlStrcmp(key, (const xmlChar*)"lb3dviz")){
-//        vizComponentType = lb3dviz;
-//
-//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-//        vizTargetMachine = QString((const char*)target);
-//        xmlFree(target);
-//
-//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-//        vizNumberProcessors = atoi((const char*)processors);
-//        xmlFree(processors);
-//
-//        xmlChar *pipes = xmlGetProp(aComponent, (xmlChar*)"numberPipes");
-//        vizNumberPipes = atoi((const char*)pipes);
-//        xmlFree(pipes);
-//
-//        xmlChar *vizServerChoice = xmlGetProp(aComponent, (xmlChar*)"vizServer");
-//        if (!xmlStrcmp(vizServerChoice, (const xmlChar*)"yes")){
-//         vizServer = true;
-//         // if we're using vizServer then there can only be one graphics pipe - enforce this
-//         vizNumberPipes = 1;
-//        }
-//        else {
-//         vizServer = false;
-//        }
-//        xmlFree(vizServerChoice);
-//
-//        xmlChar *vizTypeStr = xmlGetProp(aComponent, (xmlChar*)"type");
-//        vizType = atoi((const char*)vizTypeStr);
-//        xmlFree(vizTypeStr);
-//
-//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-//        vizTag = QString((const char*)tag);
-//        xmlFree(tag);
-//      }
-//      if (!xmlStrcmp(key, (const xmlChar*)"miniapp")){
-//        simComponentType = miniapp;
-//
-//        xmlChar *target = xmlGetProp(aComponent, (xmlChar*)"targetMachineName");
-//        simTargetMachine = QString((const char*)target);
-//        xmlFree(target);
-//
-//        xmlChar *processors = xmlGetProp(aComponent, (xmlChar*)"numberProcessors");
-//        simNumberProcessors = atoi((const char*)processors);
-//        xmlFree(processors);
-//
-//        xmlChar *tag = xmlGetProp(aComponent, (xmlChar*)"tag");
-//        simTag = QString((const char*)tag);
-//        xmlFree(tag);
-//      }
-//
-//      xmlFree(key);
-//    }
 
     // Retrieve the container information
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"containers"))){
@@ -327,10 +251,10 @@ void LauncherConfig::readConfig(QString file){
         vizTargets = vizTargets->next;
       }
     }    
-
-    if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
-      globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
-    }
+    
+    //if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
+    //  globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
+    //}
 
     if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"applications")){
 
@@ -387,6 +311,18 @@ void LauncherConfig::readConfig(QString file){
     }
 
     childOfRoot = childOfRoot->next;
+  }
+
+
+  // Get globus location from environment instead of from conf file because
+  // that's more consistent with other applications
+  globusLocation = QString(getenv("GLOBUS_LOCATION"));
+  if(globusLocation.isEmpty()){
+
+    QMessageBox::warning( NULL, "Configuration error",
+                  "Failed to get GLOBUS_LOCATION from environment.\n"
+                  "Launching via Globus will not be possible.\n",
+                  QMessageBox::Ok, 0, 0 );
   }
 }
 
