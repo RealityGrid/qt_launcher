@@ -431,13 +431,13 @@ void RegLauncher::commonLaunchCode(){
 
       ProgressBarThread *test = new ProgressBarThread();
       test->start();
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, config.currentCheckpointGSH);
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeToRun, config.currentCheckpointGSH);
       //QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       test->kill();
       consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeToRun);
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.simulationGSH);
@@ -479,9 +479,16 @@ void RegLauncher::commonLaunchCode(){
 
     consoleOutSlot(QString("Viz SGS is "+config.visualizationGSH).stripWhiteSpace());
 
-    gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
+    // At this point we want to specialise for the Argonne Cluster.
+    // Check to see where we are rendering and act accordingly
+    if (config.vizTargetMachine == "tg-master.uc.teragrid.org"){
+      gridifier.launchArgonneViz(config);
+    }
+    else {
+      gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
 
-    gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf");
+      gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf");
+    }
     
   }
   

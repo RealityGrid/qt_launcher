@@ -264,7 +264,7 @@ void ComponentLauncher::accept(){
     }
 
     // Time to run
-    mConfig->simTimeRoRun = runTimeLineEdit->text().toInt();
+    mConfig->simTimeToRun = runTimeLineEdit->text().toInt();
 
     // Container port number
     mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
@@ -309,6 +309,9 @@ void ComponentLauncher::accept(){
 
     // Container port number
     mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+
+    // Time to run
+    mConfig->vizTimeToRun = runTimeLineEdit->text().toInt();
   }
 
   // Deal with the tag
@@ -384,10 +387,40 @@ void ComponentLauncher::setApplication(RegLauncher *aRegLauncher){
  */
 void ComponentLauncher::multicastToggleSlot()
 {
+  if (vizTargetListBox->currentText() == "tg-master.uc.teragrid.org"){
+    // Argonne must use multicast - don't let the user turn it off
+    mcastCheckBox->setChecked(true);
+    mcastAddrLineEdit->setEnabled(true);
+    // don't let the user try a vizserver either
+    vizServerCheckBox->setChecked(false);
+    vizServerCheckBox->setEnabled(false);
+    return;
+  }
+  
   if (mcastCheckBox->isChecked())
     mcastAddrLineEdit->setEnabled(true);
   else
     mcastAddrLineEdit->setEnabled(false);
+}
+
+
+
+/** We need to check to see if we've selected the Argonne cluster.
+ *  It always needs a multicast address, and must have a time to run.
+ */
+void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
+{
+  if (selectedMachine != NULL & selectedMachine->text() == "tg-master.uc.teragrid.org"){
+    // check the multicast toggle, turn on the time to run page
+    mcastCheckBox->setChecked(true);
+    multicastToggleSlot();
+
+    setAppropriate(page(9), true);
+  }
+  else {
+    vizServerCheckBox->setEnabled(true);
+    setAppropriate(page(9), false);
+  }
 }
 
 

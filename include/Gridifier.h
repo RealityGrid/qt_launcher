@@ -64,6 +64,7 @@ public:
   void makeReGScriptConfig(const QString &filename, const LauncherConfig &config);
   void launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointGSH = NULL);
   void launchVizScript(const QString &scriptConfigFileName);
+  void launchArgonneViz(const LauncherConfig &config);
 
   void copyCheckPointFiles(const QString &host);
   void gsiFtp(const QString &file, const QString &destination);

@@ -387,7 +387,8 @@ if ( logFile.open(IO_WriteOnly) ){
 }*/
   
   cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
-  cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
+  if (launchSimScriptProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
 }
 
 /** Method calls Robin's ReG-L2-Viz-QTL script to
@@ -407,10 +408,49 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName){
 
 
   cout << "Stdout:" << endl << launchVizScriptProcess->readStdout() << endl;
-  cout << "Stderr:" << endl << launchVizScriptProcess->readStderr() << endl;
+  if (launchVizScriptProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << launchVizScriptProcess->readStderr() << endl;
 }
 
 
+/** Special case to launch a viz on Argonne's cluster
+ *  this will always render to multicast
+ */
+void Gridifier::launchArgonneViz(const LauncherConfig &config){
+  QProcess *launchArgonneVizProcess = new QProcess(QString("./argonneVis.sh"));
+  launchArgonneVizProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchArgonneVizProcess->addArgument(config.visualizationGSH);
+  launchArgonneVizProcess->addArgument(QString::number(config.vizTimeToRun));
+  launchArgonneVizProcess->addArgument(config.multicastAddress);
+
+  QString vizTypeStr = "";
+  if (config.vizType == isosurface){
+    vizTypeStr = "iso";
+  }
+  else if (config.vizType == volumeRender){
+    vizTypeStr = "vol";
+  }
+  if (config.vizType == hedgehog){
+    vizTypeStr = "hog";
+  }
+  else if (config.vizType == cutPlane){
+    vizTypeStr = "cut";
+  }
+  launchArgonneVizProcess->addArgument(vizTypeStr);
+
+  cout << launchArgonneVizProcess->arguments().join(" ") << endl;
+  
+  launchArgonneVizProcess->start();
+
+  while (launchArgonneVizProcess->isRunning()){
+    usleep(10000);
+    mApplication->processEvents();
+  }
+
+  cout << "Stdout:" << endl << launchArgonneVizProcess->readStdout() << endl;
+  if (launchArgonneVizProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << launchArgonneVizProcess->readStderr() << endl;
+}
 
 /** Method calls Mark McKeown's rgcpc perl script, which
  *  copies the relevant files over to the relevant remote

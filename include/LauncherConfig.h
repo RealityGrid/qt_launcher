@@ -101,7 +101,8 @@ class LauncherConfig {
     int vizType;
     QString lb3dInputFileName;
 
-    int simTimeRoRun;
+    int simTimeToRun;
+    int vizTimeToRun;
     
     QStringList containerList;
     QStringList machineList;

@@ -348,7 +348,7 @@
                             </size>
                         </property>
                         <property name="text">
-                            <string>123.456.789.012/34567</string>
+                            <string>233.33.100.3/40004</string>
                         </property>
                     </widget>
                 </vbox>
@@ -724,6 +724,12 @@
         <receiver>ComponentLauncher</receiver>
         <slot>multicastToggleSlot()</slot>
     </connection>
+    <connection>
+        <sender>vizTargetListBox</sender>
+        <signal>currentChanged(QListBoxItem*)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>vizTargetSelectedSlot(QListBoxItem*)</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in declaration">LauncherConfig.h</include>
@@ -756,6 +762,7 @@
     <slot>getInputFileTextEditText( QString * returnPtr )</slot>
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
     <slot>multicastToggleSlot()</slot>
+    <slot>vizTargetSelectedSlot(QListBoxItem *)</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>
