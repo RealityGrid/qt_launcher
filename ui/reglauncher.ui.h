@@ -147,7 +147,8 @@ void RegLauncher::migrateSimSlot()
     // Get the ID string of the app. that created this checkpoint
     QString appName;
     QString checkUIDString;
-    parseChkPtMetaData(checkPointDataText, appName, checkUIDString);
+    QStringList fileNames;
+    parseChkPtMetaData(checkPointDataText, appName, checkUIDString, fileNames);
 
     if(appName.length()==0 ){
       consoleOutSlot("Failed to get name of application from checkpoint metadata");
@@ -157,12 +158,31 @@ void RegLauncher::migrateSimSlot()
     	consoleOutSlot("Failed to get UID of checkpoint from metadata");
      	return;
     }
+    cout << "ARPDBG: appName = " << appName << endl;
+    
+    // Work out which of the applications is being migrated
+    config.mAppToLaunch = NULL;
+    for(unsigned int i=0; i<config.applicationList.count(); i++){
+      // IMPORTANT - this will require more care if we want to match up
+      // version numbers rather than crudely checking the app name
+      if(appName.contains(config.applicationList[i].mAppName, FALSE) == 1){
+        config.mAppToLaunch = &(config.applicationList[i]);
+        break;
+      }
+    }
+    if(!config.mAppToLaunch){
 
+    	consoleOutSlot("Failed to match name of application used to create checkpoint"
+                     "with those listed in default.conf");
+     	return;
+    }
+
+    cout << "ARPDBG: we are MIGRATING "<< config.mAppToLaunch->mAppName << endl;
     if(appName.contains("lbe3d", FALSE) == 1){
       patchLb3dInputFileText(inputFileText, checkUIDString);
     }
     else if(appName.contains("namd", FALSE) == 1){
-      patchNamdInputFileText(inputFileText, checkUIDString);
+      patchNamdInputFileText(inputFileText, checkUIDString, fileNames);
     }
 
     // cache it
@@ -279,82 +299,112 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
    performing a restart from the specified checkpoint
  */
 void RegLauncher::patchNamdInputFileText(QString &inputFileText,
-                                         QString &chkUIDString)
-{
-  /* Get the filestem from the chkUIDString
-
-  chkUIDString = chkUIDString.SOMETHING;
-  */
-  
-  // Generate the names of the three restart files
+                                         QString &chkUIDString,
+                                         QStringList &fileNames)
+{ 
+  // Generate the names of the five restart files
   QString coordName = QString("coordinates");
-          coordName += "           " + chkUIDString + ".coor\n";
+          coordName += "           ";
   QString velName = QString("velocities");
-          velName += "           " + chkUIDString + ".vel\n";
+          velName += "           ";
   QString extSysName = QString("extendedSystem");
-          extSysName += "           " + chkUIDString + ".xsc\n";
+          extSysName += "           ";
   // structure file
   QString structName = QString("structure");
-          structName += "           " + chkUIDString + ".psf\n";
+          structName += "           ";
   // parameters file
   QString paramName = QString("parameters");
-          paramName += "           " + chkUIDString + ".inp\n";
+          paramName += "           ";
+          
+  QStringList::iterator file = fileNames.begin();
+  while(file != fileNames.end()){
+
+    if((*file).endsWith(".coor")){
+
+      // 'section' splits string according to specified separator,
+      //  '-1' asks for the right-most portion
+      coordName +=  (*file).section('/', -1) + "\n";
+      cout << "ARPDBG coor: " << coordName << endl;
+    }
+    else if((*file).endsWith(".vel")){
+    
+      velName += (*file).section('/', -1) + "\n";
+      cout << "ARPDBG vel: " << velName << endl;
+    }
+    else if((*file).endsWith(".xsc")){
+
+      extSysName += (*file).section('/', -1) + "\n";
+      cout << "ARPDBG xsc: " << extSysName << endl;
+    }
+    else if((*file).endsWith(".psf")){
+
+      structName += (*file).section('/', -1) + "\n";
+      cout << "ARPDBG struct: " << structName << endl;
+    }
+    else if((*file).endsWith(".inp")){
+
+      paramName += (*file).section('/', -1) + "\n";
+      cout << "ARPDBG param: " << paramName << endl;
+    }
+    
+	  ++file;
+  }
   
   int nextLine = 0;
-  int index = inputFileText.find("coordinates");
+  int index = inputFileText.find("\ncoordinates");
   if(index > 0){
     // Replace exisiting line
-    nextLine = inputFileText.find("\n", index);
+    nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
       inputFileText = inputFileText.left(index) + coordName + inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
     // Insert new line
-    index = inputFileText.find("coordinates");
+    index = inputFileText.find("\ncoordinates");
     if(index > 0){
-      nextLine = inputFileText.find("\n", index);
+      nextLine = inputFileText.find("\n", ++index);
       inputFileText = inputFileText.left(nextLine) + "\n" + coordName + inputFileText.right(nextLine);
     }
   }
 
-  index = inputFileText.find("velocities");
+  index = inputFileText.find("\nvelocities");
   if(index > 0){
     // Replace exisiting line
-    nextLine = inputFileText.find("\n", index);
+    nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
       inputFileText = inputFileText.left(index) + velName + inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
     // Insert new line
-    index = inputFileText.find("coordinates");
+    index = inputFileText.find("\ncoordinates");
     if(index > 0){
-      nextLine = inputFileText.find("\n", index);
+      nextLine = inputFileText.find("\n", ++index);
       inputFileText = inputFileText.left(nextLine) + "\n" + velName + inputFileText.right(nextLine);
     }
   }
 
-  index = inputFileText.find("extendedSystem");
+  index = inputFileText.find("\nextendedSystem");
   if(index > 0){
     // Replace exisiting line
-    nextLine = inputFileText.find("\n", index);
+    nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
       inputFileText = inputFileText.left(index) + extSysName + inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
     // Insert new line
-    index = inputFileText.find("coordinates");
+    index = inputFileText.find("\ncoordinates");
     if(index > 0){
-      nextLine = inputFileText.find("\n", index);
+      nextLine = inputFileText.find("\n", ++index);
       inputFileText = inputFileText.left(nextLine) + "\n" + extSysName + inputFileText.right(nextLine);
     }
   }
 
   // We're specifying velocities so we musn't try and specify a temperature
-  index = inputFileText.find("temperature");
-  if(!(index == 0 || inputFileText.at(index-1) == '#')){
+  index = inputFileText.find("\ntemperature");
+  if( index != -1 ){
 
     inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
   }
@@ -455,8 +505,9 @@ void RegLauncher::launchSimSlot()
 
     // Get the ID string of the app. that created this checkpoint
     QString appName;
-    QString checkUIDString;     
-    parseChkPtMetaData(checkPointDataText, appName, checkUIDString);
+    QString checkUIDString;
+    QStringList fileNames;
+    parseChkPtMetaData(checkPointDataText, appName, checkUIDString, fileNames);
 
     if(appName.length()==0 ){
 
@@ -490,7 +541,7 @@ void RegLauncher::launchSimSlot()
       patchLb3dInputFileText(inputFileText, checkUIDString);
     }
     else if(appName.contains("namd", FALSE) == 1){
-      patchNamdInputFileText(inputFileText, checkUIDString);
+      patchNamdInputFileText(inputFileText, checkUIDString, fileNames);
     }
 
     // cache it
@@ -959,8 +1010,11 @@ void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
    the checkpoint
  */
 void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
-                                      QString &appName, QString &chkUID )
+                                      QString &appName, QString &chkUID,
+                                      QStringList &fileNames )
 {
+  int i;
+  
   QDomDocument doc("Checkpoint meta-data");
   doc.setContent(chkMetaData);
 
@@ -974,11 +1028,33 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
       QDomNodeList childNodes =
            nodes.item(0).toElement().elementsByTagName(QString("Chk_UID"));
 
-      if(childNodes.count() >= 1){
+      if(childNodes.count() > 0){
 
         if(childNodes.item(0).isElement()){
 
           chkUID = childNodes.item(0).toElement().text();
+        }
+      }
+
+      childNodes = nodes.item(0).toElement().elementsByTagName(QString("Files"));
+
+      QDomNode fileNode;
+      for(i=0; i<childNodes.count(); i++){
+
+      	if(childNodes.item(i).isElement()){
+          childNodes = childNodes.item(i).toElement().elementsByTagName(QString("file"));
+     
+          // Extract all of the filenames that are listed
+          //childNodes = fileNode.toElement().elementsByTagName(QString("file"));
+
+          for(i=0; i<childNodes.count(); i++){
+
+          	if(childNodes.item(i).isElement()){
+              cout << "ARPDBG File "<< i << " = " << childNodes.item(i).toElement().text() << endl;
+				      fileNames.append(childNodes.item(i).toElement().text());
+				    }
+          }
+          break;
         }
       }
     }

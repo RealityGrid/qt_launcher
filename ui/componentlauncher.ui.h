@@ -17,7 +17,7 @@ using namespace std;
 
 Gridifier mGridifier;
 
-bool inputFileEditFlag = false;
+//bool inputFileEditFlag = false;
 
 void ComponentLauncher::init(){
     // set the appropriate default pages correctly
@@ -55,10 +55,12 @@ void ComponentLauncher::componentSelectedSlot()
     setAppropriate(page(2), (chosenApp->mNumInputs > 0));
     // Page 3: Edit input file (only when restarting?)
     setAppropriate(page(3),
-         (inputFileEditFlag && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
+         ((mConfig->migration || mConfig->restart) && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
+         //(inputFileEditFlag && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
     // Page 4: Select input file
 	  setAppropriate(page(4),
-	       (!inputFileEditFlag && (chosenApp->mHasInputFile)));
+	       (!(mConfig->migration || mConfig->restart) && (chosenApp->mHasInputFile)));
+	       //(!inputFileEditFlag && (chosenApp->mHasInputFile)));
     // Page 5: Select target machine (& num px) - USE PAGE 6 INSTEAD NOW
 	  setAppropriate(page(5), false);
     // Page 6: Select target viz machine (inc. num px, pipes, vizserver & multicast)
@@ -208,7 +210,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
       QDateTime dt = QDateTime::currentDateTime();
       sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate));
       
-      if(!mConfig->restart){
+      if(!mConfig->restart && !mConfig->migration){
         Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
         sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
       }
@@ -243,8 +245,8 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 void ComponentLauncher::accept(){
 
     // Store ptr to chosen application
-    if(!mConfig->restart){
-      // If this is a restart then the app to launch is already set
+    if(!mConfig->restart && !mConfig->migration){
+      // If this is a restart or migration then the app to launch is already set
       mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
     }
     // Target machine
@@ -346,10 +348,10 @@ void ComponentLauncher::setCheckPointGSH(const QString &checkPointGSH)
     // edit the input file.  This may be overridden if the user has
     // chosen to launch an app that's not restartable (i.e. wasn't
     // used to generate the checkpoint tree in the first place).
-    inputFileEditFlag = true;
-    setAppropriate(page(3), inputFileEditFlag);
+    //inputFileEditFlag = true;
+    setAppropriate(page(3), true);
     // don't allow them to select their own file
-    setAppropriate(page(4), !inputFileEditFlag);
+    setAppropriate(page(4), false);
 }
 
 /** if the user's restarting from a checkpoint, then grab the input file,
