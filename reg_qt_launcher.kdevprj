@@ -1,19 +1,28 @@
 [Config for BinMakefileAm]
-bin_program=reg_qt_launcher
-cxxflags=-O0 -g3 -Wall
-ldflags=\s
+addcxxflags=
+bin_program=launcher
+cflags=
+cppflags=
+cxxflags=\s-O0 -g3 -Wall
+ldadd=
+ldflags=\s\s
+libtool_dir=
+path_to_bin_program=.
 
 [General]
 AMChanged=false
 author=Mark Riding
-configure_args=
+configure_args=\s--build=i386-linux --host=i386-linux --target=i386-linux\s
+dir_where_make_will_be_called=./
 email=mark.riding@man.ac.uk
 kdevprj_version=1.3
 lfv_open_groups=
-make_options=-j1
+make_options=\s-j1
 makefiles=Makefile.am,docs/Makefile.am,docs/en/Makefile.am,src/Makefile.am,include/Makefile.am,ui/Makefile.am,include/CVS/Makefile.am
+modifyMakefiles=true
 project_name=ReG_QT_Launcher
 project_type=normal_empty
+short_info=
 sub_dir=
 version=0.1
 version_control=None
