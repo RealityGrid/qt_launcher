@@ -111,8 +111,8 @@ class LauncherConfig {
     QString visualizationGSH;
 
     // Non GSH data
-    int simComponentType;
-    int vizComponentType;
+    //int simComponentType;
+    //int vizComponentType;
     
     bool    vizServer;
     bool    multicast;
@@ -121,7 +121,7 @@ class LauncherConfig {
     bool    restart;
     bool    newTree;
     int     vizType;
-    QString lb3dInputFileName;
+    QString mInputFileName;
 
     QString mTargetMachine;
     QString treeTag;
