@@ -148,8 +148,6 @@ void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t)
   if (soap_call_tree__getChildNodes(&soap, handle, "", out))
     soap_print_fault(&soap, stderr);
 
-//  cout << out->_getChildNodesReturn << endl;
-
   // and then parse for children and data nodes, fill in list view as appropriate.....
 
   parse(QString(out->_getChildNodesReturn), t);
@@ -176,23 +174,6 @@ void CheckPointTree::getNodeData(const QString &handle, CheckPointTreeItem *t){
 
 
 void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *parentListViewItem){
-/*  // First off deal with the invalid documents we're receiving from
-  // Mark McKeown's web service on vermant
-  QString xmlResultsDoc = QString("<foo>") + xmlDocString + QString("</foo>");
-  int testForOddTag = xmlResultsDoc.find("<Checkpoint_node_data>");
-  while (testForOddTag >= 0){
-    // then we need to add a closing tag
-    int insertAt = xmlResultsDoc.find("</ogsi:content>", testForOddTag);
-    int closingTagLocation = xmlResultsDoc.find("</Checkpoint_node_data>");
-    if (insertAt>closingTagLocation){
-      xmlResultsDoc = xmlResultsDoc.left(insertAt) + "</Checkpoint_node_data>" + xmlResultsDoc.right(xmlResultsDoc.length()-insertAt);
-
-      testForOddTag = xmlResultsDoc.find("<Checkpoint_node_data>", insertAt);
-    }
-    else
-      testForOddTag = closingTagLocation;
-  }
-*/
   
   QString xmlResultsDoc = xmlDocString;
 
@@ -205,7 +186,6 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
     CheckPointParamsList paramsList;
 
     QDomElement e = topLevelNode.toElement(); // try to convert the node to an element.
-//    cout << e.tagName() << endl;
 
     if (e.tagName() == "ogsi:entry"){
       // possible variables
@@ -217,7 +197,6 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
       QDomNode secondLevelNode = e.firstChild();
       while (!secondLevelNode.isNull()){
         QDomElement ee = secondLevelNode.toElement();
-//        cout << " " << ee.tagName() << endl;
 
         if (ee.tagName() == "ogsi:serviceGroupEntryLocator"){
           // ignore this for now
@@ -226,16 +205,15 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
           // we need this to get child nodes
           QDomNode locator = ee.firstChild();
           QDomNode handle = locator.firstChild();
-//          cout << "  " << handle.toElement().text() << endl;
 
           memberServiceLocatorHandle = handle.toElement().text();
         }
         else if (ee.tagName() == "ogsi:content"){
-          // we need the "REG_SEQ_NUM" & "TIMESTAMP" values
+          // we need the "SEQUENCE_NUM" & "TIMESTAMP" values
           QDomNode Checkpoint_node_data = ee.firstChild();
           
           if (Checkpoint_node_data.toElement().tagName() == "Checkpoint_node_data"){
-//            cout << "  " << Checkpoint_node_data.toElement().tagName() << endl;
+
             QDomNode Param_LevelNode = Checkpoint_node_data.firstChild();
 
             while (!Param_LevelNode.isNull()){
@@ -244,18 +222,11 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
                 
               isMainNode = true;
             
-//              cout << "   " << Param_LevelNode.toElement().tagName() << endl;
               QDomNode handle = Param_LevelNode.firstChild();
               QDomNode label = handle.nextSibling();
               QDomNode value = label.nextSibling();
-              
-//              if (label.toElement().text() == "REG_SEQ_NUM" || label.toElement().text() == "TIMESTAMP"){
-//                cout << "    handle:"<< handle.toElement().text() << endl;
-//                cout << "    label:"<< label.toElement().text() << endl;
-//                cout << "    value:"<< value.toElement().text() << endl;
-//              }
-              
-              if (label.toElement().text() == "REG_SEQ_NUM"){
+                            
+              if (label.toElement().text() == "SEQUENCE_NUM"){
                 seqNum = value.toElement().text();
               }
               else if (label.toElement().text() == "TIMESTAMP"){
@@ -263,7 +234,6 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
               }
 
               CheckPointParams tmp(label.toElement().text().stripWhiteSpace(), handle.toElement().text().stripWhiteSpace(), value.toElement().text().stripWhiteSpace());
-//              cout << label.toElement().text().stripWhiteSpace() << " " << handle.toElement().text().stripWhiteSpace() << " " << value.toElement().text().stripWhiteSpace() << endl;
               paramsList += tmp;
 
               Param_LevelNode = Param_LevelNode.nextSibling();
