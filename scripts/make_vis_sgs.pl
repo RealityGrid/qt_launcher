@@ -116,6 +116,26 @@ my $ans = SOAP::Lite
 
 print "$sgs_GSH\n";
 
+#-------------------------------------------------------------------------
+# Set-up NAMD SGS with data source - only applicable for NAMD but
+# shouldn't break other (more traditional) simulations.
+
+$dataSources = "<SGS:Data_source_list>
+<SGS:Data_source>
+<SGS:Source_GSH>" . $sgs_GSH . "</SGS:Source_GSH>
+<SGS:Source_label>vmd2namd</SGS:Source_label>
+</SGS:Data_source>
+</SGS:Data_source_list>";
+
+$func = "setServiceData";
+$arg = "<ogsi:setByServiceDataNames>".$dataSources.
+    "</ogsi:setByServiceDataNames>";
+my $ans = SOAP::Lite
+          -> uri("SGS")
+          -> proxy("$source_GSH")
+          -> $func("$arg")
+          -> result;
+
 #--------------------------------------------------
 
 sub iotype_char_handler
