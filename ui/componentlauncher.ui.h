@@ -160,7 +160,11 @@ void ComponentLauncher::sgsTagEntered()
 {
     Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
 
-    if (!mConfig->newTree || (chosenApp->mNumInputs > 0)){
+    // Next and final page allows user to enter text to describe the
+    // checkpoint tree they are about to create.  This is only
+    // applicable if the job is restartable and the user hasn't
+    // selected a checkpoint (in an existing tree) to start from.
+    if (!(mConfig->newTree && chosenApp->mIsRestartable)){
 	    setNextEnabled(currentPage(), false);
 	    setFinishEnabled(currentPage(), true);
     }
@@ -184,11 +188,6 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     for (int i=0; i<numContainers; i++){
 	    containerListBox->insertItem(mConfig->containerList[i].mContainer);
     }
-    // and the simTargetListBox too
-    //simTargetListBox->insertStringList((mConfig->machineList));
-    
-    // and the vizTargetListBox too
-    //targetMachineListBox->insertStringList((mConfig->vizMachineList));
     
     // populate the viz's simulation gsh entry box with a good default
     simulationGSHLineEdit->setText(mConfig->simulationGSH);

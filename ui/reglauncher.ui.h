@@ -308,7 +308,7 @@ void RegLauncher::launchSimSlot()
 
   // Component launcher will fill in our current config with the user's requests
   ComponentLauncher *componentLauncher = new ComponentLauncher();
-  // componentLauncher->setConfig(&config);
+
   componentLauncher->setApplication(this);
   QString inputFileText = "";
 
@@ -353,7 +353,7 @@ void RegLauncher::launchSimSlot()
     config.newTree = false;
   } // : if restarting from checkpoint
   else {
-    // else we're launching a new tree
+    // else we're launching a new tree (if this type of app is restartable)
     config.restart = false;
     config.newTree = true;
   }
