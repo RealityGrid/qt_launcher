@@ -307,7 +307,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
 
   QStringList fileText;
   fileText += "#!/bin/sh\n\n";
-  fileText += "OGSI\n\n";
+  //fileText += "OGSI\n\n";
   fileText += "CONTAINER="+config.selectedContainer+"\n";
   if (config.globusLocation.length() > 0)
     fileText += "GLOBUS_LOCATION="+config.globusLocation+"\n";
@@ -328,7 +328,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "VIZ_STD_ERR_FILE=RealityGrid/scratch/ReG-viz-stderr.$$.txt\n";
   fileText += "STEER_STD_OUT_FILE=RealityGrid/scratch/ReG-steer-stdout.$$.txt\n";
   fileText += "STEER_STD_ERR_FILE=RealityGrid/scratch/ReG-steer-stderr.$$.txt\n\n";
-  
+
   
   QString vizTypeStr;
   if (config.vizType == isosurface){
@@ -361,9 +361,13 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "REG_SGS_ADDRESS="+config.simulationGSH+"\n";
   fileText += "REG_VIS_GSH="+config.visualizationGSH+"\n";
 
-  fileText += "export OGSI CONTAINER VIZ_STD_OUT_FILE VIZ_STD_ERR_FILE STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_ANSWER VIZ_HOSTNAME VIZ_TYPE VIZ_PROCESSORS STEER_ANSWER SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
+  fileText += "export CONTAINER VIZ_STD_OUT_FILE VIZ_STD_ERR_FILE STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_ANSWER VIZ_HOSTNAME VIZ_TYPE VIZ_PROCESSORS STEER_ANSWER SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
 
-  
+  if (config.multicast){
+    fileText += "MULTICAST_ADDRESS="+config.multicastAddress+"\n\n";
+    fileText += "export MULTICAST_ADDRESS";
+  }
+
   // Then convert to a string and write it out to the file
 
   QString fileTextSingleQString = fileText.join("");
