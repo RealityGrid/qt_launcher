@@ -146,13 +146,13 @@ void RegLauncher::migrateSimSlot()
     QString checkPointDataText = getDataFileFromCheckPoint(checkPointGSH);
 
     // cache the checkpoint data on disk - we'll use it later
-    QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+/*    QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
     if ( checkPointDataFile.open(IO_WriteOnly) ){
       QTextStream stream(&checkPointDataFile);
       stream << checkPointDataText;
       checkPointDataFile.close();
     }
-
+*/
     // patch it
     patchInputFileText(inputFileText, checkPointDataText);
 
@@ -316,13 +316,13 @@ void RegLauncher::launchSimSlot()
       QString checkPointDataText = getDataFileFromCheckPoint(tGSH);
 
       // cache the checkpoint data on disk - we'll use it later
-      QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+/*      QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       if ( checkPointDataFile.open(IO_WriteOnly) ){
         QTextStream stream(&checkPointDataFile);
           stream << checkPointDataText;
         checkPointDataFile.close();
       }
-
+*/
       // patch it
       patchInputFileText(inputFileText, checkPointDataText);
         
@@ -427,7 +427,8 @@ void RegLauncher::commonLaunchCode(){
       // and copy the checkpoint files too - this could take a looong time
       // then start the job
       consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, config.currentCheckpointGSH);
+      //QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {

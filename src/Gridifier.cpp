@@ -348,13 +348,13 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
 /** Method calls Robin's ReG-L2-Sim-QTL script to
  *  actually launch the job on the target machine
  */
-void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointDataFile){
+void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointGSH){
   QProcess *launchSimScriptProcess = new QProcess(QString("./ReG-L2-Sim-QTL"));
   launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchSimScriptProcess->addArgument(scriptConfigFileName);
   launchSimScriptProcess->addArgument(QString::number(timeToRun));
-  if (checkPointDataFile != NULL)
-    launchSimScriptProcess->addArgument(checkPointDataFile);
+  if (checkPointGSH != NULL)
+    launchSimScriptProcess->addArgument(checkPointGSH);
 
   cout << launchSimScriptProcess->arguments().join(" ") << endl;
             
