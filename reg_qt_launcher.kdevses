@@ -3,24 +3,18 @@
 <KDevPrjSession>
  <LastCompileConfig>(Default)</LastCompileConfig>
  <Mainframe MaximizeMode="1" />
- <DocsAndViews NumberOfDocuments="6" >
+ <DocsAndViews NumberOfDocuments="4" >
   <Doc0 CursorPosLine="169" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="12" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/include/LauncherConfig.h" >
    <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc0>
-  <Doc1 CursorPosLine="533" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/LauncherConfig.cpp" >
-   <View0 Top="0" Width="98" Attach="1" Height="28" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc1>
-  <Doc2 CursorPosLine="437" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="42" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/reglauncher.ui.h" >
+  <Doc1 CursorPosLine="100" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="2" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/reglauncher.ui.h" >
    <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="1" Type="KWriteView" MinMaxMode="0" />
+  </Doc1>
+  <Doc2 CursorPosLine="354" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="3" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/componentlauncher.ui.h" >
+   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc2>
-  <Doc3 CursorPosLine="354" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="3" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/componentlauncher.ui.h" >
+  <Doc3 CursorPosLine="325" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="3" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/LauncherConfig.cpp" >
    <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc3>
-  <Doc4 CursorPosLine="89" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/CheckPointTreeItem.cpp" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc4>
-  <Doc5 CursorPosLine="208" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="8" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/CheckPointTree.cpp" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc5>
  </DocsAndViews>
 </KDevPrjSession>
