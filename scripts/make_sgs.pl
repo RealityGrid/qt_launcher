@@ -42,7 +42,6 @@ if(length($chkGSH) < 5){
 	$result =~ s/<\/?ogsi:locator>//og;
 	$result =~ s/<\/?ogsi:handle>//og;
 	$chkGSH = $result;
-#<ogsi:locator><ogsi:handle>http://vermont.mvc.mcc.ac.uk:50000/Session/RealityGridTree/service?/45825</ogsi:handle></ogsi:locator>
     }
 }
 
@@ -69,7 +68,9 @@ my $sgs_GSH = $node->item(0)->getFirstChild->getNodeValue;
 #---------------------------------------------------------------------
 # Supply input file
 
-open(GSH_FILE, $input_file) || die("can't open input file: $input_file");
+#open(GSH_FILE, $input_file) || die("can't open input file: $input_file");
+if( open(GSH_FILE, $input_file) ){
+
 $content = "";
 while ($line_text = <GSH_FILE>) {
     $content = $content . $line_text;
@@ -91,6 +92,7 @@ $result =  SOAP::Lite
                  -> result;
 
 #print "setServiceData returned: $result\n";
+}
 
 #---------------------------------------------------------------------
 
