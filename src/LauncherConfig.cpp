@@ -59,6 +59,8 @@ LauncherConfig::LauncherConfig(){
   newTree = false;
   simTimeToRun = 30;
   vizTimeToRun = 30;
+
+  mJobData = new JobMetaData;
 /*
   topLevelRegistryGSH = "https://maise.mvc.mcc.ac.uk:50000/1023421312312932";
   simComponentType = lb3d;

@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>371</width>
-            <height>234</height>
+            <width>518</width>
+            <height>423</height>
         </rect>
     </property>
     <property name="caption">
@@ -348,7 +348,7 @@
                             </size>
                         </property>
                         <property name="text">
-                            <string>233.33.100.12/40040</string>
+                            <string>233.2.171.181/59706</string>
                         </property>
                     </widget>
                 </vbox>
@@ -643,16 +643,148 @@
             <property name="name">
                 <cstring>unnamed</cstring>
             </property>
-            <property name="margin">
-                <number>11</number>
-            </property>
-            <property name="spacing">
-                <number>6</number>
-            </property>
-            <widget class="QTextEdit" row="0" column="0">
+            <widget class="QLabel" row="4" column="0">
+                <property name="name">
+                    <cstring>textLabel1_2_2_4</cstring>
+                </property>
+                <property name="minimumSize">
+                    <size>
+                        <width>110</width>
+                        <height>0</height>
+                    </size>
+                </property>
+                <property name="text">
+                    <string>Task Description</string>
+                </property>
+            </widget>
+            <widget class="QTextEdit" row="4" column="1">
                 <property name="name">
                     <cstring>tagTextEdit</cstring>
                 </property>
+            </widget>
+            <widget class="QLayoutWidget" row="3" column="0" rowspan="1" colspan="2">
+                <property name="name">
+                    <cstring>layout24</cstring>
+                </property>
+                <hbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2_2_3</cstring>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>Organisation</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>sgsOrganisationLineEdit</cstring>
+                        </property>
+                    </widget>
+                </hbox>
+            </widget>
+            <widget class="QLayoutWidget" row="2" column="0" rowspan="1" colspan="2">
+                <property name="name">
+                    <cstring>layout25</cstring>
+                </property>
+                <hbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2_2_2</cstring>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>Software Package</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>sgsSoftwarePackageLineEdit</cstring>
+                        </property>
+                    </widget>
+                </hbox>
+            </widget>
+            <widget class="QLayoutWidget" row="1" column="0" rowspan="1" colspan="2">
+                <property name="name">
+                    <cstring>layout26</cstring>
+                </property>
+                <hbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2_2</cstring>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>Creation Time</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>sgsCreationTimeLineEdit</cstring>
+                        </property>
+                    </widget>
+                </hbox>
+            </widget>
+            <widget class="QLayoutWidget" row="0" column="0" rowspan="1" colspan="2">
+                <property name="name">
+                    <cstring>layout27</cstring>
+                </property>
+                <hbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>textLabel1_2</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>User Name</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>sgsUserNameLineEdit</cstring>
+                        </property>
+                    </widget>
+                </hbox>
             </widget>
         </grid>
     </widget>
@@ -736,7 +868,58 @@
         <receiver>ComponentLauncher</receiver>
         <slot>containerListBoxSelectedSlot(QListBoxItem*)</slot>
     </connection>
+    <connection>
+        <sender>sgsOrganisationLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>sgsOrgChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>sgsSoftwarePackageLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>sgsSoftwarePackageChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>sgsCreationTimeLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>sgsCreationTimeChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>sgsUserNameLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>sgsUserNameChanged(const QString&amp;)</slot>
+    </connection>
 </connections>
+<tabstops>
+    <tabstop>sgsUserNameLineEdit</tabstop>
+    <tabstop>sgsCreationTimeLineEdit</tabstop>
+    <tabstop>sgsSoftwarePackageLineEdit</tabstop>
+    <tabstop>sgsOrganisationLineEdit</tabstop>
+    <tabstop>tagTextEdit</tabstop>
+    <tabstop>componentComboBox</tabstop>
+    <tabstop>checkPointGSHLineEdit</tabstop>
+    <tabstop>gshTagTable</tabstop>
+    <tabstop>simulationGSHLineEdit</tabstop>
+    <tabstop>inputFileTextEdit</tabstop>
+    <tabstop>simInputPushButton</tabstop>
+    <tabstop>simInputLineEdit</tabstop>
+    <tabstop>simTargetListBox</tabstop>
+    <tabstop>simNumProcLineEdit</tabstop>
+    <tabstop>mcastAddrLineEdit</tabstop>
+    <tabstop>vizNumProcLineEdit</tabstop>
+    <tabstop>vizPipesLineEdit</tabstop>
+    <tabstop>vizTargetListBox</tabstop>
+    <tabstop>vizServerCheckBox</tabstop>
+    <tabstop>mcastCheckBox</tabstop>
+    <tabstop>vizTypeComboBox</tabstop>
+    <tabstop>containerPortNumLineEdit</tabstop>
+    <tabstop>containerListBox</tabstop>
+    <tabstop>runTimeLineEdit</tabstop>
+    <tabstop>treeTagTextEdit</tabstop>
+</tabstops>
 <includes>
     <include location="local" impldecl="in declaration">LauncherConfig.h</include>
     <include location="local" impldecl="in declaration">reglauncher.h</include>
@@ -749,6 +932,8 @@
 <slots>
     <slot>init()</slot>
     <slot>componentSelectedSlot()</slot>
+    <slot>sgsSoftwarePackageChanged( const QString &amp; )</slot>
+    <slot>sgsOrgChanged( const QString &amp; )</slot>
     <slot>sgsTagEntered()</slot>
     <slot>treeTagEntered()</slot>
     <slot>setConfig( LauncherConfig * aConfig )</slot>
@@ -768,8 +953,10 @@
     <slot>getInputFileTextEditText( QString * returnPtr )</slot>
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
     <slot>multicastToggleSlot()</slot>
-    <slot>vizTargetSelectedSlot(QListBoxItem *)</slot>
-    <slot>containerListBoxSelectedSlot(QListBoxItem *)</slot>
+    <slot>vizTargetSelectedSlot( QListBoxItem * selectedMachine )</slot>
+    <slot>containerListBoxSelectedSlot( QListBoxItem * selectedContainer )</slot>
+    <slot>sgsCreationTimeChanged( const QString &amp; )</slot>
+    <slot>sgsUserNameChanged( const QString &amp; )</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

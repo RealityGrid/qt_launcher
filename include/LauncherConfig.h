@@ -56,6 +56,7 @@
 #include "qstring.h"
 #include "qstringlist.h"
 #include "qvaluelist.h"
+#include "jobmetadata.h"
 
 // ************************************** //
 // Be aware that only some of the values  //
@@ -115,6 +116,8 @@ class LauncherConfig {
     int vizType;
     QString lb3dInputFileName;
 
+    JobMetaData *mJobData;
+    
     int simTimeToRun;
     int vizTimeToRun;
     
