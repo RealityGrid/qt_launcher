@@ -27,7 +27,7 @@ User Interface=*.kdevdlg,*.ui,*.rc,*.dlg
 groups=Headers,Sources,User Interface,Others
 
 [Makefile.am]
-files=reg_qt_launcher.kdevprj,reg_qt_launcher.lsm
+files=reg_qt_launcher.kdevprj,reg_qt_launcher.lsm,qmdcodec.h,qmdcodec.cpp,reg_qt_launcher.pro
 sub_dirs=src,include,ui
 type=prog_main
 
@@ -89,7 +89,7 @@ install_location=
 type=HEADER
 
 [include/Makefile.am]
-files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h,include/ProgressBarThread.h,include/jobmetadata.h,include/StatusMessageData.h
+files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h,include/ProgressBarThread.h,include/jobmetadata.h,include/StatusMessageData.h,include/qmdcodec.h
 sub_dirs=CVS
 type=normal
 
@@ -117,6 +117,24 @@ install=false
 install_location=
 type=HEADER
 
+[include/qmdcodec.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[qmdcodec.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[qmdcodec.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
 [reg_qt_launcher.kdevprj]
 dist=true
 install=false
@@ -124,6 +142,12 @@ install_location=
 type=DATA
 
 [reg_qt_launcher.lsm]
+dist=true
+install=false
+install_location=
+type=DATA
+
+[reg_qt_launcher.pro]
 dist=true
 install=false
 install_location=
@@ -160,7 +184,7 @@ install_location=
 type=SOURCE
 
 [src/Makefile.am]
-files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp,src/ProgressBarThread.cpp,src/jobmetadata.cpp
+files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp,src/ProgressBarThread.cpp,src/jobmetadata.cpp,src/qmdcodec.cpp
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=src
 sub_dirs=
@@ -191,6 +215,12 @@ install_location=
 type=SOURCE
 
 [src/main.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[src/qmdcodec.cpp]
 dist=true
 install=false
 install_location=
