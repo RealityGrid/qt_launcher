@@ -59,7 +59,6 @@ JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow,
   mNameSpace = mGSH.left(index);
   index = mNameSpace.findRev("/", index, true);
   mNameSpace = mNameSpace.right(mNameSpace.length() - index - 1);
-  cout << "ARPDBG Namespace = " << mNameSpace << endl;
 
   // Set the lifespan of the thread to 15 seconds.
   // This isn't currently used - some jobs could sit
