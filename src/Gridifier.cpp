@@ -298,7 +298,6 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
   fileText += "STEER_ANSWER=yes\n";
   fileText += "FIREWALL=no\n";
   fileText += "VIZ_ANSWER=no\n";
-//  fileText += "CLIENT_DISPLAY="+Utility::getHostName()+":0.0\n";
   fileText += "CLIENT_DISPLAY="+Utility::getCurrentDisplay()+"\n";
   fileText += "VIZ_HOSTNAME="+config.mTargetMachine+"\n\n";
   fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.$$.txt\n";
@@ -335,16 +334,15 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
       vizTypeStr = "x_cut";
   }
   fileText += "VIZ_TYPE="+vizTypeStr+"\n";
-
   fileText += "VIZ_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
+  
   if(config.mAppToLaunch->mNumInputs > 0){
     fileText += "REG_SGS_ADDRESS="+config.visualizationGSH+"\n";
   }
   else{
     fileText += "REG_SGS_ADDRESS="+config.simulationGSH+"\n";
   }
-  //fileText += "REG_VIS_GSH="+config.visualizationGSH+"\n";
-
+ 
   fileText += "export CONTAINER VIZ_STD_OUT_FILE VIZ_STD_ERR_FILE STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_ANSWER VIZ_HOSTNAME VIZ_TYPE VIZ_PROCESSORS STEER_ANSWER SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
 
   if (config.multicast){

@@ -48,10 +48,9 @@
 class JobStatusThread: public QThread {
   public:
     JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH);
-    ~JobStatusThread();
-
+    
   protected:
-    void run();
+    virtual void run();
 
   private:
     QStatusBar *mainWindowStatusBar;

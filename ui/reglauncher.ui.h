@@ -32,7 +32,6 @@
 
 using namespace std;
 
-
 QProcess *proxyStatus = NULL;
 LauncherConfig config;
 CheckPointTree *cpt = NULL;
@@ -45,9 +44,6 @@ int checkPointTreeListViewPreviousSelection = -1;
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
-
-  //statusBar()->hide();
-  //statusBar()->setSizeGripEnabled(false);
 }
 
 void RegLauncher::setApplication(QApplication *aApplication){
@@ -386,7 +382,9 @@ void RegLauncher::launchSimSlot()
 
 void RegLauncher::commonLaunchCode(){
 
+  QString sgs;
   bool restartingFromCheckpoint = checkPointTreeListView->selectedItem()!=NULL;
+  
   if (config.migration)
     restartingFromCheckpoint = true;
 
@@ -411,15 +409,13 @@ void RegLauncher::commonLaunchCode(){
 
   consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
-  // Now determine whether we're starting a sim or a viz
+  // Now determine whether we need to configure the SGS with data source(s)
   if (config.mAppToLaunch->mNumInputs == 0){
-    // It's a sim
-
+  
+    // No data sources....
+    
     consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
-    // Now use the factory to create an SGS
-    QString sgs;
-    
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
       sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
@@ -460,16 +456,13 @@ void RegLauncher::commonLaunchCode(){
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
                                 config);
     }
-
+    
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.simulationGSH);
     aJobStatusThread->start();
 
   }
   else{
-    // It's a viz
-
-    // Now use the factory to create an SGS
-    QString sgs;
+    // We need to set-up data sources
 
     // Remember to fill in the config.simulationGSH during the wizard stage - or we'll have problems!
     // for the time being though - if we make sure we create a simulation before creating a visualization
@@ -499,7 +492,6 @@ void RegLauncher::commonLaunchCode(){
     }
     
   }
-  
 }
 
 void RegLauncher::discoverySlot()
@@ -527,7 +519,6 @@ void RegLauncher::steerSlot()
   // create an instance of the RealityGrid QT Steerer for the current GSH
   // bear in mind that his requires that the Steerer environment variables
   // have already been set
-  //QProcess *steerer = new QProcess(QString("/home/zzcgumr/realityGrid/reg_qt_steerer/steerer"));
   steerer = new QProcess(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts/steerer_wrapper"));
   if (config.simulationGSH.length() != 0){    
     steerer->addArgument(config.simulationGSH);
@@ -535,7 +526,6 @@ void RegLauncher::steerSlot()
 
     cout << getenv("REG_STEER_HOME") << endl;
     cout << steerer->arguments().join(" ") << endl;
-    //connect(steerer, SIGNAL(readyReadStdout()), this, SLOT(readSteerStdoutSlot()));
     
     steerer->start();
 
@@ -556,8 +546,6 @@ void RegLauncher::steerSlot()
   else {
     steerer->start();
   }
-
-//    system(QString("/home/zzcgumr/realityGrid/reg_qt_steerer/steerer "+config.simulationGSH).latin1());
 }
 
 void RegLauncher::readSteerStdoutSlot(){

@@ -41,7 +41,6 @@
 
 #include "qprocess.h"
 
-
 JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH)
 : done(false)
 {
@@ -53,10 +52,6 @@ JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH)
   // in a queue for hours on end.
   lifespan = 15000000;
 }
-
-JobStatusThread::~JobStatusThread(){
-}
-
 
 void JobStatusThread::run(){
   while (!done){
