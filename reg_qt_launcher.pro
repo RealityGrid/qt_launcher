@@ -36,7 +36,8 @@ SOURCES	+= src/main.cpp \
 FORMS	= ui/reglauncher.ui \
 	ui/componentlauncher.ui \
 	ui/RunningJobsDialog.ui \
-	ui/textviewdialog.ui
+	ui/textviewdialog.ui \
+	ui/GlobalParamConstructionForm.ui
 
 unix {
   UI_DIR = .ui
