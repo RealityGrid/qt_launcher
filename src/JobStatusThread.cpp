@@ -75,7 +75,7 @@ void JobStatusThread::getJobStatus(){
   //      quickest way to progress - hence chosen - the deadline is fast approaching.
 
   QProcess *jobStatusProcess = new QProcess(QString("./jobStatus.pl"));
-  jobStatusProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_perl_launcher/"));
+  jobStatusProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   jobStatusProcess->addArgument(mContainer);
   jobStatusProcess->addArgument(mGSH);
 

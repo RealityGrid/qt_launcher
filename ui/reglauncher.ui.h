@@ -30,8 +30,6 @@
 using namespace std;
 
 
-//Gridifier gridifier;
-
 QProcess *proxyStatus = NULL;
 LauncherConfig config;
 CheckPointTree *cpt = NULL;
@@ -124,6 +122,7 @@ void RegLauncher::migrateSimSlot()
 
   // we should now have access to the sgs of the running job,
   // so force it to take a checkpoint and halt
+  consoleOutSlot("Taking a checkpoint, and stopping the job...");
   QString checkPointGSH = gridifier.checkPointAndStop(selectedGSH);
   cout << checkPointGSH << endl;
 
@@ -138,7 +137,7 @@ void RegLauncher::migrateSimSlot()
     getDataFileFromCheckPoint(checkPointGSH, &checkPointDataText);
 
     // cache the checkpoint data on disk - we'll use it later
-    QFile checkPointDataFile("checkPointDataCache.xml");
+    QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
     if ( checkPointDataFile.open(IO_WriteOnly) ){
       QTextStream stream(&checkPointDataFile);
       stream << checkPointDataText;
@@ -150,7 +149,7 @@ void RegLauncher::migrateSimSlot()
 
     // cache it
     // we need to copy the selected/edited input file to the target machine
-    QString inputFileName = "/tmp/ReG_tmp_input_file";
+    QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
 
     config.lb3dInputFileName = inputFileName;
 
@@ -266,23 +265,6 @@ void RegLauncher::patchInputFileText(QString &inputFileText, const QString &chec
   }
 }
 
-/*
-THIS WON'T WORK WITHOUT NAMESPACES BECAUSE OF THE WAY GSOAP WORKS
-void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
-{
-  struct soap soap;
-  soap_init(&soap);
-
-  tree__findServiceDataResponse *serviceDataResponse = new tree__findServiceDataResponse();
-  if (soap_call_tree__findServiceData(&soap, sgsGSH, "", "", serviceDataResponse))
-    soap_print_fault(&soap, stderr);
-  else{
-    if (result == NULL)
-      result = new QString();
-    *result = serviceDataResponse->_findServiceDataReturn;
-  }
-}
-*/
 
 /** Slot launches a simulation or visualization component.
  *  User goes through a wizard, filling in data - after
@@ -290,7 +272,7 @@ void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
  */
 void RegLauncher::launchSimSlot()
 {
-  bool restartingFromCheckpoint = checkPointTreeListView->selectedItem()!=NULL;
+  bool restartingFromCheckPoint = checkPointTreeListView->selectedItem()!=NULL;
   config.migration = false;
 
   // Component launcher will fill in our current config with the user's requests
@@ -301,7 +283,7 @@ void RegLauncher::launchSimSlot()
 
   // Find out if the user has selected a checkpoint, and if so
   // consider that we will be starting from there
-  if (restartingFromCheckpoint){
+  if (restartingFromCheckPoint){
     QString tGSH = ((CheckPointTreeItem*)checkPointTreeListView->selectedItem())->getCheckPointGSH();
     componentLauncher->setCheckPointGSH(tGSH);
 
@@ -313,7 +295,7 @@ void RegLauncher::launchSimSlot()
       getDataFileFromCheckPoint(tGSH, &checkPointDataText);
           
       // cache the checkpoint data on disk - we'll use it later
-      QFile checkPointDataFile("checkPointDataCache.xml");
+      QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       if ( checkPointDataFile.open(IO_WriteOnly) ){
         QTextStream stream(&checkPointDataFile);
           stream << checkPointDataText;
@@ -325,7 +307,7 @@ void RegLauncher::launchSimSlot()
         
       // cache it
       // we need to copy the selected/edited input file to the target machine
-      QString inputFileName = "/tmp/ReG_tmp_input_file";
+      QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
 
       config.lb3dInputFileName = inputFileName;
 
@@ -353,7 +335,7 @@ void RegLauncher::launchSimSlot()
     return;
 
   // this is lb3d only... do we really ever want to launch miniapp?
-  if (config.selectedComponentType == lb3d){
+  if (config.selectedComponentType == lb3d && restartingFromCheckPoint){
     componentLauncher->getInputFileTextEditText(&inputFileText);
     QFile inputFile( config.lb3dInputFileName );
     if ( inputFile.open( IO_WriteOnly ) ) {
@@ -413,17 +395,17 @@ void RegLauncher::commonLaunchCode(){
 
     // Now launch the job
 
-    gridifier.makeReGScriptConfig("./sim.conf", config);
+    gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
 
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
-      gridifier.launchSimScript("./sim.conf", "./checkPointDataCache.xml");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       
       // then start the job
     }
     else {
-      gridifier.launchSimScript("./sim.conf");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf");
 
     }
 
@@ -466,9 +448,9 @@ void RegLauncher::commonLaunchCode(){
 
     consoleOutSlot(QString("Viz SGS is "+config.visualizationGSH).stripWhiteSpace());
 
-    gridifier.makeReGScriptConfig("./viz.conf", config);
+    gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
 
-    gridifier.launchVizScript("./viz.conf");
+    gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf");
     
   }
   
@@ -491,7 +473,7 @@ void RegLauncher::steerSlot()
   // bear in mind that his requires that the Steerer environment variables
   // have already been set
   //QProcess *steerer = new QProcess(QString("/home/zzcgumr/realityGrid/reg_qt_steerer/steerer"));
-  steerer = new QProcess(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_steerer/steerer_wrapper"));
+  steerer = new QProcess(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts/steerer_wrapper"));
   if (config.simulationGSH.length() != 0){    
     steerer->addArgument(config.simulationGSH);
     steerer->setCommunication(QProcess::Stdout|QProcess::Stderr|QProcess::DupStderr);
@@ -626,10 +608,16 @@ void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
   // if the current selection is already highlighted - deselect it
   if (checkPointTreeListView->itemPos(selectedItem) == checkPointTreeListViewPreviousSelection){
     checkPointTreeListView->clearSelection();
+
+    // Be nice and tell the user what's going to happen if they click the launch button
+    launchButton->setText("Launch");
   }
   else {
     checkPointTreeListViewPreviousSelection = checkPointTreeListView->itemPos(selectedItem);
     config.currentCheckpointGSH = ((CheckPointTreeItem*)selectedItem)->getCheckPointGSH();
+
+    // Be nice and tell the user what's going to happen if they click the launch button
+    launchButton->setText("Restart");
   }
   
 }
@@ -661,10 +649,6 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
     // Since we're reusing the class from the steerer
     Output_log_struct tmp;
 
-    // do something smart here
-    strcpy(tmp.param_labels[0], "testLabel");
-    strcpy(tmp.param_values[0], "testValue");
-
     // Get a copy of the parameters that we want
     if (rightMouseCheckPointTreeItem != NULL){
       CheckPointParamsList hope = rightMouseCheckPointTreeItem->getParamsList();
@@ -687,6 +671,24 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
   
 }
 
+
+/*
+THIS WON'T WORK WITHOUT NAMESPACES BECAUSE OF THE WAY GSOAP WORKS
+void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
+{
+  struct soap soap;
+  soap_init(&soap);
+
+  tree__findServiceDataResponse *serviceDataResponse = new tree__findServiceDataResponse();
+  if (soap_call_tree__findServiceData(&soap, sgsGSH, "", "", serviceDataResponse))
+    soap_print_fault(&soap, stderr);
+  else{
+    if (result == NULL)
+      result = new QString();
+    *result = serviceDataResponse->_findServiceDataReturn;
+  }
+}
+*/
 
 //void RegLauncher::getJobStatus(const QString &pSGSGSH){
   // This code essentially cribbed from Andy Porter's steering lib

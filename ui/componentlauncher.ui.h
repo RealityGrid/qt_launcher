@@ -94,7 +94,7 @@ void ComponentLauncher::componentSelectedSlot()
 
 void ComponentLauncher::sgsTagEntered()
 {
-  if (!mConfig->newTree){
+  if (!mConfig->newTree || componentComboBox->currentItem() == lb3dviz){
     setNextEnabled(currentPage(), false);
     setFinishEnabled(currentPage(), true);
   }
