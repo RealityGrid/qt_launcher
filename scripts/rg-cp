@@ -27,7 +27,7 @@
 #
 # version 0.5
 #
-# This script is hardcoded for SC2003 & bezier.man.ac.uk - note
+# This script is hardcoded for SC2003  - note
 # the non-standard perl we are using, need this to pick up SOAP::Lite
 # and XML::DOM
 # 
@@ -109,8 +109,10 @@ my %UKMachines = ( 'green.cfs.ac.uk' => 1,
 #    die "globus-url-copy not found, please add to \$PATH";
 #}
 
-my $globus_url_copy = "/usr/local/globus/bin/globus-url-copy";
-my $globus_job_run = "/usr/local/globus/bin/globus-job-run";
+#my $globus_url_copy = "/usr/local/globus/bin/globus-url-copy";
+#my $globus_job_run = "/usr/local/globus/bin/globus-job-run";
+my $globus_url_copy = "globus-url-copy";
+my $globus_job_run = "globus-job-run";
 
 if (!@ARGV) {
  print "rg-cp - RealityGrid CheckPoint copier script version 0.3\n\n";
@@ -210,7 +212,7 @@ if ( $GSH_FLAG  eq "TRUE" )
 
 
 #
-# Now check which is the best locaton to use for the target
+# Now check which is the best location to use for the target
 #
 # get target hostname - could be the local host!!
 my $TargetHostName = "";
@@ -235,7 +237,7 @@ if( ($TargetHostName =~ m/hpcx-mbng.dl.ac.uk/ ) ||
   $GSIFTPARGS = " -vb -p 10  ";
 } 
 
-#check wiether we are using a local file (including a file on a Web Server)
+#check whether we are using a local file (including a file on a Web Server)
 #or a GSH from the tree to get the CP data - use DOM to parse data
 my $doc = "";
 my $parser = new XML::DOM::Parser;
@@ -253,6 +255,7 @@ else
 # files and store in an array - we associate the place
 # in the array with the node number 
 #
+my $FilesOnMachine = 0;
 my $FileNodes = $doc->getElementsByTagName("Files");
 my $NoFileNodes = $FileNodes->getLength;
 @HostsWithFiles = ();
@@ -264,18 +267,17 @@ for ( my $i = 0; $i < $NoFileNodes; $i++ )
   if(  $TargetHostName =~ m/$hostname/  )
   {
     print "WARNING::Checkpoint files already on target machine\n";
+    $FilesOnMachine = 1;
     #if the user forces us we copy the files over again - maybe
     #the originals have become corrupt
-    if ( $FORCE eq "FALSE" )
-    {
-      print "Not Copying Files - to force the copy use the \"-x\" option.\n";
-      exit 0;
-    }
+    #if ( $FORCE eq "FALSE" )
+    #{
+    #  print "Not Copying Files - to force the copy use the \"-x\" option.\n";
+    #  exit 0;
+    #}
   }
   @HostsWithFiles = (@HostsWithFiles,$hostname);  
 }
-
-
 
 
 #
@@ -333,8 +335,6 @@ if( ($Source =~ m/hpcx-mbng.dl.ac.uk/ ) ||
 
 
 
-
-
 #move to the correct node in the Document
 my $nodes = $FileNodes->item($NodeToUse)->getElementsByTagName("file");
 my $n = $nodes->getLength;
@@ -371,45 +371,107 @@ foreach my $key (keys %MachineKeys)
   }
 }
 
+#ARPDBG
+#foreach my $file (@files) {
+#   my $targetfilename = shift @targetfilename;
+#   print "file = ".$file."\n";
+#   my $machine = $file; 
+#   # Strip off the gsiftp://xxx.machine.name from the beginning
+#   $file =~ s/gsiftp:\/\/[^\/]*\//\//o;
+#   print "file = ".$file." and targetfile = ".$targetfilename."\n";
+#   my @bits = split(/\/\//,$machine);
+#   $machine = $bits[1];
+#   @bits = split(/\//,$machine);
+#   $machine  = $bits[0];
+#   print "Machine = ".$machine."\n";
+#}
+#exit 0;
+#ARPDBGend
 
 #
 # This is the new node to be added to the checkpoint meta data stuff
-# weare not going to use DOM to do this - just simple text manitpulation
+# we are not going to use DOM to do this - just simple text manipulation
 my $NewNode = "<Files location=\"$TargetHostName\">\n";
 
-#foreach file copy it to the target location
-foreach my $file (@files) {
-   my $targetfilename = shift @targetfilename;
-   my $AddArgs = "";
-   #check we do not have a better interface for the machine
-   foreach my $key (keys %MachineKeys)
-   {
-     if ( $file =~ m/$key/g )
-     {
-       print "\nUsing Alternative Interface for Source - ".$MachineInterFace->{$key}{'Interface'}."\n";
-       $file =~ s/$key/$MachineInterFace->{$key}{Interface}/o;
-       $AddArgs = " -ss \"".$MachineInterFace->{$key}{'DN'}."\" ";
-     }   
-   }
-   
-   #line to be added to the new CP data 
-   $NewNode .="<file type=\"gsiftp-URL\">".$SavedTarget."/".$targetfilename."</file>\n";
-      
-   print "$globus_url_copy $GSIFTPARGS $AddArgs $file ".$Target."/".$targetfilename."\n";
-   my $command = "$globus_url_copy $GSIFTPARGS  $AddArgs $file ".$Target."/".$targetfilename;
-   
-   #check for errors from the globus-url-copy command - if there are any exit
-   my $out = runcmd($command);
-   if ( ($out =~ m/Process Timed Out/o) || ($out =~ m/rror/o) )
-   {
-     die "ERROR>>>>>>$out<<<<<<";
-   }
-   print $out."\n";
+#
+# Work out what our home directory is on the target machine
+open(SCRIPT_FILE, "> get_info.sh") || die("can't create get_info script: $!");
+print SCRIPT_FILE "#!/bin/sh\n";
+print SCRIPT_FILE "echo \$HOME\n";
+close(SCRIPT_FILE);
+chmod(0700, "get_info.sh");
+my $command = "$globus_job_run ".$TargetHostName."/jobmanager-fork -s get_info.sh";
+print "$command\n";
+my $home = runcmd($command);
+$home =~ s/\n//g;
+print "Home directory = ".$home."\n";
+#unlink "get_info.sh";
 
-   # This is ugly - welcome to t'Grid
-   if ( $Target =~ m/panhead.psc.edu/ )
-   {
-       # Assumes filesystem is duplicated on panhead and LeMieux
+if(($FilesOnMachine == 1) && ($FORCE eq "FALSE")){
+
+   open(SCRIPT_FILE, "> tmp_script.sh") || die("can't open tmp script: $!");
+   print SCRIPT_FILE "#!/bin/sh\n";
+
+   foreach my $file (@files) {
+      my $targetfilename = shift @targetfilename;
+
+      my $command = "";
+      # Strip off the gsiftp://xxx.machine.name from the beginning to get 
+      # the full path to the existing checkpoint file on the target machine
+      $file =~ s/gsiftp:\/\/[^\/]*\//\//o;
+      print SCRIPT_FILE "if [ -e ".$file." ]\nthen\n";
+      print SCRIPT_FILE "  ln -s ".$file." RealityGrid/scratch/".$targetfilename."\n";
+      print SCRIPT_FILE "else\n";
+      print SCRIPT_FILE "  echo \"No link because target ".$file." doesn't exist\"\n";
+      print SCRIPT_FILE "fi\n";
+   }
+
+   close(SCRIPT_FILE);
+   chmod(0700, "tmp_script.sh");
+   
+   my $command = "$globus_job_run ".$TargetHostName." -s tmp_script.sh";
+   print "$command\n"; 
+   my $out = runcmd($command);
+   print $out;
+   #unlink "tmp_script.sh";
+}
+else {
+
+   #foreach file copy it to the target location
+   foreach my $file (@files) {
+      my $targetfilename = shift @targetfilename;
+      my $AddArgs = "";
+      #check we do not have a better interface for the machine
+      foreach my $key (keys %MachineKeys)
+      {
+	  if ( $file =~ m/$key/g )
+	  {
+	      print "\nUsing Alternative Interface for Source - ".$MachineInterFace->{$key}{'Interface'}."\n";
+	      $file =~ s/$key/$MachineInterFace->{$key}{Interface}/o;
+	      $AddArgs = " -ss \"".$MachineInterFace->{$key}{'DN'}."\" ";
+	  }   
+      }
+   
+      #line to be added to the new CP data - include full path of this 
+      #user's home space so that other people know where the file is.
+      $NewNode .="<file type=\"gsiftp-URL\">".$SavedTarget."/".$home.$targetfilename."</file>\n";
+      
+      print "$globus_url_copy $GSIFTPARGS $AddArgs $file ".$Target."/".$targetfilename."\n";
+
+      $command = "$globus_url_copy $GSIFTPARGS  $AddArgs $file ".$Target."/".$targetfilename;
+   
+      #check for errors from the globus-url-copy command - if there are any exit
+      my $out = runcmd($command);
+      if ( ($out =~ m/Process Timed Out/o) || ($out =~ m/rror/o) )
+      {
+	  die "ERROR>>>>>>$out<<<<<<";
+      }
+      print $out."\n";
+
+      # This is ugly - welcome to t'Grid
+      if ( $Target =~ m/panhead.psc.edu/ )
+      {
+	  # Assumes filesystem is duplicated on panhead and LeMieux
 
        # ARP - this bit not needed since this script now runs 
        # on client machine
@@ -429,17 +491,18 @@ foreach my $file (@files) {
        #  print "Files will only be transfered to panhead NOT iam764\n";       
        #}
 
-       my $tmpTarget = $Target;
-       $tmpTarget =~ s/gsiftp\:\/\/panhead.psc.edu\///;        
-       print "Directory to use on PSC = $tmpTarget\n";
+	  my $tmpTarget = $Target;
+	  $tmpTarget =~ s/gsiftp\:\/\/panhead.psc.edu\///;        
+	  print "Directory to use on PSC = $tmpTarget\n";
         
-       #command to move files from panhead to iam764
-       #see http://www.psc.edu/general/filesys/far/far.html
-       my $command = "$globus_job_run iam764.psc.edu /usr/psc/bin/far get ".$tmpTarget."/"."$targetfilename $tmpTarget";
-       print "$command\n"; 
-       my $out = runcmd($command);
-       print $out;
-   }
+	  #command to move files from panhead to iam764
+	  #see http://www.psc.edu/general/filesys/far/far.html
+	  my $command = "$globus_job_run iam764.psc.edu /usr/psc/bin/far get ".$tmpTarget."/"."$targetfilename $tmpTarget";
+	  print "$command\n"; 
+	  my $out = runcmd($command);
+	  print $out;
+      }
+  }
 }
 
 #Close the node 
@@ -455,7 +518,7 @@ $CPmetadata .=  $NewNode."</Checkpoint_data>";
 
 #if the CP data was accessed through the GSH and the Tree
 #then update the CP data in the tree
-if ( ($GSH_FLAG  eq "TRUE") &&  ($FORCE eq "FALSE") )
+if ( ($GSH_FLAG  eq "TRUE") &&  ($FORCE eq "FALSE") && ($FilesOnMachine == 0))
 {
  require SOAP::Lite;
  $ans =  SOAP::Lite
