@@ -57,6 +57,7 @@ void ProgressBarThread::run(){
   bool commitSuicide = false;
 
   mProgressBar.setTotalSteps(limit);
+  mProgressBar.setPercentageVisible(false);
   mProgressBar.show();
   
   while (!commitSuicide){
