@@ -154,16 +154,26 @@ void RegLauncher::migrateSimSlot()
   if (inputFileText.length() != 0){
     QString checkPointDataText = getDataFileFromCheckPoint(checkPointGSH);
 
-    // cache the checkpoint data on disk - we'll use it later
-/*    QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
-    if ( checkPointDataFile.open(IO_WriteOnly) ){
-      QTextStream stream(&checkPointDataFile);
-      stream << checkPointDataText;
-      checkPointDataFile.close();
+    // Get the ID string of the app. that created this checkpoint
+    QString appName;
+    QString checkUIDString;
+    parseChkPtMetaData(checkPointDataText, appName, checkUIDString);
+
+    if(appName.length()==0 ){
+      consoleOutSlot("Failed to get name of application from checkpoint metadata");
+      return;
     }
-*/
-    // patch it
-    patchLb3dInputFileText(inputFileText, checkPointDataText);
+    else if(checkUIDString.length()==0){
+    	consoleOutSlot("Failed to get UID of checkpoint from metadata");
+     	return;
+    }
+
+    if(appName.contains("lbe3d", FALSE) == 1){
+      patchLb3dInputFileText(inputFileText, checkUIDString);
+    }
+    else if(appName.contains("namd", FALSE) == 1){
+      patchNamdInputFileText(inputFileText, checkUIDString);
+    }
 
     // cache it
     // we need to copy the selected/edited input file to the target machine
@@ -248,24 +258,9 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 
 
 
-void RegLauncher::patchLb3dInputFileText(QString &inputFileText, const QString &checkPointDataText)
+void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
+                                         QString &chkUIDString)
 {
-  QString chkUIDString;
-
-  QDomDocument doc("parsedDoc");
-  doc.setContent(checkPointDataText);
-  QDomElement docElem = doc.documentElement();
-
-  if (docElem.tagName() == "Checkpoint_data"){
-    QDomNode actualNode = docElem.firstChild();
-    actualNode = actualNode.nextSibling();
-    QDomElement e = actualNode.toElement();
-    if (e.tagName() == "Chk_UID"){
-      chkUIDString = e.text();
-    }
-
-  }
-
   // remove the leading 'check*'
   if (chkUIDString.startsWith("check*")){
     chkUIDString = chkUIDString.right(chkUIDString.length() - 6);
@@ -294,6 +289,80 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText, const QString &
   }
 }
 
+/* Method to patch NAMD input file such that it is suitable for
+   performing a restart from the specified checkpoint
+ */
+void RegLauncher::patchNamdInputFileText(QString &inputFileText,
+                                         QString &chkUIDString)
+{
+// NEEDS WRITING!
+
+/* Get the filestem from the chkUIDString
+
+*/
+  // Generate the names of the three restart files
+  QString coordName = QString("bincoordinates");
+          coordName += "           " + chkUIDString + ".coor\n";
+  QString velName = QString("binvelocities");
+          velName += "           " + chkUIDString + ".vel\n";
+  QString extSysName = QString("extendedSystem");
+          extSysName += "           " + chkUIDString + ".xsc\n";
+  
+  int nextLine = 0;
+  int index = inputFileText.find("bincoordinates");
+  if(index > 0){
+    // Replace exisiting line
+    nextLine = inputFileText.find("\n", index);
+    if (nextLine > index){
+      inputFileText = inputFileText.left(index) + coordName + inputFileText.right(inputFileText.length() - nextLine - 1);
+    }
+  }
+  else{
+    // Insert new line
+    index = inputFileText.find("coordinates");
+    if(index > 0){
+      nextLine = inputFileText.find("\n", index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + coordName + inputFileText.right(nextLine);
+    }
+  }
+
+  index = inputFileText.find("binvelocities");
+  if(index > 0){
+    // Replace exisiting line
+    nextLine = inputFileText.find("\n", index);
+    if (nextLine > index){
+      inputFileText = inputFileText.left(index) + velName + inputFileText.right(inputFileText.length() - nextLine - 1);
+    }
+  }
+  else{
+    // Insert new line
+    index = inputFileText.find("coordinates");
+    if(index > 0){
+      nextLine = inputFileText.find("\n", index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + velName + inputFileText.right(nextLine);
+    }
+  }
+
+
+  index = inputFileText.find("extendedSystem");
+  if(index > 0){
+    // Replace exisiting line
+    nextLine = inputFileText.find("\n", index);
+    if (nextLine > index){
+      inputFileText = inputFileText.left(index) + extSysName + inputFileText.right(inputFileText.length() - nextLine - 1);
+    }
+  }
+  else{
+    // Insert new line
+    index = inputFileText.find("coordinates");
+    if(index > 0){
+      nextLine = inputFileText.find("\n", index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + extSysName + inputFileText.right(nextLine);
+    }
+  }
+
+  cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
+}
 
 /** Slot launches a simulation or visualization component.
  *  User goes through a wizard, filling in data - after
@@ -321,49 +390,51 @@ void RegLauncher::launchSimSlot()
     // and then go get the input file associated with the selected checkpoint,
     inputFileText = getInputFileFromCheckPoint(tGSH);
 
-    if (inputFileText.length() != 0){
-      QString checkPointDataText = getDataFileFromCheckPoint(tGSH);
-
-      // cache the checkpoint data on disk - we'll use it later
-/*      QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
-      if ( checkPointDataFile.open(IO_WriteOnly) ){
-        QTextStream stream(&checkPointDataFile);
-          stream << checkPointDataText;
-        checkPointDataFile.close();
-      }
-*/
-
-      // Get the ID string of the app. that created this checkpoint
-      QDomDocument doc("Checkpoint meta-data");
-      doc.setContent(checkPointDataText);
-
-      QDomNodeList nodes = doc.elementsByTagName(QString("Checkpoint_data"));
-
-      // patch it
-      patchLb3dInputFileText(inputFileText, checkPointDataText);
-/*
-      switch(){
-
-      case():
-        patchLb3dInputFileText(inputFileText, checkPointDataText);
-        break;
-
-        default:
-        break;
-      }
-*/
-      // cache it
-      // we need to copy the selected/edited input file to the target machine
-      QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
-
-      config.lb3dInputFileName = inputFileName;
-
-      //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
-
-      // and insert it into the wizard's text edit box
-      componentLauncher->setInputFileTextEdit(inputFileText);
-       
+    if (inputFileText.length() == 0){
+    	cerr << "Failed to get job input file from checkpoint " << tGSH << endl;
+      return;
     }
+    
+    QString checkPointDataText = getDataFileFromCheckPoint(tGSH);
+
+    if (checkPointDataText.length() == 0){
+    	cerr << "Failed to get checkpoint meta-data from checkpoint " << tGSH << endl;
+      return;
+    }
+
+    // Get the ID string of the app. that created this checkpoint
+    QString appName;
+    QString checkUIDString;     
+    parseChkPtMetaData(checkPointDataText, appName, checkUIDString);
+
+    if(appName.length()==0 ){
+
+      consoleOutSlot("Failed to get name of application from checkpoint metadata");
+      return;
+    }
+    else if(checkUIDString.length()==0){
+
+    	consoleOutSlot("Failed to get UID of checkpoint from metadata");
+     	return;
+    }
+    
+    if(appName.contains("lbe3d", FALSE) == 1){
+      patchLb3dInputFileText(inputFileText, checkUIDString);
+    }
+    else if(appName.contains("namd", FALSE) == 1){
+      patchNamdInputFileText(inputFileText, checkUIDString);
+    }
+
+    // cache it
+    // we need to copy the selected/edited input file to the target machine
+    QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
+
+    config.lb3dInputFileName = inputFileName;
+
+    //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
+
+    // and insert it into the wizard's text edit box
+    componentLauncher->setInputFileTextEdit(inputFileText);
 
     config.newTree = false;
   } // : if restarting from checkpoint
@@ -816,5 +887,33 @@ void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
 */
 //}
 
+/* Parse the checkpoint meta-data obtained from a node in the checkpoint
+   tree in order to get the name of the application and the UID of
+   the checkpoint
+ */
+void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
+                                      QString &appName, QString &chkUID )
+{
+  QDomDocument doc("Checkpoint meta-data");
+  doc.setContent(chkMetaData);
 
+  QDomNodeList nodes = doc.elementsByTagName(QString("Checkpoint_data"));
+  if(nodes.count() >= 1){
 
+    if(nodes.item(0).isElement()){
+      appName = nodes.item(0).toElement().attribute("application");
+
+      // Extract the UID of the checkpoint from the metadata
+      QDomNodeList childNodes =
+           nodes.item(0).toElement().elementsByTagName(QString("Chk_UID"));
+
+      if(childNodes.count() >= 1){
+
+        if(childNodes.item(0).isElement()){
+
+          chkUID = childNodes.item(0).toElement().text();
+        }
+      }
+    }
+  }
+}
