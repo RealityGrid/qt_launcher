@@ -125,9 +125,10 @@ void JobStatusThread::getJobStatus(){
     mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
     
   } else {
-    StatusMessageData *aData = new StatusMessageData("No such job", 0);
+    StatusMessageData *aData = new StatusMessageData("No such job", 5000);
     aUpdateEvent->setData(aData);
     mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    done = true;
   }
   
 }

@@ -50,8 +50,8 @@ using namespace std;
 
 LauncherConfig::LauncherConfig(){
   // Some default values for testing
-  simComponentType = notused;
-  vizComponentType = notused;
+  //simComponentType = notused;
+  //vizComponentType = notused;
 
   migration  = false;
   restart    = false;

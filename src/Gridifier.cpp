@@ -289,7 +289,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
     fileText += "# Couldn't find a globus location in the default.conf\n# Going with the default environment if it is set\n";
   fileText += "SIM_HOSTNAME="+config.mTargetMachine+"\n";
   fileText += "SIM_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
-  fileText += "SIM_INFILE="+config.lb3dInputFileName+"\n\n";
+  fileText += "SIM_INFILE="+config.mInputFileName+"\n\n";
   fileText += QString("SIM_USER=")+getenv("USER")+"\n";
   fileText += "STEER_ANSWER=yes\n";
   fileText += "FIREWALL=no\n";
