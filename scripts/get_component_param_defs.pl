@@ -80,10 +80,10 @@ foreach my $node (@nodes){
     # Create a file with name constructed from application name
     my $file_name = $name;
     $file_name =~ s/ /_/og;
-    $file_name .= "_metadata.xml";
+    $file_name .= "_metadata_".$childID.".xml";
     push @file_names, $file_name;
     open(PARAM_FILE, "> $file_name") || die("can't open datafile: $!");
-    print PARAM_FILE "<Param_defs>\n";
+    print PARAM_FILE "<Param_defs GSH=\"".$childGSH."\">\n";
 
     my @params = $param_doc->getElementsByTagName("Param");
 
@@ -99,10 +99,18 @@ foreach my $node (@nodes){
 	}
 
 	# We don't want 'monitored' parameters
-        $internal =  $param_node->getElementsByTagName("Steerable");
+        $internal = $param_node->getElementsByTagName("Steerable");
 	$val = $internal->item(0)->getFirstChild->getData;
 	if ("$val" eq "0"){
 	    $parent->removeChild($param_node);
+	    next;
+	}
+
+        # Check that this parameter belongs to the current child
+        # - uses the fact that GSH ID is prepended to label
+	$internal = $param_node->getElementsByTagName("Label");
+	$val = $internal->item(0)->getFirstChild->getData;
+	if(index($val, $childID) <= -1){
 	    next;
 	}
 
@@ -110,19 +118,20 @@ foreach my $node (@nodes){
 	print PARAM_FILE "$param\n";
     }
 
-    my @labels = $param_doc->getElementsByTagName("Label");
-    my @list = ();
-    foreach my $label_node (@labels){
-
-	my $label = $label_node->getFirstChild->getData;
-	if(index($label, $childID) > -1){
-	    # This parameter belongs to this child - we use fact
-	    # that encoded labels contain the UID from the end
-	    # of a child's GSH.
-	    push @list, $label;
-	}
-    }
-    $child_params{$childGSH} = \@list;
+#    my @labels = $param_doc->getElementsByTagName("Label");
+#
+#    my @list = ();
+#    foreach my $label_node (@labels){
+#
+#	my $label = $label_node->getFirstChild->getData;
+#	if(index($label, $childID) > -1){
+#	    # This parameter belongs to this child - we use fact
+#	    # that encoded labels contain the UID from the end
+#	    # of a child's GSH.
+#	    push @list, $label;
+#	}
+#    }
+#    $child_params{$childGSH} = \@list;
 
     print PARAM_FILE "</Param_defs>\n";
     close(PARAM_FILE);
