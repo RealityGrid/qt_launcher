@@ -11,20 +11,27 @@
 
 #include "Gridifier.h"
 
+#include <iostream>
+using namespace std;
+
+
 Gridifier mGridifier;
 
 bool inputFileEditFlag = false;
 
 void ComponentLauncher::init(){
   // set the appropriate default pages correctly
-  setAppropriate(page(1), true);
+  // temporarily disable the checkPointGSHLineEdit page
+  setAppropriate(page(1), false);
+  // setAppropriate(page(1), true);
   setAppropriate(page(2), false);
   setAppropriate(page(3), false);
   setAppropriate(page(4), true);
   setAppropriate(page(5), true);
   setAppropriate(page(6), false);
   setAppropriate(page(7), false);
-  setAppropriate(page(10), false);
+  setAppropriate(page(9), true);
+  setAppropriate(page(11), false);
 
   // hide the horizontal header in the gshTagTable
   gshTagTable->verticalHeader()->hide();
@@ -40,26 +47,32 @@ void ComponentLauncher::componentSelectedSlot()
   switch (componentComboBox->currentItem()){
     
     case lb3d:
-      setAppropriate(page(1), true);
+      // temporarily disable the checkPointGSHLineEdit page
+      setAppropriate(page(1), false);
+      // setAppropriate(page(1), true);
       setAppropriate(page(2), mConfig->migration);
       setAppropriate(page(3), inputFileEditFlag);
       setAppropriate(page(4), !inputFileEditFlag);
       setAppropriate(page(5), true);
       setAppropriate(page(6), false);
       setAppropriate(page(7), false);
-      setAppropriate(page(10), false);
+      setAppropriate(page(9), true);
+      setAppropriate(page(11), false);
 
       break;
       
     case miniapp:
-      setAppropriate(page(1), true);
+      // temporarily disable the checkPointGSHLineEdit page
+      setAppropriate(page(1), false);
+      // setAppropriate(page(1), true);
       setAppropriate(page(2), false);
       setAppropriate(page(3), false);
       setAppropriate(page(4), false);
       setAppropriate(page(5), true);
       setAppropriate(page(6), false);
       setAppropriate(page(7), false);
-      setAppropriate(page(10), false);
+      setAppropriate(page(9), true);
+      setAppropriate(page(11), false);
 
       break;
       
@@ -71,7 +84,8 @@ void ComponentLauncher::componentSelectedSlot()
       setAppropriate(page(5), false);
       setAppropriate(page(6), true);
       setAppropriate(page(7), true);
-      setAppropriate(page(10), false);
+      setAppropriate(page(9), false);
+      setAppropriate(page(11), false);
 
       break;
       
@@ -83,7 +97,8 @@ void ComponentLauncher::componentSelectedSlot()
       setAppropriate(page(5), false);      
       setAppropriate(page(6), false);
       setAppropriate(page(7), false);
-      setAppropriate(page(10), false);
+      setAppropriate(page(9), true);
+      setAppropriate(page(11), false);
 
       break;
   }
@@ -126,21 +141,21 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
   // when we're ready.
   mGridifier.getSGSies(mConfig->topLevelRegistryGSH, gshTagTable);
 
-  // Test to see if we're doing a restart or a migration or whatever
+  // Test to see if we're doing a migration
   // Things are a bit different if we're migrating
-  if (mConfig->migration){
+  if (mConfig->migration || mConfig->restart){
     setAppropriate(page(0), false);
     setAppropriate(page(1), false);
     setAppropriate(page(2), false);
     setAppropriate(page(3), true);
     setAppropriate(page(4), false);
-    // force page 2 to be the first that's displayed
+    // force page 3 to be the first that's displayed
     showPage(page(3));
   }
 
   // Make the user enter a tag if a new tree is being created
   if (mConfig->newTree){
-    setAppropriate(page(10), true);
+    setAppropriate(page(11), true);
   }
 
 }
@@ -236,6 +251,9 @@ void ComponentLauncher::accept(){
     if (mConfig->newTree){
       mConfig->treeTag = treeTagTextEdit->text();
     }
+
+    // Time to run
+    mConfig->simTimeRoRun = runTimeLineEdit->text().toInt();
   }
   // Viz test
   else if (componentType == lb3dviz){

@@ -446,6 +446,7 @@
 </includes>
 <variables>
     <variable>Gridifier gridifier</variable>
+    <variable>QApplication *mApplication</variable>
 </variables>
 <slots>
     <slot>init()</slot>
@@ -477,5 +478,8 @@
     <slot>contextMenuRequestedSlot( QListViewItem * listViewItem, const QPoint &amp; pnt, int column )</slot>
     <slot>contextMenuItemSelectedSlot( int itemId )</slot>
 </slots>
+<functions>
+    <function>setApplication(QApplication *)</function>
+</functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

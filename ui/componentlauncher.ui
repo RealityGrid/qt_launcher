@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
 <class>ComponentLauncher</class>
 <widget class="QWizard">
     <property name="name">
@@ -9,7 +9,7 @@
             <x>0</x>
             <y>0</y>
             <width>367</width>
-            <height>226</height>
+            <height>229</height>
         </rect>
     </property>
     <property name="caption">
@@ -448,6 +448,46 @@
     </widget>
     <widget class="QWidget">
         <property name="name">
+            <cstring>enterRunTime</cstring>
+        </property>
+        <attribute name="title">
+            <string>Enter Maximum Run Time</string>
+        </attribute>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>runTimeLineEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>140</width>
+                    <height>23</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>30</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel1</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>160</x>
+                    <y>10</y>
+                    <width>64</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Minutes</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
             <cstring>enterTag</cstring>
         </property>
         <attribute name="title">
@@ -561,7 +601,7 @@
     <slot>gshTagSelectedSlot( int row, int col, int button, const QPoint &amp; mousePos )</slot>
     <slot>setCheckPointGSH( const QString &amp; checkPointGSH )</slot>
     <slot>setInputFileTextEdit( const QString &amp; text )</slot>
-    <slot>getInputFileTextEditText( QString * )</slot>
+    <slot>getInputFileTextEditText( QString * returnPtr )</slot>
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
 </slots>
 <pixmapinproject/>

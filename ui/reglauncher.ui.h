@@ -27,6 +27,7 @@
 // gSoap
 #include "checkPointTreeH.h"
 
+
 using namespace std;
 
 
@@ -41,6 +42,12 @@ void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
 }
+
+void RegLauncher::setApplication(QApplication *aApplication){
+  mApplication = aApplication;
+  gridifier.setApplication(mApplication);
+}
+
 
 void RegLauncher::fileNew()
 { 
@@ -159,6 +166,7 @@ void RegLauncher::migrateSimSlot()
 
     ComponentLauncher *migrater = new ComponentLauncher();
     config.migration = true;
+    config.restart = false;
     config.newTree = false;
     migrater->setConfig(&config);
     migrater->setApplication(this);
@@ -284,6 +292,8 @@ void RegLauncher::launchSimSlot()
   // Find out if the user has selected a checkpoint, and if so
   // consider that we will be starting from there
   if (restartingFromCheckPoint){
+    config.restart = true;
+
     QString tGSH = ((CheckPointTreeItem*)checkPointTreeListView->selectedItem())->getCheckPointGSH();
     componentLauncher->setCheckPointGSH(tGSH);
 
@@ -321,7 +331,8 @@ void RegLauncher::launchSimSlot()
     config.newTree = false;
   } // : if restarting from checkpoint
   else {
-    // else were launching a new tree
+    // else we're launching a new tree
+    config.restart = false;
     config.newTree = true;
   }
 
@@ -361,10 +372,13 @@ void RegLauncher::commonLaunchCode(){
     consoleOutSlot("Starting a simulation component");
 
     // First find a factory, and if we don't have one - make one
-    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH);
+    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, config.selectedContainer);
+
+    // need to make sure we can force a particular container to be used
+    // this doesn't happen at the moment - we can specifiy a container
+    // and the system will choose a different one entirely
     
     if (factory.length() == 0){
-      consoleOutSlot("There's no factories to be had - I'd better make one");
       QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":50000/", config.topLevelRegistryGSH);
       
       if (posFactory.startsWith("http://"+config.selectedContainer+":50000/"))
@@ -400,12 +414,12 @@ void RegLauncher::commonLaunchCode(){
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       
       // then start the job
     }
     else {
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
 
     }
 
@@ -418,7 +432,7 @@ void RegLauncher::commonLaunchCode(){
     consoleOutSlot("Starting a visualization component");
 
     // First find a factory, and if we don't have one - make one
-    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH);
+    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, config.selectedContainer);
 
     if (factory.length() == 0){
       consoleOutSlot("There's no factories to be had - I'd better make one");
@@ -469,6 +483,13 @@ void RegLauncher::discoverySlot()
 QProcess *steerer;
 void RegLauncher::steerSlot()
 {
+  ////////////////// TEST /////////////////////
+
+#ifdef speedTest
+  gridifier.gsiFtp("file:///tmp/aBigFile", "gsiftp://bezier.man.ac.uk/tmp/aGSIFTPSpeedTest");
+  if (1)
+    return;
+#endif  
   // create an instance of the RealityGrid QT Steerer for the current GSH
   // bear in mind that his requires that the Steerer environment variables
   // have already been set
