@@ -64,7 +64,8 @@ export REG_STEER_HOME REG_SGS_ADDRESS
 
 REG_TMP_FILE=/tmp/reg_sim_remote.$$
 REG_RSL_FILE=/tmp/sim_stage.$$.rsl
-export CHECKPOINT_GSH SIM_HOSTNAME SIM_STD_ERR_FILE SIM_STD_OUT_FILE SIM_PROCESSORS 
+export REG_TMP_FILE REG_RSL_FILE
+#export CHECKPOINT_GSH SIM_HOSTNAME SIM_STD_ERR_FILE SIM_STD_OUT_FILE SIM_PROCESSORS 
 
 case $ReG_LAUNCH in
      cog)
@@ -120,6 +121,8 @@ echo "  exit" >> $REG_TMP_FILE
 echo "fi" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
+echo "DISPLAY=${CLIENT_DISPLAY}" >> $REG_TMP_FILE
+echo "export DISPLAY" >> $REG_TMP_FILE
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> $REG_TMP_FILE
 echo "export UC_PROCESSORS" >> $REG_TMP_FILE
 echo "TIME_TO_RUN=$TIME_TO_RUN" >> $REG_TMP_FILE
@@ -158,7 +161,7 @@ then
 fi
 
 echo "echo \"Starting vmd job...\"" >> $REG_TMP_FILE
-echo "\$HOME/RealityGrid/bin/start_vmd .reg.input-file.$$" >> $REG_TMP_FILE
+echo "\$HOME/RealityGrid/bin/start_vmd $VIZ_TYPE .reg.input-file.$$" >> $REG_TMP_FILE
 
 echo "Transferring simulation input file..."
 
@@ -183,33 +186,11 @@ then
   echo "Error with transferring input file"
 fi
 
+# Start the simulation using the script created above
+
 echo "Starting simulation..."
 
-# Build the RSL file
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
 
-echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)" > $REG_RSL_FILE
-
-case $SIM_HOSTNAME in
-       green.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf-green $REG_RSL_FILE $SIM_USER
-          ;;
-       fermat.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf-fermat $REG_RSL_FILE $SIM_USER
-          ;;
-       wren.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf $REG_RSL_FILE $SIM_USER
-          ;;
-       localhost)
-          chmod a+x $REG_TMP_FILE
-          $REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
-          ;;
-       *)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $SIM_HOSTNAME jobmanager-fork $REG_RSL_FILE $SIM_USER
-          ;;
-esac
-
-if [ $? -gt "0" ]
-then
-  echo "Error with starting simulation"
-  exit
-fi
+echo "...done."
+echo "-----------------"
