@@ -415,15 +415,21 @@ cout << "Common Launch Code" << endl;
 
     consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
+    QString jobDescriptionTxt = config.mJobData->toXML();
+
     // Now use the factory to create an SGS
     QString sgs;
     
     // Create an SGS GSH, and create a checkpoint tree if necessary
-    if (config.newTree)
-      sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
-    else
-      sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");    
-
+    if (config.newTree) {
+      //sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
+      sgs = gridifier.makeSimSGS(factory, jobDescriptionTxt, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
+    }
+    else{
+      //sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
+      sgs = gridifier.makeSimSGS(factory, jobDescriptionTxt, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");
+    }
+      
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){
       consoleOutSlot("Failed to create a simulation SGS - is the factory valid?");
