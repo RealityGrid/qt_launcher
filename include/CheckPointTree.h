@@ -50,7 +50,8 @@ class CheckPointTreeItem;
 
 class CheckPointTree{//: public QThread {
   public:
-    CheckPointTree(QListView *parent);
+  //CheckPointTree(QListView *parent);
+    CheckPointTree(QListView *parent, const QString &address);
     ~CheckPointTree();
 
     void getChildNodes(const QString &handle, CheckPointTreeItem *);
