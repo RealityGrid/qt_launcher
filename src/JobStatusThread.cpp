@@ -48,6 +48,11 @@ JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aContain
   mainWindowStatusBar = aStatusBar;
   mContainer = aContainer;
   mGSH = aGSH;
+
+  // Set the lifespan of the thread to 15 seconds.
+  // This isn't currently used - some jobs could sit
+  // in a queue for hours on end.
+  lifespan = 15000000;
 }
 
 JobStatusThread::~JobStatusThread(){
@@ -74,21 +79,24 @@ void JobStatusThread::getJobStatus(){
   //  * just wrap around a script
   //      quickest way to progress - hence chosen - the deadline is fast approaching.
 
-  QProcess *jobStatusProcess = new QProcess(QString("./jobStatus.pl"));
-  jobStatusProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
-  jobStatusProcess->addArgument(mContainer);
-  jobStatusProcess->addArgument(mGSH);
+  // It's better that we run this process in stackspace rather than heapspace
+  // That way QT doesn't have to worry about garbage collecting it
+  QProcess jobStatusProcess(QString("./jobStatus.pl"));
+  jobStatusProcess.setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  jobStatusProcess.addArgument(mContainer);
+  jobStatusProcess.addArgument(mGSH);
 
-  jobStatusProcess->start();
+  jobStatusProcess.start();
 
   // We're in a thread - so no big worries about sitting waiting for this process to finish
-  while (jobStatusProcess->isRunning()){
+  while (jobStatusProcess.isRunning()){
     usleep(50000);
   }
 
   // Get the output, and simply grep for the desired results
-  QString results = jobStatusProcess->readStdout();
-  
+  QString results = jobStatusProcess.readStdout();
+
+  // need to think about having a timeout function
   if (results.find("NOT_STARTED")>=0){
     mainWindowStatusBar->message("Job is Queued");
   } else if (results.find("RUNNING")>=0){
@@ -108,5 +116,7 @@ void JobStatusThread::getJobStatus(){
 }
 
 
+void JobStatusThread::timeout(){
+}
 
 
