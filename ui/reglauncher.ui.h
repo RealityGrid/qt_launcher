@@ -39,7 +39,9 @@ CheckPointTree *cpt = NULL;
 CheckPointTreeItem *rightMouseCheckPointTreeItem = NULL;
 int checkPointTreeListViewPreviousSelection = -1;
 
-
+/** Reads the launcher configuration file "default.conf"
+  * and tweaks the way the checkpoint tree is displayed
+  */
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
