@@ -44,18 +44,28 @@
 #include "qapplication.h"
 #include "StatusMessageData.h"
 
+/** @file JobStatusThread.h
+    @brief Class for monitoring inital status of job.
+  */
+
 class JobStatusThread: public QThread {
   public:
     JobStatusThread(QApplication *aApp, QObject *aMainWindow,
                     const QString &aGSH);
     
   protected:
+    /** Starts the thread */
     virtual void run();
 
   private:
+    /** Pointer to main window so we can post GUI updates */
     QObject      *mMainWin;
+    /** Pointer to the application object for which we are getting status */
     QApplication *mApp;
+    /** GSH of the service to poll for status */
     QString       mGSH;
+    /** Namespace (SGS or MetaSGS) of service to talk to */
+    QString       mNameSpace;
     bool done;
     long age;
     long lifespan;
