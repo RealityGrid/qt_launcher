@@ -38,8 +38,63 @@
 ---------------------------------------------------------------------------*/
 
 #include "jobmetadata.h"
+#include <qdom.h>
+
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 JobMetaData::JobMetaData(){
 }
 JobMetaData::~JobMetaData(){
+}
+
+
+QString JobMetaData::toXML(){
+
+	QDomDocument doc( "job" );
+	
+  // Get root node
+  QDomElement root = doc.createElement( "componentContent");
+  doc.appendChild(root);
+
+  // Date/time job launched
+  // Create element
+  QDomElement eTime = doc.createElement( "componentStartDateTime" );
+  // Append element to root node
+  root.appendChild(eTime);
+ 
+	QDomText tnodeTime = doc.createTextNode(mLaunchTime);
+  eTime.appendChild(tnodeTime);
+
+  // Who launched it
+  QDomElement ePerson = doc.createElement("componentCreatorName");
+  root.appendChild(ePerson);
+
+  QDomText tnodePerson = doc.createTextNode(mPersonLaunching);
+  ePerson.appendChild(tnodePerson);
+
+  // What organisation they belong to
+  QDomElement eOrg = doc.createElement( "componentCreatorGroup" );
+  root.appendChild(eOrg);
+
+  QDomText tnodeOrg = doc.createTextNode(mOrganisation);
+  eOrg.appendChild(tnodeOrg);
+
+  // What the software is
+  QDomElement eSoftware = doc.createElement("componentSoftwarePackage");
+  root.appendChild(eSoftware);
+
+  QDomText tnodeSoftware = doc.createTextNode(mSoftwareDescription);
+  eSoftware.appendChild(tnodeSoftware);
+
+  // What the job is doing
+  QDomElement ePurpose = doc.createElement("componentTaskDescription");
+  root.appendChild(ePurpose);
+
+  QDomText tnodePurpose = doc.createTextNode(mPurposeOfJob);
+  ePurpose.appendChild(tnodePurpose);
+
+  return doc.toString();
 }

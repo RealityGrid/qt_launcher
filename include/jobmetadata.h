@@ -51,6 +51,8 @@ public:
 	JobMetaData();
 	~JobMetaData();
 
+	QString  toXML();
+
 	QString  mPersonLaunching;
 	QString  mOrganisation;
 	QString  mLaunchTime;
