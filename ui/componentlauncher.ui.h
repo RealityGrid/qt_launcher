@@ -134,6 +134,8 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
   containerListBox->insertStringList((mConfig->containerList));
   // and the simTargetListBox too
   simTargetListBox->insertStringList((mConfig->machineList));
+  // and the vizTargetListBox too
+  vizTargetListBox->insertStringList((mConfig->vizMachineList));
 
   // populate the viz's simulation gsh entry box with a good default
   simulationGSHLineEdit->setText(mConfig->simulationGSH);

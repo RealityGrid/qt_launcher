@@ -94,7 +94,38 @@ QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QStrin
   // this functionality is left in a seperate slot since it could be better
   // to allow the standard qt events to handle it, rather than sitting in the
   // above loop
-  result = getSGSFactoriesProcessEnded(desiredContainer);
+  //result = getSGSFactoriesProcessEnded(desiredContainer);
+
+  QString allFactories = getSGSFactoriesProcess->readStdout();
+
+  if (allFactories.length() == 0){
+    // then no SGS Factories exist - so create one - actually do this elsewhere
+    result = "";
+  }
+  else {
+    QStringList factories = QStringList::split("\n", allFactories);
+
+    int numFactories = factories.size();
+
+    // prune the list - remove any factories not on the desired container
+    for (int i=0; i<numFactories; i++){
+      if (!factories[i].contains(desiredContainer)){
+        factories.erase(factories.at(i));
+        numFactories--;
+      }
+    }
+
+    // if there's no factories left - return the blank string
+    if (numFactories <= 0)
+      result = "";
+
+    // choose a factory at random
+    int randomNum = rand();
+    randomNum = (int)((randomNum / (float)RAND_MAX) * numFactories);
+    QString randomFactory = factories[randomNum];
+
+    result = randomFactory;
+  }
   
   return result;
 }
@@ -148,17 +179,17 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
 QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &checkPointGSH, const QString &inputFileName, const QString &optionalChkPtTag){
   QString result;
   
-  makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
+  QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
   makeSimSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   makeSimSGSProcess->addArgument(factory);
-  // need to make certain that the tag is handled correctly if it contains spaces
+  // the tag is handled correctly if it contains spaces - thanks QT!
   makeSimSGSProcess->addArgument(tag);
   makeSimSGSProcess->addArgument(topLevelRegistry);
   makeSimSGSProcess->addArgument(checkPointGSH);
   makeSimSGSProcess->addArgument(inputFileName);
   if (optionalChkPtTag.length() > 0)
     makeSimSGSProcess->addArgument(optionalChkPtTag);
-cout << makeSimSGSProcess->arguments().join(" ") << endl;
+  // cout << makeSimSGSProcess->arguments().join(" ") << endl;
   makeSimSGSProcess->start();
 
   while(makeSimSGSProcess->isRunning()){
@@ -166,10 +197,9 @@ cout << makeSimSGSProcess->arguments().join(" ") << endl;
     mApplication->processEvents();
   }
 
-  // this functionality is left in a seperate slot since it could be better
-  // to allow the standard qt events to handle it, rather than sitting in the
-  // above loop
-  result = makeSimSGSProcessEnded().stripWhiteSpace();
+  // Grab the sgs and return it
+  // Do some error checking here - or in the calling class?
+  result = QString(makeSimSGSProcess->readStdout()).stripWhiteSpace();
 
   return result;
 }
@@ -177,7 +207,7 @@ cout << makeSimSGSProcess->arguments().join(" ") << endl;
 QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &simSGS){
   QString result;
 
-  makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
+  QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
   makeVizSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   makeVizSGSProcess->addArgument(factory);
   makeVizSGSProcess->addArgument(tag);
@@ -193,7 +223,8 @@ cout << makeVizSGSProcess->arguments().join(" ") << endl;
     mApplication->processEvents();
   }
 
-  result = makeVizSGSProcessEnded().stripWhiteSpace();
+  //result = makeVizSGSProcessEnded().stripWhiteSpace();
+  result = QString(makeVizSGSProcess->readStdout()).stripWhiteSpace();
 
   return result;
 }
@@ -274,19 +305,13 @@ QString Gridifier::makeSGSFactoryProcessEnded(){
   return result;  
 }
 
-QString Gridifier::makeSimSGSProcessEnded(){
-  QString result = makeSimSGSProcess->readStdout();
-
-  cout << makeSimSGSProcess->readStdout() << endl;
-  cout << makeSimSGSProcess->readStderr() << endl;
-
-  return result;
-}
-
+/*
 QString Gridifier::makeVizSGSProcessEnded(){
   QString result = makeVizSGSProcess->readStdout();
 
 // Debugging going on here
+// not any more ;p
+/ *
 QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
 if ( logFile.open(IO_WriteOnly) ){
   QTextStream stream(&logFile);
@@ -295,10 +320,10 @@ if ( logFile.open(IO_WriteOnly) ){
   stream << endl << QString(makeVizSGSProcess->readStderr()) << endl;
   logFile.close();
 }
-  
+* /
   return result;
 }
-
+*/
 
 void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConfig &config){
   QFile file(filename);
@@ -403,14 +428,14 @@ void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToR
   }
 
 // Debugging going on here
-QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
+/*QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
 if ( logFile.open(IO_WriteOnly) ){
   QTextStream stream(&logFile);
   stream << launchSimScriptProcess->arguments().join(" ") << endl;
   stream << QString(launchSimScriptProcess->readStdout()) << endl;
   stream << endl << QString(launchSimScriptProcess->readStderr()) << endl;
   logFile.close();
-}
+}*/
   
   cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
   cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
@@ -431,6 +456,9 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName){
     mApplication->processEvents();
   }
 
+
+  cout << "Stdout:" << endl << launchVizScriptProcess->readStdout() << endl;
+  cout << "Stderr:" << endl << launchVizScriptProcess->readStderr() << endl;
 }
 
 

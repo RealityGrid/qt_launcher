@@ -94,6 +94,7 @@ void LauncherConfig::readConfig(QString file){
   xmlNodePtr aComponent;
   xmlNodePtr containers;
   xmlNodePtr targets;
+  xmlNodePtr vizTargets;
 
   // Load it in and parse it with libxml2
   doc = xmlParseFile(file.latin1());
@@ -259,7 +260,7 @@ void LauncherConfig::readConfig(QString file){
       }
     }
 
-    // Retrieve the target machine information
+    // Retrieve the sim target machine information
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"targets"))){
       targets = childOfRoot->xmlChildrenNode;
 
@@ -276,6 +277,24 @@ void LauncherConfig::readConfig(QString file){
         targets = targets->next;
       }
     }
+
+    // Retrieve the viz target machine information
+    if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"vizTargets"))){
+      vizTargets = childOfRoot->xmlChildrenNode;
+
+      while (vizTargets != NULL){
+
+        if (!xmlStrcmp(vizTargets->name, (const xmlChar*)"machine")){
+          xmlChar *vizMachineName = xmlGetProp(vizTargets, (const xmlChar*)"name");
+          vizMachineList += (const char*)vizMachineName;
+          xmlFree(vizMachineName);
+          xmlChar *vizMachineOS = xmlGetProp(vizTargets, (const xmlChar*)"os");
+          xmlFree(vizMachineOS);
+        }
+
+        vizTargets = vizTargets->next;
+      }
+    }    
 
     if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
       globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
@@ -297,6 +316,7 @@ void LauncherConfig::writeConfig(QString file){
   xmlNodePtr vizComponent;
   xmlNodePtr containers;
   xmlNodePtr machines;
+  xmlNodePtr vizMachines;
 
   xmlNodePtr topLevelRegistry;
   xmlNodePtr registryOfFactories;
@@ -362,9 +382,17 @@ void LauncherConfig::writeConfig(QString file){
   }
 
   machines = xmlNewTextChild(root, NULL, (const xmlChar*)"targets", NULL);
-  for ( QStringList::Iterator it = machineList.begin(); it != containerList.end(); ++it ) {
+  for ( QStringList::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
       xmlNodePtr t = xmlNewTextChild(machines, NULL, (const xmlChar*)"machine", NULL);
       xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).latin1());
+      // the os isn't stored or used at the moment - it should be eventually - or removed
+  }
+
+  vizMachines = xmlNewTextChild(root, NULL, (const xmlChar*)"vizTargets", NULL);
+  for ( QStringList::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
+      xmlNodePtr t = xmlNewTextChild(vizMachines, NULL, (const xmlChar*)"machine", NULL);
+      xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).latin1());
+      // the os isn't stored or used at the moment - it should be eventually - or removed
   }
 
   xmlDocSetRootElement(doc, root);

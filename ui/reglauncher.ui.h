@@ -407,11 +407,15 @@ void RegLauncher::commonLaunchCode(){
     // Now use the factory to create an SGS
     QString sgs;
 
-    // Determine here whether we're starting a sim or a viz and get the appropriate tag
+cout << "1" << endl;
+    
+    // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree)
       sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
     else
       sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");    
+
+cout << "2" << endl;
 
     // Copy the value to the config
     config.simulationGSH = sgs;
@@ -422,21 +426,22 @@ void RegLauncher::commonLaunchCode(){
 
     gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
 
-    consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
-    
+cout << "3" << endl;
+
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
-      
       // then start the job
+      consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
+      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+      consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
 
     }
 
-    consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
+cout << "4" << endl;
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.selectedContainer+":50000/", config.simulationGSH);
     aJobStatusThread->start();

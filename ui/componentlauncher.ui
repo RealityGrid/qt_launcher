@@ -442,11 +442,6 @@
                 </vbox>
             </widget>
             <widget class="QListBox" row="0" column="0" rowspan="1" colspan="3">
-                <item>
-                    <property name="text">
-                        <string>bezier.man.ac.uk</string>
-                    </property>
-                </item>
                 <property name="name">
                     <cstring>vizTargetListBox</cstring>
                 </property>

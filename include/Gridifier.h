@@ -74,8 +74,6 @@ private:
   QProcess *getSGSFactoriesProcess;
   QProcess *getSGSiesProcess;
   QProcess *makeSGSFactoryProcess;
-  QProcess *makeSimSGSProcess;
-  QProcess *makeVizSGSProcess;
   QProcess *launchSimScriptProcess;
   QProcess *launchVizScriptProcess;
   QProcess *jobStatusProcess;
@@ -89,8 +87,6 @@ public slots:
   QString getSGSFactoriesProcessEnded(const QString &desiredContainer);
   void getSGSiesProcessEnded();
   QString makeSGSFactoryProcessEnded();
-  QString makeSimSGSProcessEnded();
-  QString makeVizSGSProcessEnded();
   void gsiFtpStdoutSlot();
   void gsiFtpStderrSlot();
   
