@@ -209,20 +209,19 @@ void Gridifier::getCoupledParamDefs(const QString &gsh,
   if (mFileListPtr == NULL)
     return;
 
+  cout << "ARPDBG: getCoupledParamDefs, gsh = " << gsh << endl;
   getParamDefsProcess = new QProcess(QString("./get_component_param_defs.pl"));
   getParamDefsProcess->setWorkingDirectory(mScriptsDir);
   getParamDefsProcess->addArgument(gsh);
   getParamDefsProcess->start();
 
-  connect(getParamDefsProcess, SIGNAL(processExited()), this, 
-    SLOT(getParamDefsProcessEnded()));
+  while (getParamDefsProcess->isRunning()){
+    // don't sit in an exhaustive loop - waste of electricity :)
+    usleep(10000);
+    // and keep the gui updated
+    mApplication->processEvents();
+  }
 
-  return;
-}
-
-void Gridifier::getParamDefsProcessEnded(){
-
-  QStringList result;
   QString processOutput = getParamDefsProcess->readStdout();
 
   if(processOutput.startsWith("ERROR")){
@@ -234,23 +233,6 @@ void Gridifier::getParamDefsProcessEnded(){
   }
 
   *mFileListPtr = processOutput;
-
-  // the output will be a space-delimited list of 
-  // filenames
-  /*
-  result = QStringList::split(" ", processOutput);
-
-  for (unsigned int i=0; i<result.count(); i++){
-    int firstSpace = result[i].find(" ");
-    QString tSGS = result[i].left(firstSpace);
-    QString tag = result[i].right(result[i].length() - firstSpace);
-    if (tSGS.startsWith("http://")){
-      mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, tSGS);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, tag);
-    }
-  }
-  */
 }
 
 QString Gridifier::makeSGSFactory(const QString &container, 

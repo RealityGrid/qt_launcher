@@ -66,24 +66,6 @@
             <string>Click to cancel construction of globals</string>
         </property>
     </widget>
-    <widget class="QListBox">
-        <item>
-            <property name="text">
-                <string>New Item</string>
-            </property>
-        </item>
-        <property name="name">
-            <cstring>globalParamContentListBox</cstring>
-        </property>
-        <property name="geometry">
-            <rect>
-                <x>410</x>
-                <y>80</y>
-                <width>181</width>
-                <height>270</height>
-            </rect>
-        </property>
-    </widget>
     <widget class="QPushButton">
         <property name="name">
             <cstring>globalParamDoneButton</cstring>
@@ -128,6 +110,24 @@
             <bool>true</bool>
         </property>
     </widget>
+    <widget class="QListBox">
+        <item>
+            <property name="text">
+                <string>New Item</string>
+            </property>
+        </item>
+        <property name="name">
+            <cstring>globalParamContentListBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>80</y>
+                <width>181</width>
+                <height>270</height>
+            </rect>
+        </property>
+    </widget>
 </widget>
 <connections>
     <connection>
@@ -164,6 +164,9 @@
 <includes>
     <include location="local" impldecl="in declaration">Gridifier.h</include>
     <include location="local" impldecl="in declaration">RunningJobsDialog.h</include>
+    <include location="local" impldecl="in declaration">qdom.h</include>
+    <include location="local" impldecl="in declaration">qfile.h</include>
+    <include location="local" impldecl="in declaration">qinputdialog.h</include>
     <include location="local" impldecl="in implementation">GlobalParamConstructionForm.ui.h</include>
 </includes>
 <variables>
@@ -180,8 +183,8 @@
 </slots>
 <functions>
     <function access="private" specifier="non virtual">init()</function>
-    <function>setConfig(LauncherConfig *aConfig)</function>
-    <function>setParentGSH(const QString &amp;aGSH)</function>
+    <function>setConfig( LauncherConfig * aConfig )</function>
+    <function>setParentGSH( const QString &amp; aGSH )</function>
 </functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
