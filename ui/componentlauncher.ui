@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>518</width>
-            <height>423</height>
+            <width>494</width>
+            <height>369</height>
         </rect>
     </property>
     <property name="caption">
@@ -23,21 +23,6 @@
             <string>Select Component Type</string>
         </attribute>
         <widget class="QComboBox">
-            <item>
-                <property name="text">
-                    <string>lb3d</string>
-                </property>
-            </item>
-            <item>
-                <property name="text">
-                    <string>miniapp</string>
-                </property>
-            </item>
-            <item>
-                <property name="text">
-                    <string>lb3d-viz</string>
-                </property>
-            </item>
             <property name="name">
                 <cstring>componentComboBox</cstring>
             </property>

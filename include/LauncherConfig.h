@@ -84,11 +84,16 @@ class Application {
   public:
     QString mAppName;
     int     mNumInputs;
+    bool    mHasInputFile;
+    bool    mIsRestartable;
 
     Application(){};
-    Application(const QString aName, const int aNumInputs){
+    Application(const QString aName, const int aNumInputs, const bool aHasFile,
+                const bool aIsRestartable){
       mAppName = aName;
       mNumInputs = aNumInputs;
+      mHasInputFile = aHasFile;
+      mIsRestartable = aIsRestartable;
     }
     ~Application(){}
 };

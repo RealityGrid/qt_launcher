@@ -296,19 +296,40 @@ void LauncherConfig::readConfig(QString file){
     if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"applications")){
 
       applications = childOfRoot->xmlChildrenNode;
-
+      bool lHasFile, lCanRestart;
+      
       while(applications != NULL){
 
         if(!xmlStrcmp(applications->name, (const xmlChar*)"application")){
           xmlChar *appName = xmlGetProp(applications, (const xmlChar*)"name");
           xmlChar *appNumInputs = xmlGetProp(applications, (const xmlChar*)"inputs");
+          xmlChar *appHasFile = xmlGetProp(applications, (const xmlChar*)"hasInputFile");
+          xmlChar *appRestartable = xmlGetProp(applications, (const xmlChar*)"restartable");
+          
+          if(!xmlStrcmp(appHasFile, (const xmlChar*)"yes") ||
+             !xmlStrcmp(appHasFile, (const xmlChar*)"Yes")){
+            lHasFile = true;
+          }
+          else{
+            lHasFile = false;
+          }
+
+          if(!xmlStrcmp(appRestartable, (const xmlChar*)"yes") ||
+             !xmlStrcmp(appRestartable, (const xmlChar*)"Yes")){
+            lCanRestart = true;
+          }
+          else{
+            lCanRestart = false;
+          }
           
           Application tApplication((const char*)appName,
-                                   QString((const char*)appNumInputs).toInt());
+                                   QString((const char*)appNumInputs).toInt(),
+                                   lHasFile, lCanRestart);
           applicationList += tApplication;
 
           xmlFree(appName);
           xmlFree(appNumInputs);
+          xmlFree(appHasFile);
         }
 
         applications = applications->next;

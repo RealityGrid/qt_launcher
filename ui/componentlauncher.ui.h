@@ -41,77 +41,109 @@ void ComponentLauncher::init(){
     
     // turn off the multicast address input box by default
     mcastAddrLineEdit->setEnabled(false);
+
 }
 
 void ComponentLauncher::componentSelectedSlot()
 {
-    // now set all other pages in the wizard to be appropriate to the current context
-    switch (componentComboBox->currentItem()){
-	
-    case lb3d:
-	// temporarily disable the checkPointGSHLineEdit page
-	setAppropriate(page(1), false);
-	// setAppropriate(page(1), true);
-	setAppropriate(page(2), mConfig->migration);
-	setAppropriate(page(3), inputFileEditFlag);
-	setAppropriate(page(4), !inputFileEditFlag);
-	setAppropriate(page(5), true);
-	setAppropriate(page(6), false);
-	setAppropriate(page(7), false);
-	setAppropriate(page(9), true);
-	if (mConfig->newTree)
+    Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
+
+    // The pages of the launching wizard are as follows:
+    // Page 0: type of app to launch - always used
+    // Page 1: GSH of checkpoint to restart from
+ 		setAppropriate(page(1), false);
+    // Page 2: GSH of data source (other component)
+    setAppropriate(page(2), (chosenApp->mNumInputs > 0));
+    // Page 3: Edit input file (only when restarting?)
+    setAppropriate(page(3),
+         (inputFileEditFlag && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
+    // Page 4: Select input file
+	  setAppropriate(page(4),
+	       (!inputFileEditFlag && (chosenApp->mHasInputFile)));
+    // Page 5: Select target machine (& num px)
+	  setAppropriate(page(5), (chosenApp->mNumInputs == 0));
+    // Page 6: Select target viz machine (inc. num px, pipes, vizserver & multicast)
+	  setAppropriate(page(6), (chosenApp->mNumInputs > 0));
+    // Page 7: Select type of viz (iso, cut etc.)
+	  setAppropriate(page(7), (chosenApp->mNumInputs > 0));
+    // Page 8: Select container for SGS - always used
+    // Page 9: Max run time - currently only for 'sims'
+    setAppropriate(page(9), (chosenApp->mNumInputs == 0));
+    // Page 10: Job description (used to be just a tag) - always used
+    // Page 11: Tag for new checkpoint tree
+	  if (chosenApp->mIsRestartable && mConfig->newTree){
 	    setAppropriate(page(11), true);
-	else
+	  }
+	  else{
 	    setAppropriate(page(11), false);
-	
-	
-	break;
-	
-    case miniapp:
-	// temporarily disable the checkPointGSHLineEdit page
-	setAppropriate(page(1), false);
-	// setAppropriate(page(1), true);
-	setAppropriate(page(2), false);
-	setAppropriate(page(3), false);
-	setAppropriate(page(4), false);
-	setAppropriate(page(5), true);
-	setAppropriate(page(6), false);
-	setAppropriate(page(7), false);
-	setAppropriate(page(9), true);
-	if (mConfig->newTree)
-	    setAppropriate(page(11), true);
-	else
-	    setAppropriate(page(11), false);
-	
-	break;
-	
-    case lb3dviz:
-	setAppropriate(page(1), false);
-	setAppropriate(page(2), true);
-	setAppropriate(page(3), false);      
-	setAppropriate(page(4), false);
-	setAppropriate(page(5), false);
-	setAppropriate(page(6), true);
-	setAppropriate(page(7), true);
-	setAppropriate(page(9), false);
-	setAppropriate(page(11), false);
-	
-	break;
-	
-    default:
-	setAppropriate(page(1), false);
-	setAppropriate(page(2), false);
-	setAppropriate(page(3), false);
-	setAppropriate(page(4), false);
-	setAppropriate(page(5), false);      
-	setAppropriate(page(6), false);
-	setAppropriate(page(7), false);
-	setAppropriate(page(9), true);
-	setAppropriate(page(11), false);
-	
-	break;
     }
     
+//    // now set all other pages in the wizard to be appropriate to the current context
+//    switch (componentComboBox->currentItem()){
+//
+//    case lb3d:
+//		  // temporarily disable the checkPointGSHLineEdit page
+//		  setAppropriate(page(1), false);
+//	    // setAppropriate(page(1), true);
+//	    setAppropriate(page(2), mConfig->migration);
+//	    // Input file can only be edited if we're doing a restart
+//	    setAppropriate(page(3), inputFileEditFlag);
+//	    setAppropriate(page(4), !inputFileEditFlag);
+//	    setAppropriate(page(5), true);
+//	    setAppropriate(page(6), false);
+//	    setAppropriate(page(7), false);
+//	    setAppropriate(page(9), true);
+//	    if (mConfig->newTree)
+//	      setAppropriate(page(11), true);
+//	    else
+//	      setAppropriate(page(11), false);
+//
+//	    break;
+//
+//    case miniapp:
+//	    // temporarily disable the checkPointGSHLineEdit page
+//	    setAppropriate(page(1), false);
+//	    // setAppropriate(page(1), true);
+//	    setAppropriate(page(2), false);
+//	    setAppropriate(page(3), false);
+//	    setAppropriate(page(4), false);
+//	    setAppropriate(page(5), true);
+//	    setAppropriate(page(6), false);
+//	    setAppropriate(page(7), false);
+//	    setAppropriate(page(9), true);
+//	    if (mConfig->newTree)
+//	      setAppropriate(page(11), true);
+//	    else
+//	      setAppropriate(page(11), false);
+//
+//	    break;
+//
+//    case lb3dviz:
+//	    setAppropriate(page(1), false);
+//	    setAppropriate(page(2), true);
+//	    setAppropriate(page(3), false);
+//	    setAppropriate(page(4), false);
+//	    setAppropriate(page(5), false);
+//	    setAppropriate(page(6), true);
+//	    setAppropriate(page(7), true);
+//	    setAppropriate(page(9), false);
+//	    setAppropriate(page(11), false);
+//
+//	    break;
+//
+//    default:
+//	    setAppropriate(page(1), false);
+//	    setAppropriate(page(2), false);
+//	    setAppropriate(page(3), false);
+//	    setAppropriate(page(4), false);
+//	    setAppropriate(page(5), false);
+//	    setAppropriate(page(6), false);
+//	    setAppropriate(page(7), false);
+//	    setAppropriate(page(9), true);
+//	    setAppropriate(page(11), false);
+//
+//	    break;
+//    }
 }
 
 
@@ -129,8 +161,8 @@ void ComponentLauncher::sgsOrgChanged( const QString & )
 void ComponentLauncher::sgsTagEntered()
 {
     if (!mConfig->newTree || componentComboBox->currentItem() == lb3dviz){
-	setNextEnabled(currentPage(), false);
-	setFinishEnabled(currentPage(), true);
+	    setNextEnabled(currentPage(), false);
+	    setFinishEnabled(currentPage(), true);
     }
 }
 
@@ -138,7 +170,7 @@ void ComponentLauncher::sgsTagEntered()
 void ComponentLauncher::treeTagEntered()
 {
     if (mConfig->newTree){
-	setFinishEnabled(currentPage(), true);
+	    setFinishEnabled(currentPage(), true);
     }
 }
 
@@ -148,10 +180,9 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     mConfig = aConfig;
     
     // populate the containerListBox
-    //containerListBox->insertStringList((mConfig->containerList));
     int numContainers = mConfig->containerList.size();
     for (int i=0; i<numContainers; i++){
-	containerListBox->insertItem(mConfig->containerList[i].mContainer);
+	    containerListBox->insertItem(mConfig->containerList[i].mContainer);
     }
     // and the simTargetListBox too
     simTargetListBox->insertStringList((mConfig->machineList));
@@ -182,7 +213,14 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     if (mConfig->newTree){
 	setAppropriate(page(11), true);
     }
-    
+
+  // Set up the drop-down list of available apps
+  QStringList list;
+  for ( int i = 0; i < (int)mConfig->applicationList.count(); i++ )
+    list += mConfig->applicationList[i].mAppName;
+
+  componentComboBox->insertStringList(list, 0);
+
 }
 
 
@@ -231,8 +269,8 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
     //if (pageName == title(page(1))){
     //  componentSelectedSlot();
     //}
-    //cout << string << endl;
     
+    //cout << string << endl;
     if (string == title(page(10))){
     	// Find out who we are - could query our certificate at this stage
     	sgsUserNameLineEdit->setText(QString(getenv("USER")));
@@ -396,7 +434,10 @@ void ComponentLauncher::setCheckPointGSH(const QString &checkPointGSH)
 {
     checkPointGSHLineEdit->setText(checkPointGSH);
     
-    // if we're starting from a checkpoint tree then allow the user to edit the input file
+    // if we're starting from a checkpoint tree then allow the user to
+    // edit the input file.  This may be overridden if the user has
+    // chosen to launch an app that's not restartable (i.e. wasn't
+    // used to generate the checkpoint tree in the first place).
     inputFileEditFlag = true;
     setAppropriate(page(3), inputFileEditFlag);
     // don't allow them to select their own file
