@@ -1,0 +1,20 @@
+RealityGrid QT Launcher Application
+
+QT's 'Designer' software is used to design the GUI layout for the ReG launcher. This enables rapid prototyping to be employed, as well as offering the developer the benefit of a more intuitive design methodology (gui drag and drop style development, as opposed to pure text based!).
+
+The knock on effect of this design choice is in the code tree, which has a 'ui' directory in addition to the standard 'src' and 'include' directories. This contains the high-level gui definition files produced by Designer, as well as accompanying ui-header files (*.ui.h), which contain actual code. A decision was made to keep these header files in the same directory as the a *.ui files, since the two exists in pairs, and not the standard c/c++ header/instance files.
+
+The reg_qt_launcher.pro file is the project file produced and used by Designer. QMake will accept this as an input, and use it to generate the system Makefile.
+
+So, the build process is simply:
+
+qmake reg_qt_launcher.pro
+make
+
+Note - *.ui files and their accompanying headers are automatically converted into c++ classes, contained in the .ui/ directory. These are automatically generated files - and should therefore contain no user code. Any changes made to those files is wiped during the build process.
+
+
+
+****
+
+In short - non top level gui code lives in the src & include dirs, gui code lives in the ui dir (but in the *.ui.h files (!)).

@@ -1,0 +1,16 @@
+[check]
+QMAKE_CACHE_VERSION = 1.03a
+QMAKE_ABSOLUTE_SOURCE_PATH = 
+MOC_DIR = .moc/
+UI_DIR = .ui/
+UI_HEADERS_DIR = 
+UI_SOURCES_DIR = 
+[depend]
+componentlauncher.cpp = componentlauncher.ui.h
+componentlauncher.ui = 
+main.cpp = .ui/reglauncher.h
+reglauncher.cpp = reglauncher.ui.h
+.ui/reglauncher.h = 
+reglauncher.ui = 
+[mocable]
+main.cpp = *qmake_ignore*

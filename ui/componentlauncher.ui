@@ -1,0 +1,568 @@
+<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<class>ComponentLauncher</class>
+<widget class="QWizard">
+    <property name="name">
+        <cstring>ComponentLauncher</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>367</width>
+            <height>226</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Component Launcher</string>
+    </property>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>selectComponentType</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select Component Type</string>
+        </attribute>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>lb3d</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>miniapp</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>lb3d-viz</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>componentComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>120</width>
+                    <height>22</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>checkPointGSHEntry</cstring>
+        </property>
+        <attribute name="title">
+            <string>Enter Checkpoint GSH</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLineEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>checkPointGSHLineEdit</cstring>
+                </property>
+            </widget>
+            <spacer row="1" column="0">
+                <property name="name">
+                    <cstring>Spacer1</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Vertical</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>0</width>
+                        <height>30</height>
+                    </size>
+                </property>
+            </spacer>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>simulationGSHEntry</cstring>
+        </property>
+        <attribute name="title">
+            <string>Enter or Select a Simulation GSH</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QTable" row="1" column="0">
+                <column>
+                    <property name="text">
+                        <string>GSH</string>
+                    </property>
+                </column>
+                <column>
+                    <property name="text">
+                        <string>Tag</string>
+                    </property>
+                </column>
+                <property name="name">
+                    <cstring>gshTagTable</cstring>
+                </property>
+                <property name="frameShape">
+                    <enum>LineEditPanel</enum>
+                </property>
+                <property name="frameShadow">
+                    <enum>Sunken</enum>
+                </property>
+                <property name="resizePolicy">
+                    <enum>Default</enum>
+                </property>
+                <property name="numRows">
+                    <number>0</number>
+                </property>
+                <property name="numCols">
+                    <number>2</number>
+                </property>
+                <property name="columnMovingEnabled">
+                    <bool>true</bool>
+                </property>
+                <property name="readOnly">
+                    <bool>true</bool>
+                </property>
+                <property name="selectionMode">
+                    <enum>SingleRow</enum>
+                </property>
+                <property name="focusStyle">
+                    <enum>SpreadSheet</enum>
+                </property>
+            </widget>
+            <widget class="QLineEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>simulationGSHLineEdit</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>inputFileEdit</cstring>
+        </property>
+        <attribute name="title">
+            <string>Edit Input File (optional)</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QTextEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>inputFileTextEdit</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>selectSimInput</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select Simulation Input file</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QPushButton" row="0" column="1">
+                <property name="name">
+                    <cstring>simInputPushButton</cstring>
+                </property>
+                <property name="text">
+                    <string>..</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>simInputLineEdit</cstring>
+                </property>
+            </widget>
+            <spacer row="1" column="0">
+                <property name="name">
+                    <cstring>Spacer2</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Vertical</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>0</width>
+                        <height>30</height>
+                    </size>
+                </property>
+            </spacer>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>selectTargetMachine</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select Target Machine</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <spacer row="0" column="1">
+                <property name="name">
+                    <cstring>Spacer3</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Vertical</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>0</width>
+                        <height>30</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QLabel" row="1" column="1">
+                <property name="name">
+                    <cstring>TextLabel2</cstring>
+                </property>
+                <property name="text">
+                    <string>Number of Processors</string>
+                </property>
+            </widget>
+            <widget class="QListBox" row="0" column="0" rowspan="3" colspan="1">
+                <property name="name">
+                    <cstring>simTargetListBox</cstring>
+                </property>
+            </widget>
+            <widget class="QLineEdit" row="2" column="1">
+                <property name="name">
+                    <cstring>simNumProcLineEdit</cstring>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy>
+                        <hsizetype>0</hsizetype>
+                        <vsizetype>0</vsizetype>
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <property name="text">
+                    <string>1</string>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>selectVizTarget</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select Target Visualization Machine</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QLabel" row="3" column="1">
+                <property name="name">
+                    <cstring>TextLabel2_2</cstring>
+                </property>
+                <property name="text">
+                    <string>Number of Processors</string>
+                </property>
+            </widget>
+            <widget class="QLabel" row="1" column="1">
+                <property name="name">
+                    <cstring>TextLabel2_3</cstring>
+                </property>
+                <property name="text">
+                    <string>Number of Pipes</string>
+                </property>
+            </widget>
+            <widget class="QCheckBox" row="0" column="1">
+                <property name="name">
+                    <cstring>vizServerCheckBox</cstring>
+                </property>
+                <property name="text">
+                    <string>VizServer</string>
+                </property>
+            </widget>
+            <widget class="QListBox" row="0" column="0" rowspan="5" colspan="1">
+                <item>
+                    <property name="text">
+                        <string>bezier.man.ac.uk</string>
+                    </property>
+                </item>
+                <property name="name">
+                    <cstring>vizTargetListBox</cstring>
+                </property>
+            </widget>
+            <widget class="QLineEdit" row="4" column="1">
+                <property name="name">
+                    <cstring>vizNumProcLineEdit</cstring>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy>
+                        <hsizetype>0</hsizetype>
+                        <vsizetype>0</vsizetype>
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <property name="text">
+                    <string>1</string>
+                </property>
+            </widget>
+            <widget class="QLineEdit" row="2" column="1">
+                <property name="name">
+                    <cstring>vizPipesLineEdit</cstring>
+                </property>
+                <property name="sizePolicy">
+                    <sizepolicy>
+                        <hsizetype>0</hsizetype>
+                        <vsizetype>0</vsizetype>
+                        <horstretch>0</horstretch>
+                        <verstretch>0</verstretch>
+                    </sizepolicy>
+                </property>
+                <property name="text">
+                    <string>1</string>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>selectVizType</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select Visualization Type</string>
+        </attribute>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>Isosurface</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Volume Render</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Hedgehog</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Cut Plane</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>vizTypeComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>14</x>
+                    <y>8</y>
+                    <width>130</width>
+                    <height>22</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>containerSelect</cstring>
+        </property>
+        <attribute name="title">
+            <string>Select a Container</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QListBox" row="0" column="0">
+                <property name="name">
+                    <cstring>containerListBox</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>enterTag</cstring>
+        </property>
+        <attribute name="title">
+            <string>Enter a descriptive tag for the SGS</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QTextEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>tagTextEdit</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+    <widget class="QWidget">
+        <property name="name">
+            <cstring>enterCheckPointTreeTag</cstring>
+        </property>
+        <attribute name="title">
+            <string>Enter a tag for the new CheckPoint Tree</string>
+        </attribute>
+        <grid>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>11</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <widget class="QTextEdit" row="0" column="0">
+                <property name="name">
+                    <cstring>treeTagTextEdit</cstring>
+                </property>
+            </widget>
+        </grid>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>componentComboBox</sender>
+        <signal>activated(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>componentSelectedSlot()</slot>
+    </connection>
+    <connection>
+        <sender>tagTextEdit</sender>
+        <signal>textChanged()</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>sgsTagEntered()</slot>
+    </connection>
+    <connection>
+        <sender>treeTagTextEdit</sender>
+        <signal>textChanged()</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>treeTagEntered()</slot>
+    </connection>
+    <connection>
+        <sender>ComponentLauncher</sender>
+        <signal>selected(const QString&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>pageSelectedSlot(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>simInputPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>simInputButtonPushedSlot()</slot>
+    </connection>
+    <connection>
+        <sender>gshTagTable</sender>
+        <signal>doubleClicked(int,int,int,const QPoint&amp;)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>gshTagSelectedSlot(int,int,int,const QPoint&amp;)</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in declaration">LauncherConfig.h</include>
+    <include location="local" impldecl="in declaration">reglauncher.h</include>
+    <include location="local" impldecl="in implementation">componentlauncher.ui.h</include>
+</includes>
+<variables>
+    <variable>LauncherConfig *mConfig</variable>
+    <variable>RegLauncher *mRegLauncher</variable>
+</variables>
+<slots>
+    <slot>init()</slot>
+    <slot>componentSelectedSlot()</slot>
+    <slot>sgsTagEntered()</slot>
+    <slot>treeTagEntered()</slot>
+    <slot>setConfig( LauncherConfig * aConfig )</slot>
+    <slot>vizServerSlot()</slot>
+    <slot>simNumProcessorsSlot()</slot>
+    <slot>simTargetMachineSlot()</slot>
+    <slot>vizNumberPipesSlot()</slot>
+    <slot>vizNumProcessorsSlot()</slot>
+    <slot>vizTargetMachineSlot()</slot>
+    <slot>containerSelectedSlot()</slot>
+    <slot>pageSelectedSlot( const QString &amp; string )</slot>
+    <slot>accept()</slot>
+    <slot>simInputButtonPushedSlot()</slot>
+    <slot>gshTagSelectedSlot( int row, int col, int button, const QPoint &amp; mousePos )</slot>
+    <slot>setCheckPointGSH( const QString &amp; checkPointGSH )</slot>
+    <slot>setInputFileTextEdit( const QString &amp; text )</slot>
+    <slot>setApplication( RegLauncher * aRegLauncher )</slot>
+</slots>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
