@@ -445,7 +445,6 @@ void LauncherConfig::writeConfig(QString file){
   }
 
   machines = xmlNewTextChild(root, NULL, (const xmlChar*)"targets", NULL);
-//  for ( QStringList::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
   for ( QValueList<Machine>::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
       xmlNodePtr t = xmlNewTextChild(machines, NULL, (const xmlChar*)"machine", NULL);
       xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).mName.latin1());
@@ -454,7 +453,6 @@ void LauncherConfig::writeConfig(QString file){
   }
 
   vizMachines = xmlNewTextChild(root, NULL, (const xmlChar*)"vizTargets", NULL);
-//  for ( QStringList::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
   for ( QValueList<Machine>::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
       xmlNodePtr t = xmlNewTextChild(vizMachines, NULL, (const xmlChar*)"machine", NULL);
       xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).mName.latin1());

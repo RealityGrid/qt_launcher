@@ -110,7 +110,7 @@ class Machine {
       mName = aName;
       mJobManager = aJobManager;
       mOS = aOS;
-      cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << endl;
+      //cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << endl;
     }
     ~Machine(){}
 };

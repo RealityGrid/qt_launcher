@@ -70,6 +70,7 @@ STRUCT_FILE=`awk '/^structure/ {print $2}' $SIM_INFILE`
 PARAM_FILE=`awk '/^parameters/ {print $2}' $SIM_INFILE`
 VECT_FILE=`awk '/^extendedSystem/ {print $2}' $SIM_INFILE`
 VEL_FILE=`awk '/^velocities/ {print $2}' $SIM_INFILE`
+FEP_FILE=`awk '/^fepFile/ {print $2}' $SIM_INFILE`
 TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
 # Fourthly: Export these variables for use in child scripts
@@ -133,6 +134,7 @@ echo "mv -f \$HOME/RealityGrid/scratch/${STRUCT_FILE}.$$ ./${STRUCT_FILE}" >> $R
 echo "mv -f \$HOME/RealityGrid/scratch/${PARAM_FILE}.$$ ./${PARAM_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${VECT_FILE}.$$ ./${VECT_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${VEL_FILE}.$$ ./${VEL_FILE}" >> $REG_TMP_FILE
+echo "mv -f \$HOME/RealityGrid/scratch/${FEP_FILE}.$$ ./${FEP_FILE}" >> $REG_TMP_FILE
 fi
 
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
@@ -166,6 +168,7 @@ case $SIM_HOSTNAME in
           cp -f ${TMP_PATH}${PARAM_FILE} $HOME/RealityGrid/scratch/${PARAM_FILE}.$$
           cp -f ${TMP_PATH}${VECT_FILE} $HOME/RealityGrid/scratch/${VECT_FILE}.$$
           cp -f ${TMP_PATH}${VEL_FILE} $HOME/RealityGrid/scratch/${VEL_FILE}.$$
+          cp -f ${TMP_PATH}${FEP_FILE} $HOME/RealityGrid/scratch/${FEP_FILE}.$$
           ;;
       *)
           case $ReG_LAUNCH in
@@ -176,6 +179,7 @@ case $SIM_HOSTNAME in
                scp ${TMP_PATH}${PARAM_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${PARAM_FILE}.$$
                scp ${TMP_PATH}${VECT_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${VECT_FILE}.$$
                scp ${TMP_PATH}${VEL_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${VEL_FILE}.$$
+               scp ${TMP_PATH}${FEP_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${FEP_FILE}.$$
                ;;
              *)
                $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
@@ -187,6 +191,7 @@ case $SIM_HOSTNAME in
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VEL_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VEL_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${FEP_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${FEP_FILE}.$$
 	       fi
 	       ;;
           esac
