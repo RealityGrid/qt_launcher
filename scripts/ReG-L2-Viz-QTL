@@ -96,7 +96,6 @@ echo "Starting viz"
 REG_SGS_ADDRESS=$REG_VIS_GSH
 export REG_SGS_ADDRESS
 
-    echo "GOT THIS FAR>>>>>>>"
    echo "#!/bin/sh" > /tmp/reg_viz_remote.$$
    echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> /tmp/reg_viz_remote.$$
    echo "SSH=$SSH" >> /tmp/reg_viz_remote.$$
@@ -142,7 +141,7 @@ fi
    #   globus-job-run $VIZ_HOSTNAME/jobmanager-lsf -x "(jobtype=single)" -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -np $VIZ_PROCESSORS -s /tmp/reg_viz_remote.$$ &
 #   globus-job-run $VIZ_HOSTNAME/jobmanager-fork -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
 
-if [ $SSH -eq 0 ]
+if [ $SSH = 0 ]
 then
      case $VIZ_HOSTNAME in
        bezier.man.ac.uk)
