@@ -168,9 +168,9 @@ case $SIM_HOSTNAME in
                ;;
              *)
                $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:${TMP_PATH}${COORD_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:${TMP_PATH}${STRUCT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
+               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
+               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
+               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
 	       ;;
           esac
           ;;
