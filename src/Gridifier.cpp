@@ -37,6 +37,10 @@
     
 ---------------------------------------------------------------------------*/
 
+/** @file Gridifier.cpp
+    @brief Implementation of wrappers for calling OGSA and remote-launching
+    scripts. */
+
 #include "Gridifier.h"
 #include "Utility.h"
 #include <iostream>
@@ -55,6 +59,9 @@ Gridifier::Gridifier(){
   // Seed the random number generator
   srand(time(NULL));
   mApplication = qApp;
+  // Set a default value in case something goes wrong
+  mScriptsDir = QString(QString(getenv("HOME")) + 
+			"/RealityGrid/reg_qt_launcher/scripts");
 }
 
 Gridifier::~Gridifier(){
@@ -65,16 +72,21 @@ void Gridifier::setApplication(QApplication *aApplication){
   mApplication = aApplication;
 }
 
+void Gridifier::setScriptsDirectory(const QString &dir){
+  mScriptsDir = dir;
+}
+
 
 /** The following static methods wrap around QProcess objects to
  *  run the reg_perl_launcher scripts. Ultimately replace with
  *  code that uses an API to perform the same function programatically.
  */
-QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer){
+QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer,
+				   const QString &className){
   QString result;
 
-  QProcess *getSGSFactoriesProcess = new QProcess(QString("./get_sgs_factories.pl"));
-  getSGSFactoriesProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts/"));
+  QProcess *getSGSFactoriesProcess = new QProcess(QString("./get_" + className + "_factories.pl"));
+  getSGSFactoriesProcess->setWorkingDirectory(mScriptsDir);
   getSGSFactoriesProcess->addArgument(topLevelRegistry);
 
   getSGSFactoriesProcess->start();
@@ -146,11 +158,12 @@ void Gridifier::getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable)
   mGSHTagTable->setText(0, 0, "Searching for Running Jobs");
 
   getSGSiesProcess = new QProcess(QString("./get_sgsies.pl"));
-  getSGSiesProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  getSGSiesProcess->setWorkingDirectory(mScriptsDir);
   getSGSiesProcess->addArgument(topLevelRegistry);
   getSGSiesProcess->start();
 
-  connect(getSGSiesProcess, SIGNAL(processExited()), this, SLOT(getSGSiesProcessEnded()));
+  connect(getSGSiesProcess, SIGNAL(processExited()), this, 
+    SLOT(getSGSiesProcessEnded()));
 
   return;
 }
@@ -182,26 +195,18 @@ void Gridifier::getSGSiesProcessEnded(){
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, tSGS);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, tag);
     }
-/*
-    // Here's a problem - this
-    QStringList temp = QStringList::split(" ", result[i]);
-    if (temp.count() == 2){
-      mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, temp[0]);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, temp[1]);
-    }
-*/
   }
-
 
   return;
 }
 
-QString Gridifier::makeSGSFactory(const QString &container, const QString &topLevelRegistry){
+QString Gridifier::makeSGSFactory(const QString &container, 
+				  const QString &topLevelRegistry,
+				  const QString &className){
   QString result;
   
-  QProcess *makeSGSFactoryProcess = new QProcess(QString("./make_sgs_factory.pl"));
-  makeSGSFactoryProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  QProcess *makeSGSFactoryProcess = new QProcess(QString("./make_" + className + "_factory.pl"));
+  makeSGSFactoryProcess->setWorkingDirectory(mScriptsDir);
   makeSGSFactoryProcess->addArgument(container);
   makeSGSFactoryProcess->addArgument(topLevelRegistry);
 
@@ -229,10 +234,10 @@ QString Gridifier::makeSimSGS(const QString &factory,
   QString result;
   
   QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
-  makeSimSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  makeSimSGSProcess->setWorkingDirectory(mScriptsDir);
   makeSimSGSProcess->addArgument(factory);
   // the tag is handled correctly if it contains spaces - thanks QT!
-  makeSimSGSProcess->addArgument(config.mJobData->toXML());
+  makeSimSGSProcess->addArgument(config.mJobData->toXML(QString("SGS")));
   makeSimSGSProcess->addArgument(config.topLevelRegistryGSH);
   makeSimSGSProcess->addArgument(config.currentCheckpointGSH);
   makeSimSGSProcess->addArgument(config.mInputFileName);
@@ -260,9 +265,9 @@ QString Gridifier::makeVizSGS(const QString &factory,
   QString result;
 
   QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
-  makeVizSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  makeVizSGSProcess->setWorkingDirectory(mScriptsDir);
   makeVizSGSProcess->addArgument(factory);
-  makeVizSGSProcess->addArgument(config.mJobData->toXML());
+  makeVizSGSProcess->addArgument(config.mJobData->toXML(QString("SGS")));
   makeVizSGSProcess->addArgument(config.topLevelRegistryGSH);
   makeVizSGSProcess->addArgument(config.simulationGSH);
   makeVizSGSProcess->addArgument(QString::number(config.mTimeToRun));
@@ -278,8 +283,46 @@ QString Gridifier::makeVizSGS(const QString &factory,
   return result;
 }
 
+/** Create a MetaSGS */
+QString Gridifier::makeMetaSGS(const QString &factory,
+			       const LauncherConfig &config,
+			       const QString &parentGSH){
 
+  QString result;
+  
+  QProcess *makeSimSGSProcess = new QProcess(QString("./make_msgs.pl"));
+  makeSimSGSProcess->setWorkingDirectory(mScriptsDir);
+  makeSimSGSProcess->addArgument(factory);
+  // the tag is handled correctly if it contains spaces - thanks QT!
+  makeSimSGSProcess->addArgument(config.mJobData->toXML(QString("MetaSGS")));
+  makeSimSGSProcess->addArgument(config.topLevelRegistryGSH);
+  makeSimSGSProcess->addArgument(config.currentCheckpointGSH);
+  makeSimSGSProcess->addArgument(config.mInputFileName);
+  makeSimSGSProcess->addArgument(QString::number(config.mTimeToRun));
+  makeSimSGSProcess->addArgument(parentGSH);
+  if (config.treeTag.length() > 0){
+    makeSimSGSProcess->addArgument(config.treeTag);
+    makeSimSGSProcess->addArgument(config.checkPointTreeFactoryGSH);
+  }
+  makeSimSGSProcess->start();
 
+  while(makeSimSGSProcess->isRunning()){
+    usleep(10000);
+    mApplication->processEvents();
+  }
+
+  // Grab the sgs and return it
+  // Do some error checking here - or in the calling class?
+  result = QString(makeSimSGSProcess->readStdout()).stripWhiteSpace();
+
+  cout << "Stdout:" << endl << result << endl;
+  if (makeSimSGSProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << makeSimSGSProcess->readStderr() << endl;
+
+  return result;
+}
+
+/** Create the script that sets up the job environment */
 void Gridifier::makeReGScriptConfig(const QString & filename,
                                     const LauncherConfig &config){
   QFile file(filename);
@@ -372,15 +415,13 @@ void Gridifier::launchSimScript(const QString &scriptConfigFileName,
 
   // Construct name of script from name of application
   QProcess *launchSimScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
-  launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchSimScriptProcess->setWorkingDirectory(mScriptsDir);
   launchSimScriptProcess->addArgument(scriptConfigFileName);
   launchSimScriptProcess->addArgument(QString::number(config.mTimeToRun));
   
   if(config.currentCheckpointGSH.length() != 0)
     launchSimScriptProcess->addArgument(config.currentCheckpointGSH);
- //if (checkPointGSH != NULL)
-  //  launchSimScriptProcess->addArgument(checkPointGSH);
-             
+    
   launchSimScriptProcess->start();
 
   while (launchSimScriptProcess->isRunning()){
@@ -411,7 +452,7 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName,
                                 
   // Construct name of script from name of application
   QProcess *launchVizScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
-  launchVizScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchVizScriptProcess->setWorkingDirectory(mScriptsDir);
   launchVizScriptProcess->addArgument(scriptConfigFileName);
   launchVizScriptProcess->addArgument(QString::number(config.mTimeToRun));
 
@@ -434,7 +475,7 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName,
  */
 void Gridifier::launchArgonneViz(const LauncherConfig &config){
   QProcess *launchArgonneVizProcess = new QProcess(QString("./argonneVis.sh"));
-  launchArgonneVizProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchArgonneVizProcess->setWorkingDirectory(mScriptsDir);
   launchArgonneVizProcess->addArgument(config.visualizationGSH);
   launchArgonneVizProcess->addArgument(QString::number(config.mTimeToRun));
   launchArgonneVizProcess->addArgument(config.multicastAddress);
@@ -476,7 +517,7 @@ void Gridifier::launchArgonneViz(const LauncherConfig &config){
 //////// NOT USED //////////
 void Gridifier::copyCheckPointFiles(const QString &host){
   QProcess *rgcpcProcess = new QProcess(QString("./rgcpc.pl"));
-  rgcpcProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  rgcpcProcess->setWorkingDirectory(mScriptsDir);
   rgcpcProcess->addArgument("-t");
   rgcpcProcess->addArgument(host);
   rgcpcProcess->addArgument("-f");
@@ -527,7 +568,7 @@ void Gridifier::gsiFtpStderrSlot()
 
 QString Gridifier::checkPointAndStop(const QString &sgsGSH){
   QProcess *checkPointAndStopProcess = new QProcess(QString("./checkpoint_and_stop.pl"));
-  checkPointAndStopProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  checkPointAndStopProcess->setWorkingDirectory(mScriptsDir);
   checkPointAndStopProcess->addArgument(sgsGSH);
   checkPointAndStopProcess->start();
 
@@ -549,7 +590,7 @@ void Gridifier::webServiceJobSubmit(const QString & scriptConfigFileName){
 
   // Construct name of script from name of application
   QProcess *launchSimScriptProcess = new QProcess(QString("./lb3d_client.pl"));
-  launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchSimScriptProcess->setWorkingDirectory(mScriptsDir);
   launchSimScriptProcess->addArgument(scriptConfigFileName);
 
   launchSimScriptProcess->start();
