@@ -168,7 +168,7 @@
     </connection>
     <connection>
         <sender>runningGSHTagTable</sender>
-        <signal>doubleClicked(int,int,int,const QPoint&amp;)</signal>
+        <signal>clicked(int,int,int,const QPoint&amp;)</signal>
         <receiver>RunningJobsDialog</receiver>
         <slot>runningGSHSelectedSlot(int,int,int,const QPoint&amp;)</slot>
     </connection>

@@ -714,7 +714,7 @@
     </connection>
     <connection>
         <sender>gshTagTable</sender>
-        <signal>doubleClicked(int,int,int,const QPoint&amp;)</signal>
+        <signal>clicked(int,int,int,const QPoint&amp;)</signal>
         <receiver>ComponentLauncher</receiver>
         <slot>gshTagSelectedSlot(int,int,int,const QPoint&amp;)</slot>
     </connection>
