@@ -50,6 +50,7 @@
 
 #include "qapplication.h"
 #include "qfile.h"
+#include "qmessagebox.h"
 
 using namespace std;
 
@@ -198,6 +199,58 @@ void Gridifier::getSGSiesProcessEnded(){
   }
 
   return;
+}
+
+void Gridifier::getCoupledParamDefs(const QString &gsh, 
+				    QString *aList){
+  QStringList result;
+
+  mFileListPtr = aList;
+  if (mFileListPtr == NULL)
+    return;
+
+  getParamDefsProcess = new QProcess(QString("./get_component_param_defs.pl"));
+  getParamDefsProcess->setWorkingDirectory(mScriptsDir);
+  getParamDefsProcess->addArgument(gsh);
+  getParamDefsProcess->start();
+
+  connect(getParamDefsProcess, SIGNAL(processExited()), this, 
+    SLOT(getParamDefsProcessEnded()));
+
+  return;
+}
+
+void Gridifier::getParamDefsProcessEnded(){
+
+  QStringList result;
+  QString processOutput = getParamDefsProcess->readStdout();
+
+  if(processOutput.startsWith("ERROR")){
+
+    QMessageBox::warning( NULL, "Problem getting Param_defs:",
+                    processOutput+"\n\n",
+                    QMessageBox::Ok, 0, 0 );
+
+  }
+
+  *mFileListPtr = processOutput;
+
+  // the output will be a space-delimited list of 
+  // filenames
+  /*
+  result = QStringList::split(" ", processOutput);
+
+  for (unsigned int i=0; i<result.count(); i++){
+    int firstSpace = result[i].find(" ");
+    QString tSGS = result[i].left(firstSpace);
+    QString tag = result[i].right(result[i].length() - firstSpace);
+    if (tSGS.startsWith("http://")){
+      mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, tSGS);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, tag);
+    }
+  }
+  */
 }
 
 QString Gridifier::makeSGSFactory(const QString &container, 
@@ -604,8 +657,3 @@ void Gridifier::webServiceJobSubmit(const QString & scriptConfigFileName){
   if (launchSimScriptProcess->canReadLineStderr())
     cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
 }
-
-
-
-
-
