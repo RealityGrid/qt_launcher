@@ -3,27 +3,21 @@
 <KDevPrjSession>
  <LastCompileConfig>(Default)</LastCompileConfig>
  <Mainframe MaximizeMode="1" />
- <DocsAndViews NumberOfDocuments="7" >
-  <Doc0 CursorPosLine="123" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="14" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/include/LauncherConfig.h" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
+ <DocsAndViews NumberOfDocuments="5" >
+  <Doc0 CursorPosLine="137" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="20" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/include/LauncherConfig.h" >
+   <View0 Top="0" Width="767" Attach="1" Height="496" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc0>
-  <Doc1 CursorPosLine="336" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/LauncherConfig.cpp" >
-   <View0 Top="0" Width="98" Attach="1" Height="28" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc1 CursorPosLine="456" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="12" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/LauncherConfig.cpp" >
+   <View0 Top="0" Width="767" Attach="1" Height="496" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc1>
-  <Doc2 CursorPosLine="467" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="84" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/reglauncher.ui.h" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc2 CursorPosLine="672" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="36" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/reglauncher.ui.h" >
+   <View0 Top="0" Width="767" Attach="1" Height="496" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc2>
-  <Doc3 CursorPosLine="68" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/.ui/reglauncher.h" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc3 CursorPosLine="269" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/componentlauncher.ui.h" >
+   <View0 Top="0" Width="767" Attach="1" Height="496" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
   </Doc3>
-  <Doc4 CursorPosLine="113" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/.ui/reglauncher.cpp" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
+  <Doc4 CursorPosLine="339" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="35" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/src/Gridifier.cpp" >
+   <View0 Top="0" Width="767" Attach="1" Height="496" Left="0" Focus="1" Type="KWriteView" MinMaxMode="0" />
   </Doc4>
-  <Doc5 CursorPosLine="48" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="0" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/include/Gridifier.h" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="0" Type="KWriteView" MinMaxMode="0" />
-  </Doc5>
-  <Doc6 CursorPosLine="474" Type="KWriteDoc" NumberOfViews="1" CursorPosCol="6" FileName="/home/zzcguap/RealityGrid/reg_qt_launcher/ui/componentlauncher.ui.h" >
-   <View0 Top="0" Width="767" Attach="1" Height="494" Left="0" Focus="1" Type="KWriteView" MinMaxMode="0" />
-  </Doc6>
  </DocsAndViews>
 </KDevPrjSession>

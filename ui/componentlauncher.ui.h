@@ -265,7 +265,6 @@ void ComponentLauncher::accept(){
       mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
     }
     // Target machine
-    //mConfig->mTargetMachine = targetMachineListBox->currentText();
     if(mConfig->mAppToLaunch->mIsViz){
       mConfig->mTargetMachine = &(mConfig->vizMachineList[targetMachineListBox->currentItem()]);
     }
