@@ -70,6 +70,7 @@ public:
   void launchSimScript(const QString &scriptConfigFileName, const LauncherConfig &config);
   void launchVizScript(const QString &scriptConfigFileName, const LauncherConfig &config);
   void launchArgonneViz(const LauncherConfig &config);
+  void webServiceJobSubmit(const QString &scriptConfigFileName);
 
   void copyCheckPointFiles(const QString &host);
   void gsiFtp(const QString &file, const QString &destination);

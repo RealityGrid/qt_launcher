@@ -543,6 +543,30 @@ QString Gridifier::checkPointAndStop(const QString &sgsGSH){
   return result;
 }
 
+/**
+ * Method calls lb3d_client.pl script to call web service
+ * to actually launch the job on the target machine
+ */
+void Gridifier::webServiceJobSubmit(const QString & scriptConfigFileName){
+
+  // Construct name of script from name of application
+  QProcess *launchSimScriptProcess = new QProcess(QString("./lb3d_client.pl"));
+  launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  launchSimScriptProcess->addArgument(scriptConfigFileName);
+
+  launchSimScriptProcess->start();
+
+  while (launchSimScriptProcess->isRunning()){
+    usleep(10000);
+    mApplication->processEvents();
+  }
+
+  cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
+  if (launchSimScriptProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
+}
+
+
 
 
 
