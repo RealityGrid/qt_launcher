@@ -54,6 +54,7 @@ using namespace std;
 Gridifier::Gridifier(){
   // Seed the random number generator
   srand(time(NULL));
+  mApplication = qApp;
 }
 
 Gridifier::~Gridifier(){
