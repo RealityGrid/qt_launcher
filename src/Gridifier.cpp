@@ -297,7 +297,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "FIREWALL=no\n";
   fileText += "VIZ_ANSWER=no\n";
 //  fileText += "CLIENT_DISPLAY="+Utility::getHostName()+":0.0\n";
-  fileText += "CLIENT_DISPLAY="+Utility::getCurrentDisplay();
+  fileText += "CLIENT_DISPLAY="+Utility::getCurrentDisplay()+"\n";
   fileText += "VIZ_HOSTNAME="+config.vizTargetMachine+"\n\n";
   fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.$$.txt\n";
   fileText += "SIM_STD_ERR_FILE=RealityGrid/scratch/ReG-sim-stderr.$$.txt\n";
