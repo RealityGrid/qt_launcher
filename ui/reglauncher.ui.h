@@ -390,29 +390,30 @@ void RegLauncher::commonLaunchCode(){
   if (config.migration)
     restartingFromCheckpoint = true;
 
-  // First up determine if we're starting a sim or a viz
-  if (!config.mAppToLaunch->mIsViz){
-    // It's a sim
-    consoleOutSlot("Starting a simulation component");
+  consoleOutSlot("Starting a component...");
 
-    // First find a factory, and if we don't have one - make one
-    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, config.selectedContainer);
+  // First find a factory, and if we don't have one - make one
+  QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
+					      config.selectedContainer);
 
-    // need to make sure we can force a particular container to be used
-    // this doesn't happen at the moment - we can specifiy a container
-    // and the system will choose a different one entirely
-    
-    if (factory.length() == 0){
-      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
+  if (factory.length() == 0){
+    consoleOutSlot("There's no factories to be had - I'd better make one");
+    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
       
-      if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
-        factory = posFactory;
+    if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
+      factory = posFactory;
         
-      else{
-        consoleOutSlot("Sorry! - couldn't start a factory");
-        return;
-      }     
-    }
+    else{
+      consoleOutSlot("Sorry! - couldn't start a factory");
+      return;
+    }     
+  }
+
+  consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
+
+  // Now determine whether we're starting a sim or a viz
+  if (config.mAppToLaunch->mNumInputs == 0){
+    // It's a sim
 
     consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
@@ -466,25 +467,6 @@ void RegLauncher::commonLaunchCode(){
   }
   else{
     // It's a viz
-    consoleOutSlot("Starting a visualization component");
-
-    // First find a factory, and if we don't have one - make one
-    QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, config.selectedContainer);
-
-    if (factory.length() == 0){
-      consoleOutSlot("There's no factories to be had - I'd better make one");
-      QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", config.topLevelRegistryGSH);
-
-      if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
-        factory = posFactory;
-
-      else{
-        consoleOutSlot("Sorry! - couldn't start a factory");
-        return;
-      }
-    }
-
-    consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 
     // Now use the factory to create an SGS
     QString sgs;
