@@ -37,8 +37,11 @@
     
 ---------------------------------------------------------------------------*/
 
-/* Important note - libxml was used for this class, but QT does provide */
-/* its own set of XML classes. I just didn't realise that when I began..*/
+/** @file LauncherConfig.cpp
+ *  @brief Holds all of the data describing the job to launch */
+
+/** Important note - libxml was used for this class, but QT does provide
+  * its own set of XML classes. I just didn't realise that when I began..*/
 
 /* MORE IMPORTANTLY - I'll convert all this to QT xml support later.... */
 
@@ -52,20 +55,23 @@
 
 using namespace std;
 
+/** Constructor */
 LauncherConfig::LauncherConfig(){
 
-  migration  = false;
-  restart    = false;
-  newTree    = false;
-  mTimeToRun = 30;
-
-  mJobData = new JobMetaData;
+  migration       = false;
+  restart         = false;
+  newTree         = false;
+  mTimeToRun      = 30;
+  mJobData        = new JobMetaData;
+  mIsCoupledModel = false;
 }
 
+/** Constructor using configuration file (not used?) */
 LauncherConfig::LauncherConfig(QString file){
   readConfig(file);
 }
 
+/** Destructor */
 LauncherConfig::~LauncherConfig(){
 	delete mJobData;
 }
@@ -83,9 +89,16 @@ void LauncherConfig::readConfig(QString file){
   //Not sure we'll ever need to...
   //xmlNodePtr aComponent;
   xmlNodePtr containers;
+  xmlNodePtr settings;
   xmlNodePtr targets;
   xmlNodePtr vizTargets;
   xmlNodePtr applications;
+
+  QFile *configFile = new QFile(file);
+  if(!(configFile->exists())){
+    cout << "Input file " << file << " does not exist :-(" <<endl;
+    return;
+  }
 
   // Load it in and parse it with libxml2
   doc = xmlParseFile(file.latin1());
@@ -112,12 +125,36 @@ void LauncherConfig::readConfig(QString file){
     
 		xmlFreeDoc(doc);
 		return;
-	}
+  }
 
-  // Grab the SGSs
   childOfRoot = root->xmlChildrenNode;
   
   while (childOfRoot != NULL){
+
+    if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"settings")){
+      settings = childOfRoot->xmlChildrenNode;
+
+      while(settings != NULL){
+        if (!xmlStrcmp(settings->name, 
+		       (const xmlChar*)"scriptsDirectory")){
+
+          xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
+	  mScriptsDirectory = QString((const char*)val);
+	  xmlFree(val);
+	}
+
+        if (!xmlStrcmp(settings->name, 
+		       (const xmlChar*)"scratchDirectory")){
+
+          xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
+	  mScratchDirectory = QString((const char*)val);
+	  xmlFree(val);
+	}
+
+	settings = settings->next;
+      }
+    }
+
     // Retrieve the GSH information
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar *)"GSHs"))){
       
@@ -137,28 +174,28 @@ void LauncherConfig::readConfig(QString file){
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"checkPointTreeFactory"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           checkPointTreeFactoryGSH = QString((const char*)key);
-	        xmlFree(key);
+	  xmlFree(key);
         }
 
         // Registry of Factories
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"registryOfFactories"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           registryOfFactoriesGSH = QString((const char*)key);
-		      xmlFree(key);
+	  xmlFree(key);
         }
 
         // SGS Factory
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"SGSFactory"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           SGSFactoryGSH = QString((const char*)key);
-		      xmlFree(key);
+	  xmlFree(key);
         }
 
         // SGS
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"SGS"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           SGSGSH = QString((const char*)key);
-		      xmlFree(key);
+	  xmlFree(key);
         }
 
         aGSH = aGSH->next;
@@ -433,7 +470,7 @@ void LauncherConfig::writeConfig(QString file){
  */
 QString LauncherConfig::toXML(){
 
-	QDomDocument *doc = new QDomDocument();
+  QDomDocument *doc = new QDomDocument();
 
   // Get root node
   QDomElement root = doc->createElement("LaunchSimulation");
