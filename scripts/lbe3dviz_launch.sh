@@ -1,161 +1,130 @@
 #!/bin/sh
-#set -x
-# /*----------------------------------------------------------------------------
-#    Script to start RealityGrid-L2 steered application
+#----------------------------------------------------------------------
+#  A shell script to launch the ReG steering system using COG kit,
+#  globus or ssh.
 #
-#    (C)Copyright 2003 The University of Manchester, United Kingdom,
-#    all rights reserved.
+#  (C) Copyright 2002, 2004, University of Manchester, United Kingdom,
+#  all rights reserved.
 #
-#    This software is produced by the Supercomputing, Visualization &
-#    e-Science Group, Manchester Computing, the Victoria University of
-#    Manchester as part of the RealityGrid project.
+#  This software is produced by the Supercomputing, Visualization and
+#  e-Science Group, Manchester Computing, University of Manchester
+#  as part of the RealityGrid project (http://www.realitygrid.org),
+#  funded by the EPSRC under grants GR/R67699/01 and GR/R67699/02.
 #
-#    This software has been tested with care but is not guaranteed for
-#    any particular purpose. Neither the copyright holder, nor the
-#    University of Manchester offer any warranties or representations,
-#    nor do they accept any liabilities with respect to this software.
+#  LICENCE TERMS
 #
-#    This software must not be used for commercial gain without the
-#    written permission of the authors.
+#  Redistribution and use in source and binary forms, with or without
+#  modification, are permitted provided that the following conditions
+#  are met:
+#  1. Redistributions of source code must retain the above copyright
+#     notice, this list of conditions and the following disclaimer.
+#  2. Redistributions in binary form must reproduce the above copyright
+#     notice, this list of conditions and the following disclaimer in the
+#     documentation and/or other materials provided with the distribution.
 #
-#    This software must not be redistributed without the written
-#    permission of the authors.
+#  THIS MATERIAL IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+#  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+#  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+#  A PARTICULAR PURPOSE ARE DISCLAIMED. THE ENTIRE RISK AS TO THE QUALITY
+#  AND PERFORMANCE OF THE PROGRAM IS WITH YOU. SHOULD THE PROGRAM PROVE
+#  DEFECTIVE, YOU ASSUME THE COST OF ALL NECESSARY SERVICING, REPAIR OR
+#  CORRECTION.
 #
-#    Permission is granted to modify this software, provided any
-#    modifications are made freely available to the original authors.
+#  Author(s)......: <R. L. Pinning>
+#  Initial version: <10.03.2003>
+#  Modified:        <27.04.2004>
 #
-#    Supercomputing, Visualization & e-Science Group
-#    Manchester Computing
-#    University of Manchester
-#    Manchester M13 9PL
-#
-#    WWW:    http://www.sve.man.ac.uk
-#    email:  sve@man.ac.uk
-#    Tel:    +44 161 275 6095
-#    Fax:    +44 161 275 6800
-#
-#    Initial version by: R Pinning, 10.03.2003
-#
-#---------------------------------------------------------------------------*/
-
-# Read in config file
-
-#. $PWD/ReG-L2.conf
-#. $PWD/ReG-L2-GUI.conf
+#------------------------------------------------------------------------
 
 echo $1
 . $1
 
-# Optionally get the multicast address we're to use
-#if [ $# -eq 2 ]
-#then
-#MULTICAST_ADDRESS=$2
-#else
-#MULTICAST_ADDRESS=""
-#fi
+case $ReG_LAUNCH in
+     cog)
+       GLOBUS_BIN_PATH=$COG_INSTALL_PATH/bin
+      ;;
+     globus)
+       GLOBUS_BIN_PATH=$GLOBUS_LOCATION/bin
+      ;;
+     *)
+       echo "Using ssh/scp for launching only...check public-key is correctly installed"
+      ;;
+esac
 
 # Ascertain whether we have a valid grid-proxy 
 
-if [ $SSH -eq 0 ]
-then
-  echo "Using Globus to launch"
-  $GLOBUS_LOCATION/bin/grid-proxy-info -e
+case $ReG_LAUNCH in
+  cog|globus)
+  $GLOBUS_LOCATION/bin/grid-proxy-info -exists
   if [ $? -ne "0" ]
   then
      echo "No grid proxy, please invoke grid-proxy-init"
      exit
   fi
-else
-  echo "Using SSH to launch"
-fi
-
-# Initialize Vizserver if required
-
-if [[ $VIZ_TYPE = "viz_iso" || $VIZ_TYPE = "viz_vol" || $VIZ_TYPE = "viz_cut" ]]
-then
-   echo "Launching SGI Vizserver client..."
-   echo ""
-   xhost + $VIZ_HOSTNAME
-   echo ""
-   vizserver -h $VIZ_HOSTNAME &
-fi
+  ;;
+esac
 
 # Setup xhost access to allow steerer display
 
-xhost + $SIM_HOSTNAME
 xhost + $VIZ_HOSTNAME
-xhost + 
+
+# Setup some variables
+
+REG_TMP_FILE=/tmp/reg_viz_remote.$$
+#REG_SGS_ADDRESS=$REG_VIS_GSH
+#export REG_SGS_ADDRESS VIZ_HOSTNAME REG_TMP_FILE
+export VIZ_HOSTNAME REG_TMP_FILE
 
 #  Start visualisation 
 
-echo "Starting viz"
-
-# Fixed in launcher code instead
-#REG_SGS_ADDRESS=$REG_VIS_GSH
-export REG_SGS_ADDRESS
-
-   echo "#!/bin/sh" > /tmp/reg_viz_remote.$$
-   echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> /tmp/reg_viz_remote.$$
-   echo "SSH=$SSH" >> /tmp/reg_viz_remote.$$
-   echo "export SSH" >> /tmp/reg_viz_remote.$$
-   echo "VIZ_STD_ERR_FILE=$VIZ_STD_ERR_FILE" >> /tmp/reg_viz_remote.$$
-   echo "export VIZ_STD_ERR_FILE" >> /tmp/reg_viz_remote.$$
-   echo "VIZ_STD_OUT_FILE=$VIZ_STD_OUT_FILE" >> /tmp/reg_viz_remote.$$
-   echo "export VIZ_STD_OUT_FILE" >> /tmp/reg_viz_remote.$$
-   echo "if [ ! -d \$HOME/RealityGrid/scratch/ReG_workdir_viz$$ ]" >> /tmp/reg_viz_remote.$$
-   echo "then" >> /tmp/reg_viz_remote.$$
-   echo "   mkdir \$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> /tmp/reg_viz_remote.$$
-   echo "fi" >> /tmp/reg_viz_remote.$$
-   echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> /tmp/reg_viz_remote.$$
-   echo "export REG_WORKING_DIR" >> /tmp/reg_viz_remote.$$
-   echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> /tmp/reg_viz_remote.$$
-   echo "export REG_STEER_DIRECTORY" >> /tmp/reg_viz_remote.$$
-   echo "cd \$REG_WORKING_DIR" >> /tmp/reg_viz_remote.$$
-   echo "echo \"Starting script\"" >> /tmp/reg_viz_remote.$$
-   echo "DISPLAY=${CLIENT_DISPLAY}" >> /tmp/reg_viz_remote.$$
-   echo "export DISPLAY" >> /tmp/reg_viz_remote.$$
-   echo "UC_PROCESSORS=$VIZ_PROCESSORS" >> /tmp/reg_viz_remote.$$
-   echo "export UC_PROCESSORS" >> /tmp/reg_viz_remote.$$
-   echo "VIZ_TYPE=$VIZ_TYPE" >> /tmp/reg_viz_remote.$$
-   echo "export VIZ_TYPE" >> /tmp/reg_viz_remote.$$
-   echo "echo \$PATH" >> /tmp/reg_viz_remote.$$
+   echo "#!/bin/sh" > $REG_TMP_FILE
+   echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
+   echo "SSH=$SSH" >> $REG_TMP_FILE
+   echo "export SSH" >> $REG_TMP_FILE
+   echo "VIZ_STD_ERR_FILE=$VIZ_STD_ERR_FILE" >> $REG_TMP_FILE
+   echo "export VIZ_STD_ERR_FILE" >> $REG_TMP_FILE
+   echo "VIZ_STD_OUT_FILE=$VIZ_STD_OUT_FILE" >> $REG_TMP_FILE
+   echo "export VIZ_STD_OUT_FILE" >> $REG_TMP_FILE
+   echo "if [ ! -d \$HOME/RealityGrid/scratch/ReG_workdir_viz$$ ]" >> $REG_TMP_FILE
+   echo "then" >> $REG_TMP_FILE
+   echo "   mkdir \$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
+   echo "fi" >> $REG_TMP_FILE
+   echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
+   echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
+   echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> $REG_TMP_FILE
+   echo "export REG_STEER_DIRECTORY" >> $REG_TMP_FILE
+   echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
+   echo "echo \"Starting script\"" >> $REG_TMP_FILE
+   echo "DISPLAY=${CLIENT_DISPLAY}" >> $REG_TMP_FILE
+   echo "export DISPLAY" >> $REG_TMP_FILE
+   echo "UC_PROCESSORS=$VIZ_PROCESSORS" >> $REG_TMP_FILE
+   echo "export UC_PROCESSORS" >> $REG_TMP_FILE
+   echo "VIZ_TYPE=$VIZ_TYPE" >> $REG_TMP_FILE
+   echo "export VIZ_TYPE" >> $REG_TMP_FILE
+   echo "echo \$PATH" >> $REG_TMP_FILE
    if [ $SIM_HOSTNAME = viking-i00.viking.lesc.doc.ic.ac.uk ]
    then
-      echo "REG_CONNECTOR_HOSTNAME=$SIM_NODE_HOSTNAME" >> /tmp/reg_viz_remote.$$
+      echo "REG_CONNECTOR_HOSTNAME=$SIM_NODE_HOSTNAME" >> $REG_TMP_FILE
    else
-      echo "REG_CONNECTOR_HOSTNAME=$SIM_HOSTNAME" >> /tmp/reg_viz_remote.$$
+      echo "REG_CONNECTOR_HOSTNAME=$SIM_HOSTNAME" >> $REG_TMP_FILE
    fi
-   echo "export REG_CONNECTOR_HOSTNAME" >> /tmp/reg_viz_remote.$$
-   echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> /tmp/reg_viz_remote.$$
-   echo "export REG_SGS_ADDRESS" >> /tmp/reg_viz_remote.$$
+   echo "export REG_CONNECTOR_HOSTNAME" >> $REG_TMP_FILE
+   echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
+   echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 if [ $MULTICAST_ADDRESS ]
 then 
-   echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE $MULTICAST_ADDRESS" >> /tmp/reg_viz_remote.$$
+   echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE $MULTICAST_ADDRESS" >> $REG_TMP_FILE
 else
-   echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE" >> /tmp/reg_viz_remote.$$
+   echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE" >> $REG_TMP_FILE
 fi
 
-   # Submit job into lsf batch system on bezier
-   #   globus-job-run $VIZ_HOSTNAME/jobmanager-lsf -x "(jobtype=single)" -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -np $VIZ_PROCESSORS -s /tmp/reg_viz_remote.$$ &
-#   globus-job-run $VIZ_HOSTNAME/jobmanager-fork -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
+# Build RSL
 
-if [ $SSH = 0 ]
+echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$VIZ_STD_OUT_FILE)(stderr=$VIZ_STD_ERR_FILE)" > /tmp/viz_stage.rsl
+
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $VIZ_HOSTNAME jobmanager-fork /tmp/viz_stage.rsl $VIZ_USER
+
+if [ $? -gt "0" ]
 then
-     case $VIZ_HOSTNAME in
-       bezier.man.ac.uk)
-   globus-job-run $VIZ_HOSTNAME/jobmanager-fork -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
-          ;;
-       *)
-	  globus-job-run $VIZ_HOSTNAME -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
-	  ;;
-     esac
-else
-    chmod a+x /tmp/reg_viz_remote.$$
-    scp /tmp/reg_viz_remote.$$ $VIZ_USER@$VIZ_HOSTNAME:/tmp/reg_viz_remote.$$
-    ssh -f $VIZ_USER@$VIZ_HOSTNAME /tmp/reg_viz_remote.$$ 
+   echo "Error with starting viz helper"
 fi
-
-   if [ $? -gt "0" ]
-   then
-     echo "Error with starting viz helper"
-   fi
