@@ -64,10 +64,10 @@ export REG_STEER_HOME REG_SGS_ADDRESS
 # and also get the path to the namd input file so that we can reconstruct
 # the full paths to each of the necessary files.
 
-COORD_FILE=`awk '/coordinates/ {print $2}' $SIM_INFILE`
-STRUCT_FILE=`awk '/structure/ {print $2}' $SIM_INFILE`
-PARAM_FILE=`awk '/parameters/ {print $2}' $SIM_INFILE`
-VECT_FILE=`awk '/extendedSystem/ {print $2}' $SIM_INFILE`
+COORD_FILE=`awk '/^coordinates/ {print $2}' $SIM_INFILE`
+STRUCT_FILE=`awk '/^structure/ {print $2}' $SIM_INFILE`
+PARAM_FILE=`awk '/^parameters/ {print $2}' $SIM_INFILE`
+VECT_FILE=`awk '/^extendedSystem/ {print $2}' $SIM_INFILE`
 TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
 # Fourthly: Export these variables for use in child scripts
@@ -100,7 +100,7 @@ case $ReG_LAUNCH in
     ;;
 esac
 
-# Setup the script for running the lbe3d wrapper
+# Setup the script for running the namd wrapper
 
 echo "#!/bin/sh" > $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>$REG_TMP_FILE
@@ -148,10 +148,11 @@ echo "Transferring simulation input file..."
 if [ $CHECKPOINT_GSH ]
 then 
 # Build RSL
-  echo "&(executable="/home/bezier1/globus/bin/rg-cp")(arguments="-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH")" > /tmp/rgcp.rsl
+  echo "&(executable=\"/home/bezier1/globus/bin/rg-cp\")(arguments=\"-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH\")" > /tmp/rgcp.rsl
   echo "Calling MM's rgcpc script on Bezier..."
   $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun bezier.man.ac.uk jobmanager-fork /tmp/rgcp.rsl 
 fi
+
 case $SIM_HOSTNAME in
       localhost)
           cp -f $SIM_INFILE $HOME/RealityGrid/scratch/.reg.input-file.$$
@@ -171,10 +172,14 @@ case $SIM_HOSTNAME in
                ;;
              *)
                $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
-               $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
+	       if [ "$CHECKPOINT_GSH" == "" ]
+		   then
+		   echo "Copying various input files to target machine"
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
+	       fi
 	       ;;
           esac
           ;;
