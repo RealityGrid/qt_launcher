@@ -41,10 +41,10 @@
 
 #include "qprocess.h"
 
-JobStatusThread::JobStatusThread(QApplication *aApp, LauncherStatusBar *aStatusBar, const QString &aGSH)
+JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, const QString &aGSH)
 : done(false)
 {
-  mainWindowStatusBar = aStatusBar;
+  mMainWin = aMainWindow;
   mGSH = aGSH;
   mApp = aApp;
   
@@ -100,34 +100,34 @@ void JobStatusThread::getJobStatus(){
   if (results.find("NOT_STARTED")>=0){
     StatusMessageData *aData = new StatusMessageData("Job is Queued", 0);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    mApp->postEvent(mMainWin, aUpdateEvent);
     
   } else if (results.find("RUNNING")>=0){
     StatusMessageData *aData = new StatusMessageData("Job is Running", 2500);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    mApp->postEvent(mMainWin, aUpdateEvent);
     done = true;
     
   } else if (results.find("STOPPING")>=0){
     StatusMessageData *aData = new StatusMessageData("Job is Stopping", 0);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    mApp->postEvent(mMainWin, aUpdateEvent);
     
   } else if (results.find("STOPPED")>=0){
     StatusMessageData *aData = new StatusMessageData("Job has Stopped", 2000);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    mApp->postEvent(mMainWin, aUpdateEvent);
     done = true;
     
   } else if (results.find("PAUSED")>=0){
     StatusMessageData *aData = new StatusMessageData("Job is Paused", 0);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
-    
+    mApp->postEvent(mMainWin, aUpdateEvent);
+        
   } else {
     StatusMessageData *aData = new StatusMessageData("No such job", 5000);
     aUpdateEvent->setData(aData);
-    mApp->postEvent(mainWindowStatusBar, aUpdateEvent);
+    mApp->postEvent(mMainWin, aUpdateEvent);
     done = true;
   }
   

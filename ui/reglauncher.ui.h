@@ -12,6 +12,7 @@
 #include "qmessagebox.h"
 #include "qpopupmenu.h"
 #include "qprocess.h"
+#include "qstatusbar.h"
 
 #include "componentlauncher.h"
 #include "RunningJobsDialog.h"
@@ -22,7 +23,6 @@
 #include "LauncherConfig.h"
 #include "JobStatusThread.h"
 #include "ProgressBarThread.h"
-#include "launcherstatusbar.h"
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
@@ -32,7 +32,6 @@
 
 using namespace std;
 
-LauncherStatusBar *mStatusBar = NULL;
 QProcess *proxyStatus = NULL;
 LauncherConfig config;
 CheckPointTree *cpt = NULL;
@@ -45,15 +44,6 @@ int checkPointTreeListViewPreviousSelection = -1;
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
-
-  // Cludge - hide the status bar that comes with the main
-  // window by default (unfortunately we lose our menu-item tool tips)...
-  // (I think that to do this properly would require generating a sub-class
-  // of QMainWindow and making its status bar a LauncherStatusBar.)
-  statusBar()->hide();
-  // ...and make our own to accept custom events that we post
-  // from the JobStatusThread
-  mStatusBar = new LauncherStatusBar(this, "Launcher Status Bar");
 }
 
 void RegLauncher::setApplication(QApplication *aApplication){
@@ -246,8 +236,6 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
   if (soap_call_tree__getCheckPointData(&soap, checkPointGSH, "", chkptDataResponse))
     soap_print_fault(&soap, stderr);
   else{
-    //if (result == NULL)
-    //  result = new QString();
     result = chkptDataResponse->_getCheckPointDataReturn;
   }
 
@@ -441,7 +429,7 @@ void RegLauncher::launchSimSlot()
 
     // Work out which of the applications is being restarted
     config.mAppToLaunch = NULL;
-    for(int i=0; i<config.applicationList.count(); i++){
+    for(unsigned int i=0; i<config.applicationList.count(); i++){
       // IMPORTANT - this will require more care if we want to match up
       // version numbers rather than crudely checking the app name
       if(appName.contains(config.applicationList[i].mAppName, FALSE) == 1){
@@ -585,7 +573,7 @@ void RegLauncher::commonLaunchCode(){
                                 config);
     }
     
-    JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, mStatusBar,
+    JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
                                                             config.simulationGSH);
     aJobStatusThread->start();
 
@@ -808,7 +796,8 @@ void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
 
 
 
-void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem, const QPoint &pnt, int column)
+void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem,
+                                            const QPoint &pnt, int column)
 {
   // First of all check to see if the mouse was actually over a item
   if (listViewItem == NULL)
@@ -954,4 +943,21 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
       }
     }
   }
+}
+
+
+void RegLauncher::customEvent( QCustomEvent *e )
+{
+  if(e->type() != (QEvent::User+1))return;
+  
+  StatusMessageData *msg = (StatusMessageData *)(e->data());
+  if(msg->mTimeout == 0){
+    statusBar()->message(msg->msgTxt);
+  } else {
+    statusBar()->message(msg->msgTxt, msg->mTimeout);
+  }
+
+  // Clean up - I think Qt deletes the event object itself but it can't
+  // know about the associated data so we delete that.
+  delete msg;
 }

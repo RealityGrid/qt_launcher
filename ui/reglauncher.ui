@@ -490,6 +490,7 @@
     <function>patchLb3dInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString )</function>
     <function>patchNamdInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString )</function>
     <function>parseChkPtMetaData(const QString &amp;chkMetaData, QString &amp;appName, QString &amp;chkUID)</function>
+    <function>customEvent( QCustomEvent * )</function>
 </functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
