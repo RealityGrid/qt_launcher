@@ -71,7 +71,7 @@ fi
 
 # Initialize Vizserver if required
 
-if [[ $VIZ_TYPE = "viz_iso" || $VIZ_TYPE = "viz_vol" ]]
+if [[ $VIZ_TYPE = "viz_iso" || $VIZ_TYPE = "viz_vol" || $VIZ_TYPE = "viz_cut" ]]
 then
    echo "Launching SGI Vizserver client..."
    echo ""
