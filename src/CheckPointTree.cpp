@@ -37,6 +37,10 @@
     
 ---------------------------------------------------------------------------*/
 
+/** @file CheckPointTree.cpp
+    @brief Implements methods for handling the CheckPointTree
+ */
+
 #include "CheckPointTree.h"
 
 #include "CheckPointTree.h"
