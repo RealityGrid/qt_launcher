@@ -182,7 +182,8 @@ then
           globus-job-run $SIM_HOSTNAME -stdout $SIM_STD_OUT_FILE.initial -stderr $SIM_STD_ERR_FILE.initial -s /tmp/reg_sim_remote.$$ &  
           ;;
        green.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})(queue=normal)" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+#          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})(queue=testq)" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        fermat.cfs.ac.uk)
           globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
