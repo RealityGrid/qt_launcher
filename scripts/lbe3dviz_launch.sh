@@ -65,16 +65,16 @@ case $ReG_LAUNCH in
 esac
 
 # Setup xhost access to allow steerer display
-
-xhost + $VIZ_HOSTNAME
+if [ "$SIM_HOSTNAME" != "localhost" ]
+then
+   xhost + $SIM_HOSTNAME
+fi
 
 # Setup some variables
 
 REG_TMP_FILE=/tmp/reg_viz_remote.$$
 REG_RSL_FILE=/tmp/sim_stage.$$.rsl
-#REG_SGS_ADDRESS=$REG_VIS_GSH
-#export REG_SGS_ADDRESS VIZ_HOSTNAME REG_TMP_FILE
-export VIZ_HOSTNAME REG_TMP_FILE
+export REG_RSL_FILE REG_TMP_FILE
 
 #  Start visualisation 
 
@@ -82,10 +82,10 @@ export VIZ_HOSTNAME REG_TMP_FILE
    echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
    echo "SSH=$SSH" >> $REG_TMP_FILE
    echo "export SSH" >> $REG_TMP_FILE
-   echo "VIZ_STD_ERR_FILE=$VIZ_STD_ERR_FILE" >> $REG_TMP_FILE
-   echo "export VIZ_STD_ERR_FILE" >> $REG_TMP_FILE
-   echo "VIZ_STD_OUT_FILE=$VIZ_STD_OUT_FILE" >> $REG_TMP_FILE
-   echo "export VIZ_STD_OUT_FILE" >> $REG_TMP_FILE
+   echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+   echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+   echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+   echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
    echo "if [ ! -d \$HOME/RealityGrid/scratch/ReG_workdir_viz$$ ]" >> $REG_TMP_FILE
    echo "then" >> $REG_TMP_FILE
    echo "   mkdir \$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
@@ -103,13 +103,6 @@ export VIZ_HOSTNAME REG_TMP_FILE
    echo "VIZ_TYPE=$VIZ_TYPE" >> $REG_TMP_FILE
    echo "export VIZ_TYPE" >> $REG_TMP_FILE
    echo "echo \$PATH" >> $REG_TMP_FILE
-   if [ $SIM_HOSTNAME = viking-i00.viking.lesc.doc.ic.ac.uk ]
-   then
-      echo "REG_CONNECTOR_HOSTNAME=$SIM_NODE_HOSTNAME" >> $REG_TMP_FILE
-   else
-      echo "REG_CONNECTOR_HOSTNAME=$SIM_HOSTNAME" >> $REG_TMP_FILE
-   fi
-   echo "export REG_CONNECTOR_HOSTNAME" >> $REG_TMP_FILE
    echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
    echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 if [ $MULTICAST_ADDRESS ]
@@ -121,11 +114,19 @@ fi
 
 # Build RSL
 
-echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$VIZ_STD_OUT_FILE)(stderr=$VIZ_STD_ERR_FILE)" > $REG_RSL_FILE
+echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)" > $REG_RSL_FILE
 
-$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $VIZ_HOSTNAME jobmanager-fork $REG_RSL_FILE $VIZ_USER
+case $SIM_HOSTNAME in
+       localhost)
+          chmod a+x $REG_TMP_FILE
+          $REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
+          ;;
+       *)
+          $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $SIM_HOSTNAME jobmanager-fork $REG_RSL_FILE $VIZ_USER
+          ;;
+esac
 
 if [ $? -gt "0" ]
 then
-   echo "Error with starting viz helper"
+   echo "Error with starting visualization"
 fi
