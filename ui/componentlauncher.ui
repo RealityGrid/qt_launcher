@@ -20,7 +20,7 @@
             <cstring>selectComponentType</cstring>
         </property>
         <attribute name="title">
-            <string>Select Component Type</string>
+            <string>Select component type, input file and run time</string>
         </attribute>
         <widget class="QComboBox">
             <property name="name">
@@ -35,47 +35,157 @@
                 </rect>
             </property>
         </widget>
-    </widget>
-    <widget class="QWidget">
-        <property name="name">
-            <cstring>checkPointGSHEntry</cstring>
-        </property>
-        <attribute name="title">
-            <string>Enter Checkpoint GSH</string>
-        </attribute>
-        <grid>
+        <spacer>
             <property name="name">
-                <cstring>unnamed</cstring>
+                <cstring>Spacer2_2</cstring>
             </property>
-            <property name="margin">
-                <number>11</number>
+            <property name="orientation">
+                <enum>Vertical</enum>
             </property>
-            <property name="spacing">
-                <number>6</number>
+            <property name="sizeType">
+                <enum>Expanding</enum>
             </property>
-            <widget class="QLineEdit" row="0" column="0">
-                <property name="name">
-                    <cstring>checkPointGSHLineEdit</cstring>
-                </property>
-            </widget>
-            <spacer row="1" column="0">
-                <property name="name">
-                    <cstring>Spacer1</cstring>
-                </property>
-                <property name="orientation">
-                    <enum>Vertical</enum>
-                </property>
-                <property name="sizeType">
-                    <enum>Expanding</enum>
-                </property>
-                <property name="sizeHint">
-                    <size>
-                        <width>0</width>
-                        <height>30</height>
-                    </size>
-                </property>
-            </spacer>
-        </grid>
+            <property name="sizeHint">
+                <size>
+                    <width>1</width>
+                    <height>231</height>
+                </size>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>215</x>
+                    <y>106</y>
+                    <width>1</width>
+                    <height>231</height>
+                </rect>
+            </property>
+        </spacer>
+        <widget class="Line">
+            <property name="name">
+                <cstring>line1</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>14</x>
+                    <y>56</y>
+                    <width>451</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="frameShape">
+                <enum>HLine</enum>
+            </property>
+            <property name="frameShadow">
+                <enum>Sunken</enum>
+            </property>
+            <property name="orientation">
+                <enum>Horizontal</enum>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>runTimeLineEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>105</x>
+                    <y>161</y>
+                    <width>123</width>
+                    <height>21</height>
+                </rect>
+            </property>
+            <property name="sizePolicy">
+                <sizepolicy>
+                    <hsizetype>7</hsizetype>
+                    <vsizetype>0</vsizetype>
+                    <horstretch>180</horstretch>
+                    <verstretch>21</verstretch>
+                </sizepolicy>
+            </property>
+            <property name="text">
+                <string>30</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel2</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>11</x>
+                    <y>161</y>
+                    <width>88</width>
+                    <height>21</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Max. run time:</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>simInputLineEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>105</x>
+                    <y>99</y>
+                    <width>310</width>
+                    <height>21</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabelInputFile</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>11</x>
+                    <y>100</y>
+                    <width>90</width>
+                    <height>21</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Input file:</string>
+            </property>
+            <property name="buddy" stdset="0">
+                <cstring>simInputLineEdit_2</cstring>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>simInputPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>421</x>
+                    <y>95</y>
+                    <width>46</width>
+                    <height>29</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>..</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>textLabel1_4</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>234</x>
+                    <y>161</y>
+                    <width>58</width>
+                    <height>21</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>(minutes)</string>
+            </property>
+        </widget>
     </widget>
     <widget class="QWidget">
         <property name="name">
@@ -163,120 +273,6 @@
             <widget class="QTextEdit" row="0" column="0">
                 <property name="name">
                     <cstring>inputFileTextEdit</cstring>
-                </property>
-            </widget>
-        </grid>
-    </widget>
-    <widget class="QWidget">
-        <property name="name">
-            <cstring>selectSimInput</cstring>
-        </property>
-        <attribute name="title">
-            <string>Select Simulation Input file</string>
-        </attribute>
-        <grid>
-            <property name="name">
-                <cstring>unnamed</cstring>
-            </property>
-            <property name="margin">
-                <number>11</number>
-            </property>
-            <property name="spacing">
-                <number>6</number>
-            </property>
-            <widget class="QPushButton" row="0" column="1">
-                <property name="name">
-                    <cstring>simInputPushButton</cstring>
-                </property>
-                <property name="text">
-                    <string>..</string>
-                </property>
-            </widget>
-            <widget class="QLineEdit" row="0" column="0">
-                <property name="name">
-                    <cstring>simInputLineEdit</cstring>
-                </property>
-            </widget>
-            <spacer row="1" column="0">
-                <property name="name">
-                    <cstring>Spacer2</cstring>
-                </property>
-                <property name="orientation">
-                    <enum>Vertical</enum>
-                </property>
-                <property name="sizeType">
-                    <enum>Expanding</enum>
-                </property>
-                <property name="sizeHint">
-                    <size>
-                        <width>0</width>
-                        <height>30</height>
-                    </size>
-                </property>
-            </spacer>
-        </grid>
-    </widget>
-    <widget class="QWidget">
-        <property name="name">
-            <cstring>selectTargetMachine</cstring>
-        </property>
-        <attribute name="title">
-            <string>Select Target Machine Old</string>
-        </attribute>
-        <grid>
-            <property name="name">
-                <cstring>unnamed</cstring>
-            </property>
-            <property name="margin">
-                <number>11</number>
-            </property>
-            <property name="spacing">
-                <number>6</number>
-            </property>
-            <spacer row="0" column="1">
-                <property name="name">
-                    <cstring>Spacer3</cstring>
-                </property>
-                <property name="orientation">
-                    <enum>Vertical</enum>
-                </property>
-                <property name="sizeType">
-                    <enum>Expanding</enum>
-                </property>
-                <property name="sizeHint">
-                    <size>
-                        <width>0</width>
-                        <height>30</height>
-                    </size>
-                </property>
-            </spacer>
-            <widget class="QLabel" row="1" column="1">
-                <property name="name">
-                    <cstring>TextLabel2</cstring>
-                </property>
-                <property name="text">
-                    <string>Number of Processors</string>
-                </property>
-            </widget>
-            <widget class="QListBox" row="0" column="0" rowspan="3" colspan="1">
-                <property name="name">
-                    <cstring>simTargetListBox</cstring>
-                </property>
-            </widget>
-            <widget class="QLineEdit" row="2" column="1">
-                <property name="name">
-                    <cstring>simNumProcLineEdit</cstring>
-                </property>
-                <property name="sizePolicy">
-                    <sizepolicy>
-                        <hsizetype>0</hsizetype>
-                        <vsizetype>0</vsizetype>
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                    </sizepolicy>
-                </property>
-                <property name="text">
-                    <string>1</string>
                 </property>
             </widget>
         </grid>
@@ -597,50 +593,10 @@
     </widget>
     <widget class="QWidget">
         <property name="name">
-            <cstring>enterRunTime</cstring>
-        </property>
-        <attribute name="title">
-            <string>Enter Maximum Run Time</string>
-        </attribute>
-        <widget class="QLineEdit">
-            <property name="name">
-                <cstring>runTimeLineEdit</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>10</y>
-                    <width>140</width>
-                    <height>23</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>30</string>
-            </property>
-        </widget>
-        <widget class="QLabel">
-            <property name="name">
-                <cstring>textLabel1</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>160</x>
-                    <y>10</y>
-                    <width>64</width>
-                    <height>20</height>
-                </rect>
-            </property>
-            <property name="text">
-                <string>Minutes</string>
-            </property>
-        </widget>
-    </widget>
-    <widget class="QWidget">
-        <property name="name">
             <cstring>enterTag</cstring>
         </property>
         <attribute name="title">
-            <string>Enter a descriptive tag for the SGS</string>
+            <string>Enter information about the component</string>
         </attribute>
         <grid>
             <property name="name">
@@ -842,12 +798,6 @@
         <slot>pageSelectedSlot(const QString&amp;)</slot>
     </connection>
     <connection>
-        <sender>simInputPushButton</sender>
-        <signal>clicked()</signal>
-        <receiver>ComponentLauncher</receiver>
-        <slot>simInputButtonPushedSlot()</slot>
-    </connection>
-    <connection>
         <sender>gshTagTable</sender>
         <signal>clicked(int,int,int,const QPoint&amp;)</signal>
         <receiver>ComponentLauncher</receiver>
@@ -895,6 +845,12 @@
         <receiver>ComponentLauncher</receiver>
         <slot>sgsUserNameChanged(const QString&amp;)</slot>
     </connection>
+    <connection>
+        <sender>simInputPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>simInputPushButton_clicked()</slot>
+    </connection>
 </connections>
 <tabstops>
     <tabstop>sgsUserNameLineEdit</tabstop>
@@ -903,14 +859,9 @@
     <tabstop>sgsOrganisationLineEdit</tabstop>
     <tabstop>tagTextEdit</tabstop>
     <tabstop>componentComboBox</tabstop>
-    <tabstop>checkPointGSHLineEdit</tabstop>
     <tabstop>gshTagTable</tabstop>
     <tabstop>simulationGSHLineEdit</tabstop>
     <tabstop>inputFileTextEdit</tabstop>
-    <tabstop>simInputPushButton</tabstop>
-    <tabstop>simInputLineEdit</tabstop>
-    <tabstop>simTargetListBox</tabstop>
-    <tabstop>simNumProcLineEdit</tabstop>
     <tabstop>mcastAddrLineEdit</tabstop>
     <tabstop>numProcLineEdit</tabstop>
     <tabstop>vizPipesLineEdit</tabstop>
@@ -920,7 +871,6 @@
     <tabstop>vizTypeComboBox</tabstop>
     <tabstop>containerPortNumLineEdit</tabstop>
     <tabstop>containerListBox</tabstop>
-    <tabstop>runTimeLineEdit</tabstop>
     <tabstop>treeTagTextEdit</tabstop>
 </tabstops>
 <includes>
@@ -949,7 +899,7 @@
     <slot>containerSelectedSlot()</slot>
     <slot>pageSelectedSlot( const QString &amp; string )</slot>
     <slot>accept()</slot>
-    <slot>simInputButtonPushedSlot()</slot>
+    <slot>simInputPushButton_clicked()</slot>
     <slot>gshTagSelectedSlot( int row, int col, int button, const QPoint &amp; mousePos )</slot>
     <slot>setCheckPointGSH( const QString &amp; checkPointGSH )</slot>
     <slot>setInputFileTextEdit( const QString &amp; text )</slot>
@@ -960,6 +910,7 @@
     <slot>containerListBoxSelectedSlot( QListBoxItem * selectedContainer )</slot>
     <slot>sgsCreationTimeChanged( const QString &amp; )</slot>
     <slot>sgsUserNameChanged( const QString &amp; )</slot>
+    <slot access="protected">next()</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

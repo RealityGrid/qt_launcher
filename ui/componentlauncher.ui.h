@@ -13,22 +13,20 @@
 
 #include <iostream>
 using namespace std;
-
+#include <qmessagebox.h>
 
 Gridifier mGridifier;
 
 void ComponentLauncher::init(){
     // set the appropriate default pages correctly
-    // temporarily disable the checkPointGSHLineEdit page
-    setAppropriate(page(1), false);
-    setAppropriate(page(2), false);
-    setAppropriate(page(3), false);
-    setAppropriate(page(4), true);
-    setAppropriate(page(5), false);
-    setAppropriate(page(6), true);
-    setAppropriate(page(7), false);
-    setAppropriate(page(9), true);
-    setAppropriate(page(11), false);
+    // page(0) is component selection (plus input file & run time)
+    setAppropriate(page(1), false); // Select sim GSH
+    setAppropriate(page(2), false); // Edit input file
+    setAppropriate(page(3), true); // Select target machine
+    setAppropriate(page(4), false); // Select visualization type
+    setAppropriate(page(5), true); // Select container
+    setAppropriate(page(6), true); // Enter job meta-data
+    setAppropriate(page(7), false); // Enter tag for new Chk tree
     
     // hide the horizontal header in the gshTagTable
     gshTagTable->verticalHeader()->hide();
@@ -46,33 +44,36 @@ void ComponentLauncher::componentSelectedSlot()
     Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
 
     // The pages of the launching wizard are as follows:
-    // Page 0: type of app to launch - always used
-    // Page 1: GSH of checkpoint to restart from
- 		setAppropriate(page(1), false);
-    // Page 2: GSH of data source (other component)
-    setAppropriate(page(2), (chosenApp->mNumInputs > 0));
-    // Page 3: Edit input file (only when restarting?)
-    setAppropriate(page(3),
+    // Page 0: type of app to launch + input file + max runtime - page is
+    // always used but en/disable the input-file selection as appropriate
+    textLabelInputFile->setEnabled(chosenApp->mHasInputFile);
+    simInputLineEdit->setEnabled(chosenApp->mHasInputFile);
+    simInputPushButton->setEnabled(chosenApp->mHasInputFile);
+
+    // Page 1: GSH of data source (other component)
+    setAppropriate(page(1), (chosenApp->mNumInputs > 0));
+    // Page 2: Edit input file (only when restarting?)
+    setAppropriate(page(2),
          ((mConfig->migration || mConfig->restart) && (chosenApp->mIsRestartable) && (chosenApp->mHasInputFile)));
-    // Page 4: Select input file
-	  setAppropriate(page(4),
-	       (!(mConfig->migration || mConfig->restart) && (chosenApp->mHasInputFile)));
-    // Page 5: Select target machine (& num px) - USE PAGE 6 INSTEAD NOW
-	  setAppropriate(page(5), false);
-    // Page 6: Select target viz machine (inc. num px, pipes, vizserver & multicast)
-	  setAppropriate(page(6), true);
-    // Page 7: Select type of viz (iso, cut etc.)
-	  setAppropriate(page(7), chosenApp->mIsViz);
-    // Page 8: Select container for SGS - always used
-    // Page 9: Max run time - always used
-    // Page 10: Job description (used to be just a tag) - always used
-    // Page 11: Tag for new checkpoint tree
+    // Page 3: Select input file
+	  //setAppropriate(page(4),
+	  //     (!(mConfig->migration || mConfig->restart) && (chosenApp->mHasInputFile)));
+    // Page 3: Select target machine (inc. num px, pipes, vizserver & multicast)
+	  setAppropriate(page(3), true);
+    // Page 4: Select type of viz (iso, cut etc.)
+	  setAppropriate(page(4), chosenApp->mIsViz);
+    // Page 5: Select container for SGS - always used
+    // Page 6: Job description (used to be just a tag) - always used
+    // Page 7: Tag for new checkpoint tree
+    /*
 	  if (chosenApp->mIsRestartable && mConfig->newTree){
-	    setAppropriate(page(11), true);
+	    setAppropriate(page(7), true);
 	  }
 	  else{
-	    setAppropriate(page(11), false);
-    }    
+	    setAppropriate(page(7), false);
+    }
+    */
+    setAppropriate(page(7), (chosenApp->mIsRestartable && mConfig->newTree));
 }
 
 
@@ -131,18 +132,18 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     // Test to see if we're doing a migration
     // Things are a bit different if we're migrating
     if (mConfig->migration || mConfig->restart){
-	    setAppropriate(page(0), false);
-	    setAppropriate(page(1), false);
-	    setAppropriate(page(2), false);
-	    setAppropriate(page(3), true);
-	    setAppropriate(page(4), false);
-	    // force page 3 to be the first that's displayed
-	    showPage(page(3));
+	    setAppropriate(page(0), true); // Choose component (only need runtime)
+	    setAppropriate(page(1), false); // Select sim. GSH
+	    setAppropriate(page(2), true); // Edit input file
+	    setAppropriate(page(3), true); // Select target machine
+	    setAppropriate(page(4), false); // Select viz type
+	    // force page 0 to be the first that's displayed
+	    showPage(page(0));
     }
     
     // Make the user enter a tag if a new tree is being created
     if (mConfig->newTree){
-	    setAppropriate(page(11), true);
+	    setAppropriate(page(7), true);
     }
 
     // Set up the drop-down list of available apps using the list
@@ -195,9 +196,20 @@ void ComponentLauncher::containerSelectedSlot()
  */
 void ComponentLauncher::pageSelectedSlot(const QString &string)
 {
+    if (string == title(page(0))){
+
+    	// If restarting or migrating then we're only using the first page
+      // to set the max runtime
+      if(mConfig->restart || mConfig->migration){
+        componentComboBox->setEnabled(false);
+        textLabelInputFile->setEnabled(false);
+        simInputLineEdit->setEnabled(false);
+        simInputPushButton->setEnabled(false);
+      }
+    }
     // Automatically generate as much of the meta data for the job
     // as possible
-    if (string == title(page(10))){
+    else if (string == title(page(6))){
     	// Find out who we are - could query our certificate at this stage
     	sgsUserNameLineEdit->setText(QString(getenv("USER")));
 
@@ -214,7 +226,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
         sgsSoftwarePackageLineEdit->setText(mConfig->mAppToLaunch->mAppName);
       }
     }
-    else if(string == title(page(6))){
+    else if(string == title(page(3))){
     
       Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
       if(!chosenApp->mIsViz){
@@ -252,13 +264,14 @@ void ComponentLauncher::accept(){
 	  mConfig->selectedContainer = containerListBox->currentText();
 
     // CheckPoint GSH - note that this is entirely optional if we're not migrating
+/*
 	  if (!mConfig->migration){
 	    if (checkPointGSHLineEdit->text().length() == 0)
 		    mConfig->currentCheckpointGSH = "";
 	    else
 		    mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
 	  }
-
+*/
 	  // Input file name
 	  if (mConfig->mAppToLaunch->mHasInputFile && simInputLineEdit->text().length() != 0){
 	    mConfig->mInputFileName = simInputLineEdit->text();
@@ -317,7 +330,7 @@ void ComponentLauncher::accept(){
 /** Bring up a file input selection dialog to choose the input for an lb3d
  *  simulation. Put the result into the accompanying line edit box
  */
-void ComponentLauncher::simInputButtonPushedSlot()
+void ComponentLauncher::simInputPushButton_clicked()
 {
     QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+"/realityGrid/reg_qt_launcher", "Input file (*)", this, "open file dialog" "Choose a file" );
     simInputLineEdit->setText(s);
@@ -337,15 +350,16 @@ void ComponentLauncher::gshTagSelectedSlot( int row, int col, int button, const 
  */
 void ComponentLauncher::setCheckPointGSH(const QString &checkPointGSH)
 {
-    checkPointGSHLineEdit->setText(checkPointGSH);
+    //checkPointGSHLineEdit->setText(checkPointGSH);
     
     // if we're starting from a checkpoint tree then allow the user to
     // edit the input file.  This may be overridden if the user has
     // chosen to launch an app that's not restartable (i.e. wasn't
     // used to generate the checkpoint tree in the first place).
-    setAppropriate(page(3), true);
+    setAppropriate(page(2), true);
     // don't allow them to select their own file
-    setAppropriate(page(4), false);
+    // that's now done on p.0 anyway
+    //setAppropriate(page(4), false);
 }
 
 /** if the user's restarting from a checkpoint, then grab the input file,
@@ -401,11 +415,9 @@ void ComponentLauncher::multicastToggleSlot()
 void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
 {
     if (selectedMachine != NULL & selectedMachine->text() == "tg-master.uc.teragrid.org"){
-	    // check the multicast toggle, turn on the time to run page
+	    // check the multicast toggle
 	    mcastCheckBox->setChecked(true);
 	    multicastToggleSlot();
-	
-	    setAppropriate(page(9), true);
     }
 }
 
@@ -432,3 +444,37 @@ void ComponentLauncher::sgsUserNameChanged( const QString & )
 {
     
 }
+
+
+void ComponentLauncher::next()
+{
+  // If this is the first page then make sure the user has selected an
+  // input file if one is required
+  if( mConfig->applicationList[componentComboBox->currentItem()].mHasInputFile &&
+      (this->indexOf(this->currentPage())) == 0){
+
+    if(!mConfig->restart && !mConfig->migration){
+
+      if(simInputLineEdit->text().length() == 0){
+
+        QMessageBox::warning(this, "No input file",
+                             "Chosen component requires that an input file be specified\n",
+                             QMessageBox::Ok,
+                             QMessageBox::NoButton,
+                             QMessageBox::NoButton );
+        return;
+      }
+      else if( !(QFile::exists(simInputLineEdit->text())) ){
+
+        QMessageBox::warning(this, "Missing input file",
+                             "The specified input file ("+simInputLineEdit->text()+") cannot be found\n",
+                             QMessageBox::Ok,
+                             QMessageBox::NoButton,
+                             QMessageBox::NoButton );
+        return;
+      }
+    }
+  }
+  QWizard::next();
+}
+

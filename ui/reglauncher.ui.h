@@ -465,7 +465,8 @@ void RegLauncher::launchSimSlot()
     config.restart = true;
 
     QString tGSH = ((CheckPointTreeItem*)checkPointTreeListView->selectedItem())->getCheckPointGSH();
-    componentLauncher->setCheckPointGSH(tGSH);
+    componentLauncher->setCheckPointGSH(tGSH); // ARPDBG should get rid of this call
+    config.currentCheckpointGSH = tGSH;
 
     // and then go get the input file associated with the selected checkpoint,
     inputFileText = getInputFileFromCheckPoint(tGSH);
