@@ -1,0 +1,187 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>GlobalParamConstructionForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>GlobalParamConstructionForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>602</width>
+            <height>362</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Construct global parameters</string>
+    </property>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>pushButton2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>40</y>
+                <width>90</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Create global</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>pushButton1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>10</y>
+                <width>90</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Add to global</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>globalParamCancelButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>510</x>
+                <y>40</y>
+                <width>81</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Cancel</string>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Click to cancel construction of globals</string>
+        </property>
+    </widget>
+    <widget class="QListBox">
+        <item>
+            <property name="text">
+                <string>New Item</string>
+            </property>
+        </item>
+        <property name="name">
+            <cstring>globalParamContentListBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>80</y>
+                <width>181</width>
+                <height>270</height>
+            </rect>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>globalParamDoneButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>510</x>
+                <y>10</y>
+                <width>80</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="focusPolicy">
+            <enum>TabFocus</enum>
+        </property>
+        <property name="text">
+            <string>Done</string>
+        </property>
+        <property name="toolTip" stdset="0">
+            <string>Click when finished</string>
+        </property>
+    </widget>
+    <widget class="QTable">
+        <property name="name">
+            <cstring>paramListTable</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>390</width>
+                <height>340</height>
+            </rect>
+        </property>
+        <property name="numRows">
+            <number>3</number>
+        </property>
+        <property name="numCols">
+            <number>3</number>
+        </property>
+        <property name="readOnly">
+            <bool>true</bool>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>pushButton1</sender>
+        <signal>clicked()</signal>
+        <receiver>GlobalParamConstructionForm</receiver>
+        <slot>addGlobal_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>pushButton2</sender>
+        <signal>clicked()</signal>
+        <receiver>GlobalParamConstructionForm</receiver>
+        <slot>createGlobal_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>paramListTable</sender>
+        <signal>clicked(int,int,int,const QPoint&amp;)</signal>
+        <receiver>GlobalParamConstructionForm</receiver>
+        <slot>paramListTable_clicked(int,int,int,const QPoint&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>globalParamDoneButton</sender>
+        <signal>clicked()</signal>
+        <receiver>GlobalParamConstructionForm</receiver>
+        <slot>globalParamDoneButton_clicked()</slot>
+    </connection>
+    <connection>
+        <sender>globalParamCancelButton</sender>
+        <signal>clicked()</signal>
+        <receiver>GlobalParamConstructionForm</receiver>
+        <slot>globalParamCancelButton_clicked()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in declaration">Gridifier.h</include>
+    <include location="local" impldecl="in declaration">RunningJobsDialog.h</include>
+    <include location="local" impldecl="in implementation">GlobalParamConstructionForm.ui.h</include>
+</includes>
+<variables>
+    <variable access="private">Gridifier gridifier;</variable>
+    <variable access="private">LauncherConfig *mConfig;</variable>
+    <variable access="private">QString mParentGSH;</variable>
+</variables>
+<slots>
+    <slot>addGlobal_clicked()</slot>
+    <slot>createGlobal_clicked()</slot>
+    <slot>paramListTable_clicked( int lRow, int lCol, int lButton, const QPoint &amp; aPt )</slot>
+    <slot>globalParamDoneButton_clicked()</slot>
+    <slot>globalParamCancelButton_clicked()</slot>
+</slots>
+<functions>
+    <function access="private" specifier="non virtual">init()</function>
+    <function>setConfig(LauncherConfig *aConfig)</function>
+    <function>setParentGSH(const QString &amp;aGSH)</function>
+</functions>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>
