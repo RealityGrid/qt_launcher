@@ -5,24 +5,23 @@ use LWP::Simple;
 #use SOAP::Lite +trace =>  debug => sub {};
 use SOAP::Lite;
 
-if( @ARGV != 1  )
+if( @ARGV != 2  )
 {
-  print "Usage: jobStatus.pl <GSH of job>\n";
+  print "Usage: jobStatus.pl <namespace of service> <GSH of job>\n";
   exit;
 }
 
-#my $SGS_factory = $ARGV[0] . "SGS/factory";
-my $app_SGS_GSH = $ARGV[0];
+my $namespace = $ARGV[0];
+my $app_SGS_GSH = $ARGV[1];
 
 #------------------------------------------------------------------------
 # Query Registry for SGSs
 
-my $func = "findServiceData";
 my $arg  = "<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>";
 my $job_status = SOAP::Lite
-               -> uri("SGS")
+               -> uri("$namespace")
                -> proxy("$app_SGS_GSH")
-               -> $func("$arg")
+               -> findServiceData("$arg")
                -> result;
 
 print "findServiceData returned: >>$job_status<<\n";
