@@ -56,6 +56,11 @@
 #include <iostream>
 using namespace std;
 
+/** @file LauncherConfig.h
+    @brief Defines class holding job description plus Container and Application
+    and Machine classes.
+*/
+
 // ************************************** //
 // Be aware that only some of the values  //
 // of this class will get saved out /     //
@@ -153,8 +158,6 @@ class LauncherConfig {
     JobMetaData *mJobData;
 
     QValueList<Container> containerList;
-    //QStringList machineList;
-    //QStringList vizMachineList;
     QString selectedContainer;
     int containerPortNum;
     QString globusLocation;
@@ -162,6 +165,10 @@ class LauncherConfig {
     Application *mAppToLaunch;
     QValueList<Machine> machineList;
     QValueList<Machine> vizMachineList;
+
+    bool    mIsCoupledModel;
+    QString mScriptsDirectory;
+    QString mScratchDirectory;
 
     // Methods
 
