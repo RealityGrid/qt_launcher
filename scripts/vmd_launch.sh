@@ -91,6 +91,11 @@ case $ReG_LAUNCH in
     ;;
 esac
 
+if [ $SIM_HOSTNAME != "localhost" ]
+then
+   xhost + $SIM_HOSTNAME
+fi
+
 # Setup the script for running the lbe3d wrapper
 
 echo "#!/bin/sh" > $REG_TMP_FILE
