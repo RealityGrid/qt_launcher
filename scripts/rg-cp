@@ -411,21 +411,23 @@ foreach my $file (@files) {
    {
        # Assumes filesystem is duplicated on panhead and LeMieux
 
+       # ARP - this bit not needed since this script now runs 
+       # on client machine
        #In order to do this we need to set the proxy
        #to a full proxy - total hack
-       if ( $ENV{LOGNAME} eq "zzcguap" )
-       {
-         $ENV{X509_USER_PROXY} = "/tmp/x509up_u6489";
-       }
-       elsif ( $ENV{LOGNAME} eq "zzcgurp" )
-       {
-         $ENV{X509_USER_PROXY} = "/tmp/x509up_u5453";
-       }
-       else
-       { 
-         print "Warning: No Full Proxy for this User $ENV{LOGNAME}\n";
-         print "Files will only be transfered to panhead NOT iam764\n";       
-       }
+       #if ( $ENV{LOGNAME} eq "zzcguap" )
+       #{
+       #  $ENV{X509_USER_PROXY} = "/tmp/x509up_u6489";
+       #}
+       #elsif ( $ENV{LOGNAME} eq "zzcgurp" )
+       #{
+       #  $ENV{X509_USER_PROXY} = "/tmp/x509up_u5453";
+       #}
+       #else
+       #{ 
+       #  print "Warning: No Full Proxy for this User $ENV{LOGNAME}\n";
+       #  print "Files will only be transfered to panhead NOT iam764\n";       
+       #}
 
        my $tmpTarget = $Target;
        $tmpTarget =~ s/gsiftp\:\/\/panhead.psc.edu\///;        
