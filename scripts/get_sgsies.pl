@@ -20,7 +20,8 @@ open(SGS_FILE, "> sgs_list.txt") || die("can't open datafile: $!");
 # Set-up parser for xml returned from querying registries
 my $parser = new XML::Parser(ErrorContext => 2);
 $parser->setHandlers(Char => \&char_handler,
-		     Start => \&start_handler);
+		     Start => \&start_handler,
+                     End => \&end_handler);
 
 # Query registry 
 query_registry($registry_GSH, "ogsi:entry");
@@ -33,6 +34,9 @@ if(@{gsh_array} > 0){
 
 	if($content_array[$i] ne "factoryRegistry"){
 
+            # Remove new-line characters that may or may not be present 
+            # in the job meta-data
+	    $content_array[$i] =~ s/\n/ /og;
 	    print SGS_FILE "$gsh_array[$i] $content_array[$i]\n";
 	    print "$gsh_array[$i] $content_array[$i]\n";
 	}
@@ -55,9 +59,8 @@ sub char_handler
    } elsif ($store_content_flag == 1) {
 # Assume that entry ALWAYS has an associated content element and that it
 # comes AFTER the handle.
-       $content_array[$count] = $data;
-       $store_content_flag = 0;
-       $count++;
+# Content now has children so concatenate their contents
+       $content_array[$count] = $content_array[$count].$data;
    }
 }
 
@@ -77,6 +80,20 @@ sub start_handler
    }
 }
 
+#--------------------------------------------------
+
+sub end_handler
+{
+   my ($p, $element) = @_;
+
+   # Catch end of Content element 
+   if($element eq "ogsi:content"){
+
+       $store_content_flag = 0;
+       $count++;
+   }
+
+}
 #---------------------------------------------------
 
 sub query_registry
