@@ -287,13 +287,12 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
     fileText += "GLOBUS_LOCATION="+config.globusLocation+"\n";
   else
     fileText += "# Couldn't find a globus location in the default.conf\n# Going with the default environment if it is set\n";
-  fileText += "SIM_HOSTNAME="+config.mTargetMachine+"\n";
+  fileText += "SIM_HOSTNAME="+config.mTargetMachine->mName+"\n";
+  fileText += "HOST_JOB_MGR="+config.mTargetMachine->mJobManager+"\n";
   fileText += "SIM_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
   fileText += "SIM_INFILE="+config.mInputFileName+"\n\n";
   fileText += QString("SIM_USER=")+getenv("USER")+"\n";
-  fileText += "STEER_ANSWER=yes\n";
   fileText += "FIREWALL=no\n";
-  fileText += "VIZ_ANSWER=no\n";
   fileText += "CLIENT_DISPLAY="+Utility::getCurrentDisplay()+"\n";
   fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.$$.txt\n";
   fileText += "SIM_STD_ERR_FILE=RealityGrid/scratch/ReG-sim-stderr.$$.txt\n";
@@ -336,7 +335,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
     fileText += "REG_SGS_ADDRESS="+config.simulationGSH+"\n";
   }
  
-  fileText += "export CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_ANSWER VIZ_TYPE VIZ_PROCESSORS STEER_ANSWER SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
+  fileText += "export HOST_JOB_MGR CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_TYPE VIZ_PROCESSORS SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
 
   if (config.multicast){
     fileText += "MULTICAST_ADDRESS="+config.multicastAddress+"\n\n";
@@ -406,6 +405,7 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName,
   QProcess *launchVizScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
   launchVizScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchVizScriptProcess->addArgument(scriptConfigFileName);
+  launchVizScriptProcess->addArgument(QString::number(config.mTimeToRun));
 
   launchVizScriptProcess->start();
 

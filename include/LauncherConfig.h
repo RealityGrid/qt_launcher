@@ -53,6 +53,9 @@
 #include "qvaluelist.h"
 #include "jobmetadata.h"
 
+#include <iostream>
+using namespace std;
+
 // ************************************** //
 // Be aware that only some of the values  //
 // of this class will get saved out /     //
@@ -95,6 +98,23 @@ class Application {
     ~Application(){}
 };
 
+class Machine {
+
+  public:
+    QString mName;
+    QString mJobManager;
+    QString mOS;
+    
+    Machine(){};
+    Machine(const QString aName, const QString aJobManager, const QString aOS){
+      mName = aName;
+      mJobManager = aJobManager;
+      mOS = aOS;
+      cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << endl;
+    }
+    ~Machine(){}
+};
+
 class LauncherConfig {
   public:
 
@@ -109,10 +129,6 @@ class LauncherConfig {
     QString currentCheckpointGSH;
     QString simulationGSH;
     QString visualizationGSH;
-
-    // Non GSH data
-    //int simComponentType;
-    //int vizComponentType;
     
     bool    vizServer;
     bool    multicast;
@@ -123,7 +139,8 @@ class LauncherConfig {
     int     vizType;
     QString mInputFileName;
 
-    QString mTargetMachine;
+    //QString mTargetMachine;
+    Machine *mTargetMachine;
     QString treeTag;
     int     mNumberProcessors;
     int     mNumberPipes;
@@ -132,13 +149,15 @@ class LauncherConfig {
     JobMetaData *mJobData;
 
     QValueList<Container> containerList;
-    QStringList machineList;
-    QStringList vizMachineList;
+    //QStringList machineList;
+    //QStringList vizMachineList;
     QString selectedContainer;
     int containerPortNum;
     QString globusLocation;
     QValueList<Application> applicationList;
     Application *mAppToLaunch;
+    QValueList<Machine> machineList;
+    QValueList<Machine> vizMachineList;
 
     // Methods
 

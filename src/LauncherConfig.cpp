@@ -261,10 +261,17 @@ void LauncherConfig::readConfig(QString file){
 
         if (!xmlStrcmp(targets->name, (const xmlChar*)"machine")){
           xmlChar *machineName = xmlGetProp(targets, (const xmlChar*)"name");
-          machineList += (const char*)machineName;
-          xmlFree(machineName);
           xmlChar *machineOS = xmlGetProp(targets, (const xmlChar*)"os");
+          xmlChar *machineJobManager = xmlGetProp(targets, (const xmlChar*)"jobmanager");
+
+          Machine tMachine((const char*)machineName,
+                           (const char*)machineJobManager,
+                           (const char*)machineOS);
+          machineList += tMachine;
+
+          xmlFree(machineName);
           xmlFree(machineOS);
+          xmlFree(machineJobManager);
         }
 
         targets = targets->next;
@@ -279,10 +286,17 @@ void LauncherConfig::readConfig(QString file){
 
         if (!xmlStrcmp(vizTargets->name, (const xmlChar*)"machine")){
           xmlChar *vizMachineName = xmlGetProp(vizTargets, (const xmlChar*)"name");
-          vizMachineList += (const char*)vizMachineName;
-          xmlFree(vizMachineName);
           xmlChar *vizMachineOS = xmlGetProp(vizTargets, (const xmlChar*)"os");
+          xmlChar *vizMachineJobManager = xmlGetProp(vizTargets, (const xmlChar*)"jobmanager");
+
+          Machine tMachine((const char*)vizMachineName,
+                           (const char*)vizMachineJobManager,
+                           (const char*)vizMachineOS);
+          vizMachineList += tMachine;
+          
+          xmlFree(vizMachineName);
           xmlFree(vizMachineOS);
+          xmlFree(vizMachineJobManager);
         }
 
         vizTargets = vizTargets->next;
@@ -352,7 +366,6 @@ void LauncherConfig::readConfig(QString file){
     //            applicationList[i].mNumInputs << endl;
 
     childOfRoot = childOfRoot->next;
-    
   }
 }
 
@@ -436,17 +449,21 @@ void LauncherConfig::writeConfig(QString file){
   }
 
   machines = xmlNewTextChild(root, NULL, (const xmlChar*)"targets", NULL);
-  for ( QStringList::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
+//  for ( QStringList::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
+  for ( QValueList<Machine>::Iterator it = machineList.begin(); it != machineList.end(); ++it ) {
       xmlNodePtr t = xmlNewTextChild(machines, NULL, (const xmlChar*)"machine", NULL);
-      xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).latin1());
-      // the os isn't stored or used at the moment - it should be eventually - or removed
+      xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).mName.latin1());
+      xmlNewProp(t, (const xmlChar*)"jobmanager", (const xmlChar*)(*it).mJobManager.latin1());
+      xmlNewProp(t, (const xmlChar*)"os", (const xmlChar*)(*it).mOS.latin1());
   }
 
   vizMachines = xmlNewTextChild(root, NULL, (const xmlChar*)"vizTargets", NULL);
-  for ( QStringList::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
+//  for ( QStringList::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
+  for ( QValueList<Machine>::Iterator it = vizMachineList.begin(); it != vizMachineList.end(); ++it ) {
       xmlNodePtr t = xmlNewTextChild(vizMachines, NULL, (const xmlChar*)"machine", NULL);
-      xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).latin1());
-      // the os isn't stored or used at the moment - it should be eventually - or removed
+      xmlNewProp(t, (const xmlChar*)"name", (const xmlChar*)(*it).mName.latin1());
+      xmlNewProp(t, (const xmlChar*)"jobmanager", (const xmlChar*)(*it).mJobManager.latin1());
+      xmlNewProp(t, (const xmlChar*)"os", (const xmlChar*)(*it).mOS.latin1());
   }
 
   xmlDocSetRootElement(doc, root);
