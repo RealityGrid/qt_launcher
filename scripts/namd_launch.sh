@@ -75,7 +75,7 @@ TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
 # Fourthly: Export these variables for use in child scripts
 
-REG_TMP_FILE=/tmp/reg_sim_remote.$$
+REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
 export REG_TMP_FILE
 
 case $ReG_LAUNCH in
@@ -218,7 +218,7 @@ case $SIM_HOSTNAME in
                scp ${TMP_PATH}${FEP_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${FEP_FILE}.$$
                ;;
              *)
-               $GLOBUS_BIN_PATH/globus-url-copy -dbg file:///$SIM_INFILE gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$ > /tmp/andy_dbg0_out 2>&1
+               $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
 	       if [ "$CHECKPOINT_GSH" == "" ]
 		   then
 		   echo "Copying various input files to target machine"

@@ -93,7 +93,7 @@ fi
 
 # Setup the script for launching the lb3dviz
 
-REG_TMP_FILE=/tmp/reg_viz_remote.$$
+REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_viz_remote.$$
 export REG_TMP_FILE
 
 echo "#!/bin/sh" > $REG_TMP_FILE

@@ -90,7 +90,7 @@ fi
 
 # Setup the script for running the 'sink' wrapper
 
-REG_TMP_FILE=/tmp/reg_sim_remote.$$
+REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
 export  REG_TMP_FILE
 
 echo "#!/bin/sh" > $REG_TMP_FILE

@@ -39,7 +39,7 @@ echo "Job manager is: $HOST_JOB_MGR"
 echo "Remote machine is: $SIM_HOSTNAME"
 
 # Build the RSL file
-REG_RSL_FILE=/tmp/sim_stage.$$.rsl
+REG_RSL_FILE=$REG_SCRATCH_DIRECTORY/sim_stage.$$.rsl
 export REG_RSL_FILE
 
 

@@ -62,8 +62,8 @@ export REG_STEER_HOME REG_SGS_ADDRESS
 
 # Fourthly: Export these variables for use in child scripts
 
-REG_TMP_FILE=/tmp/reg_sim_remote.$$
-REG_RSL_FILE=/tmp/sim_stage.$$.rsl
+REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
+REG_RSL_FILE=$REG_SCRATCH_DIRECTORY/sim_stage.$$.rsl
 export REG_TMP_FILE REG_RSL_FILE
 #export CHECKPOINT_GSH SIM_HOSTNAME SIM_STD_ERR_FILE SIM_STD_OUT_FILE SIM_PROCESSORS 
 

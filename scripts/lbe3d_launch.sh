@@ -64,7 +64,7 @@ export REG_STEER_HOME
 
 # Fourthly: Export these variables for use in child scripts
 
-REG_TMP_FILE=/tmp/reg_sim_remote.$$
+REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
 export REG_TMP_FILE
 
 case $ReG_LAUNCH in
