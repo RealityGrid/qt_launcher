@@ -260,7 +260,7 @@ void ComponentLauncher::accept(){
 
     // Tree tag
     if (mConfig->newTree){
-      mConfig->treeTag = treeTagTextEdit->text();
+      mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
     }
 
     // Time to run
