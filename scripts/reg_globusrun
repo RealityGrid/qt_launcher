@@ -56,6 +56,6 @@ case $ReG_LAUNCH in
         ssh -f $USER@$HOST $REG_TMP_FILE
     ;;
     *)
-     echo "Usage: ./ReG-L2-globusrun cog/globus/ssh host jobmanager -f file.rsl"
+     echo "Usage: ./reg_globusrun  host jobmanager -f file.rsl"
     ;;
 esac
