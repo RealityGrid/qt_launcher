@@ -122,7 +122,7 @@ export REG_SGS_ADDRESS
    echo "VIZ_TYPE=$VIZ_TYPE" >> /tmp/reg_viz_remote.$$
    echo "export VIZ_TYPE" >> /tmp/reg_viz_remote.$$
    echo "echo \$PATH" >> /tmp/reg_viz_remote.$$
-   if [ $SIM_HOSTNAME == viking-i00.viking.lesc.doc.ic.ac.uk ]
+   if [ $SIM_HOSTNAME = viking-i00.viking.lesc.doc.ic.ac.uk ]
    then
       echo "REG_CONNECTOR_HOSTNAME=$SIM_NODE_HOSTNAME" >> /tmp/reg_viz_remote.$$
    else
