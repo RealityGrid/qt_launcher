@@ -394,6 +394,11 @@ void ComponentLauncher::multicastToggleSlot()
     // don't let the user try a vizserver either
     vizServerCheckBox->setChecked(false);
     vizServerCheckBox->setEnabled(false);
+    // and pretend we're setting 9 nodes for the viz
+    vizNumProcLineEdit->setText("18");
+    vizNumProcLineEdit->setEnabled(false);
+    vizPipesLineEdit->setText("9");
+    vizPipesLineEdit->setEnabled(false);
     return;
   }
   
@@ -420,6 +425,10 @@ void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
   else {
     vizServerCheckBox->setEnabled(true);
     setAppropriate(page(9), false);
+    vizNumProcLineEdit->setText("1");
+    vizNumProcLineEdit->setEnabled(true);
+    vizPipesLineEdit->setText("1");
+    vizPipesLineEdit->setEnabled(true);
   }
 }
 
