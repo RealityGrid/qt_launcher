@@ -42,6 +42,7 @@
 
 #include "qthread.h"
 
+#include "qapplication.h"
 #include "qstatusbar.h"
 
 class JobStatusThread: public QThread {

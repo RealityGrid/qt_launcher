@@ -13,6 +13,9 @@ void RunningJobsDialog::init()
   runningGSHTagTable->setLeftMargin(0);
   runningGSHTagTable->setColumnWidth(0, 250);
   runningGSHTagTable->setColumnWidth(1, 50);
+
+  // set the result string pointer to NULL
+  mResultString = NULL;
 }
 
 

@@ -124,7 +124,7 @@ void RegLauncher::migrateSimSlot()
   RunningJobsDialog rjd;
 
   QString selectedGSH;
-  rjd.setConfig(&config); 
+  rjd.setConfig(&config);
   // Read the note at the RunningJobsDialog::setResultString implementation
   rjd.setResultString(&selectedGSH);
   if (!rjd.exec()){
@@ -406,16 +406,12 @@ void RegLauncher::commonLaunchCode(){
 
     // Now use the factory to create an SGS
     QString sgs;
-
-cout << "1" << endl;
     
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree)
       sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, config.treeTag);
     else
       sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");    
-
-cout << "2" << endl;
 
     // Copy the value to the config
     config.simulationGSH = sgs;
@@ -425,8 +421,6 @@ cout << "2" << endl;
     // Now launch the job
 
     gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
-
-cout << "3" << endl;
 
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
@@ -440,8 +434,6 @@ cout << "3" << endl;
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
 
     }
-
-cout << "4" << endl;
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.selectedContainer+":50000/", config.simulationGSH);
     aJobStatusThread->start();

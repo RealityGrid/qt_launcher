@@ -48,7 +48,7 @@ JobStatusThread::JobStatusThread(QStatusBar *aStatusBar, const QString &aContain
   mainWindowStatusBar = aStatusBar;
   mContainer = aContainer;
   mGSH = aGSH;
-
+  
   // Set the lifespan of the thread to 15 seconds.
   // This isn't currently used - some jobs could sit
   // in a queue for hours on end.
@@ -91,6 +91,7 @@ void JobStatusThread::getJobStatus(){
   // We're in a thread - so no big worries about sitting waiting for this process to finish
   while (jobStatusProcess.isRunning()){
     usleep(50000);
+    mainWindowStatusBar->updateGeometry();
   }
 
   // Get the output, and simply grep for the desired results
