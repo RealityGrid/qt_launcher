@@ -120,21 +120,45 @@ echo "then" >> $REG_TMP_FILE
 echo "  mkdir \$REG_WORKING_DIR" >> $REG_TMP_FILE
 echo "fi" >> $REG_TMP_FILE
 echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
-echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> $REG_TMP_FILE
-echo "then" >> $REG_TMP_FILE
-echo "  echo \"Input file not found - exiting\"" >> $REG_TMP_FILE
-echo "  exit" >> $REG_TMP_FILE
-echo "fi" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
 
-if [ "$CHECKPOINT_GSH" == "" ]
-then 
-echo "mv -f \$HOME/RealityGrid/scratch/${COORD_FILE}.$$ ./${COORD_FILE}" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/${STRUCT_FILE}.$$ ./${STRUCT_FILE}" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/${PARAM_FILE}.$$ ./${PARAM_FILE}" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/${VECT_FILE}.$$ ./${VECT_FILE}" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/${VEL_FILE}.$$ ./${VEL_FILE}" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/${FEP_FILE}.$$ ./${FEP_FILE}" >> $REG_TMP_FILE
+# Cope with fact that lemieux is not the frontend for file-transfer at PSC
+GRIDFTP_HOSTNAME=$SIM_HOSTNAME
+
+if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+then
+  GRIDFTP_HOSTNAME="knucklehead.psc.edu"
+  echo "/usr/psc/bin/far get RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+  
+#  if [ "$CHECKPOINT_GSH" == "" ]
+#  then 
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
+    echo "/usr/psc/bin/far get RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
+#  fi
+else
+
+  # Check that input file has arrived - don't do this for PSC since files
+  # arrive on another disk
+  echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> $REG_TMP_FILE
+  echo "then" >> $REG_TMP_FILE
+  echo "  echo \"Input file not found - exiting\"" >> $REG_TMP_FILE
+  echo "  exit" >> $REG_TMP_FILE
+  echo "fi" >> $REG_TMP_FILE
+
+  echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+
+  if [ "$CHECKPOINT_GSH" == "" ]
+  then 
+    echo "mv -f \$HOME/RealityGrid/scratch/${COORD_FILE}.$$ ./${COORD_FILE}" >> $REG_TMP_FILE
+    echo "mv -f \$HOME/RealityGrid/scratch/${STRUCT_FILE}.$$ ./${STRUCT_FILE}" >> $REG_TMP_FILE
+    echo "mv -f \$HOME/RealityGrid/scratch/${PARAM_FILE}.$$ ./${PARAM_FILE}" >> $REG_TMP_FILE
+    echo "mv -f \$HOME/RealityGrid/scratch/${VECT_FILE}.$$ ./${VECT_FILE}" >> $REG_TMP_FILE
+    echo "mv -f \$HOME/RealityGrid/scratch/${VEL_FILE}.$$ ./${VEL_FILE}" >> $REG_TMP_FILE
+    echo "mv -f \$HOME/RealityGrid/scratch/${FEP_FILE}.$$ ./${FEP_FILE}" >> $REG_TMP_FILE
+  fi
 fi
 
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
@@ -182,16 +206,16 @@ case $SIM_HOSTNAME in
                scp ${TMP_PATH}${FEP_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${FEP_FILE}.$$
                ;;
              *)
-               $GLOBUS_BIN_PATH/globus-url-copy file:///$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
+               $GLOBUS_BIN_PATH/globus-url-copy -dbg file:///$SIM_INFILE gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$ > /tmp/andy_dbg0_out 2>&1
 	       if [ "$CHECKPOINT_GSH" == "" ]
 		   then
 		   echo "Copying various input files to target machine"
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VEL_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${VEL_FILE}.$$
-		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${FEP_FILE} gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/${FEP_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
+ 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VEL_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${VEL_FILE}.$$
+		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${FEP_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${FEP_FILE}.$$
 	       fi
 	       ;;
           esac
