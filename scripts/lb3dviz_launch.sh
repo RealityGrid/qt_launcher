@@ -89,11 +89,9 @@ xhost +
 #  Start visualisation 
 
 echo "Starting viz"
-#. $HOME/RealityGrid/scratch/reg_app_info.sh
-#$PWD/bin/vis_launcher.pl $CONTAINER $REG_REGISTRY_GSH
-#. $HOME/RealityGrid/scratch/reg_viz_info.sh
 
-REG_SGS_ADDRESS=$REG_VIS_GSH
+# Fixed in launcher code instead
+#REG_SGS_ADDRESS=$REG_VIS_GSH
 export REG_SGS_ADDRESS
 
    echo "#!/bin/sh" > /tmp/reg_viz_remote.$$
