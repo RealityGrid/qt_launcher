@@ -360,13 +360,12 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
   }
 
 
-/** Method calls Robin's ReG-L2-Sim-QTL script to
+/** Method calls <app_name>_launch.sh script to
  *  actually launch the job on the target machine
  */
 void Gridifier::launchSimScript(const QString &scriptConfigFileName,
                                 const LauncherConfig &config){
 
-  //QProcess *launchSimScriptProcess = new QProcess(QString("./ReG-L2-Sim-QTL"));
   // Construct name of script from name of application
   QProcess *launchSimScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
   launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
