@@ -36,8 +36,27 @@
 #
 #------------------------------------------------------------------------
 
-echo $1
+#  Source the GUI generated configuration file
 . $1
+
+# Get the time to run
+TIME_TO_RUN=$2
+export TIME_TO_RUN
+
+# Optionally get the checkpoint data file name from the command line args
+if [ $# -eq 3 ]
+then
+CHECKPOINT_GSH=$3
+else
+CHECKPOINT_GSH=""
+fi
+export CHECKPOINT_GSH
+echo "Checkpoint GSH = $CHECKPOINT_GSH"
+
+# Thirdly: Setup REG_STEER_HOME for library location
+
+REG_STEER_HOME=$HOME/RealityGrid/reg_steer_lib
+export REG_STEER_HOME
 
 case $ReG_LAUNCH in
      cog)
@@ -53,58 +72,57 @@ esac
 
 # Ascertain whether we have a valid grid-proxy 
 
-case $ReG_LAUNCH in
-  cog|globus)
-  $GLOBUS_LOCATION/bin/grid-proxy-info -exists
-  if [ $? -ne "0" ]
-  then
-     echo "No grid proxy, please invoke grid-proxy-init"
-     exit
-  fi
-  ;;
-esac
+if [ $SIM_HOSTNAME != "localhost" ]
+then
+  case $ReG_LAUNCH in
+      globus|cog)
+      $GLOBUS_BIN_PATH/grid-proxy-info -exists
+       if [ $? -ne "0" ]
+       then
+         echo "No grid proxy, please invoke grid-proxy-init"
+         exit
+       fi
+      ;;
+  esac
+fi
 
-# Setup xhost access to allow steerer display
-if [ "$SIM_HOSTNAME" != "localhost" ]
+if [ $SIM_HOSTNAME != "localhost" ]
 then
    xhost + $SIM_HOSTNAME
 fi
 
-# Setup some variables
+# Setup the script for launching the lb3dviz
 
 REG_TMP_FILE=/tmp/reg_viz_remote.$$
-REG_RSL_FILE=/tmp/sim_stage.$$.rsl
-export REG_RSL_FILE REG_TMP_FILE
+export REG_TMP_FILE
 
-#  Start visualisation 
-
-   echo "#!/bin/sh" > $REG_TMP_FILE
-   echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
-   echo "SSH=$SSH" >> $REG_TMP_FILE
-   echo "export SSH" >> $REG_TMP_FILE
-   echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
-   echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
-   echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
-   echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
-   echo "if [ ! -d \$HOME/RealityGrid/scratch/ReG_workdir_viz$$ ]" >> $REG_TMP_FILE
-   echo "then" >> $REG_TMP_FILE
-   echo "   mkdir \$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
-   echo "fi" >> $REG_TMP_FILE
-   echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
-   echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
-   echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> $REG_TMP_FILE
-   echo "export REG_STEER_DIRECTORY" >> $REG_TMP_FILE
-   echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
-   echo "echo \"Starting script\"" >> $REG_TMP_FILE
-   echo "DISPLAY=${CLIENT_DISPLAY}" >> $REG_TMP_FILE
-   echo "export DISPLAY" >> $REG_TMP_FILE
-   echo "UC_PROCESSORS=$VIZ_PROCESSORS" >> $REG_TMP_FILE
-   echo "export UC_PROCESSORS" >> $REG_TMP_FILE
-   echo "VIZ_TYPE=$VIZ_TYPE" >> $REG_TMP_FILE
-   echo "export VIZ_TYPE" >> $REG_TMP_FILE
-   echo "echo \$PATH" >> $REG_TMP_FILE
-   echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
-   echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
+echo "#!/bin/sh" > $REG_TMP_FILE
+echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
+echo "SSH=$SSH" >> $REG_TMP_FILE
+echo "export SSH" >> $REG_TMP_FILE
+echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+echo "if [ ! -d \$HOME/RealityGrid/scratch/ReG_workdir_viz$$ ]" >> $REG_TMP_FILE
+echo "then" >> $REG_TMP_FILE
+echo "   mkdir \$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
+echo "fi" >> $REG_TMP_FILE
+echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch/ReG_workdir_viz$$" >> $REG_TMP_FILE
+echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "export REG_STEER_DIRECTORY" >> $REG_TMP_FILE
+echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "echo \"Starting script\"" >> $REG_TMP_FILE
+echo "DISPLAY=${CLIENT_DISPLAY}" >> $REG_TMP_FILE
+echo "export DISPLAY" >> $REG_TMP_FILE
+echo "UC_PROCESSORS=$VIZ_PROCESSORS" >> $REG_TMP_FILE
+echo "export UC_PROCESSORS" >> $REG_TMP_FILE
+echo "VIZ_TYPE=$VIZ_TYPE" >> $REG_TMP_FILE
+echo "export VIZ_TYPE" >> $REG_TMP_FILE
+echo "echo \$PATH" >> $REG_TMP_FILE
+echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
+echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 if [ $MULTICAST_ADDRESS ]
 then 
    echo "\$HOME/RealityGrid/ReG-vol-viewer-sockets/vis_l2g $VIZ_TYPE $MULTICAST_ADDRESS" >> $REG_TMP_FILE
@@ -114,19 +132,13 @@ fi
 
 # Build RSL
 
-echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)" > $REG_RSL_FILE
+#echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)" > $REG_RSL_FILE
 
-case $SIM_HOSTNAME in
-       localhost)
-          chmod a+x $REG_TMP_FILE
-          $REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
-          ;;
-       *)
-          $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $SIM_HOSTNAME jobmanager-fork $REG_RSL_FILE $VIZ_USER
-          ;;
-esac
+# Start the simulation using the script created above
 
-if [ $? -gt "0" ]
-then
-   echo "Error with starting visualization"
-fi
+echo "Starting simulation..."
+
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
+
+echo "...done."
+echo "-----------------"

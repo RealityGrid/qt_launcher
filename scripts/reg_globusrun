@@ -35,20 +35,42 @@
 #
 #------------------------------------------------------------------------
 
+echo "Job manager is: "$HOST_JOB_MGR
 
-HOST=$1
-JOBMGR=$2
-REG_RSL=$3
-USER=$4
+# Build the RSL file
+REG_RSL_FILE=/tmp/sim_stage.$$.rsl
+export REG_RSL_FILE
+
+echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(environment=(NGSMODULES pbs:gm:mpich-gm))" > $REG_RSL_FILE
+
+# If target machine is the local client then just execute the launching script
+# created in the xxx_launch.sh script that called this one
+case $SIM_HOSTNAME in
+       localhost)
+        chmod a+x $REG_TMP_FILE
+	$REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
+	exit
+          ;;
+esac
+
+# SIM_NODE_HOSTNAME is needed for running on a linux cluster
+# viking has a unique script on the machine itself configured to put the job
+# into SGE queues
+#if [ $SSH -eq 0 ]
+#then
+#  case $SIM_HOSTNAME in
+#       viking-i00.viking.lesc.doc.ic.ac.uk)
+#          SIM_NODE_HOSTNAME=viking000.viking.lesc.doc.ic.ac.uk
+#          globus-job-run $SIM_HOSTNAME -stdout $SIM_STD_OUT_FILE.initial -stderr $SIM_STD_ERR_FILE.initial -s /tmp/reg_sim_remote.$$ &  
 
 case $ReG_LAUNCH in
     globus)
      echo "Using vanilla globus"
-     $GLOBUS_LOCATION/bin/globusrun -b -s -r $HOST/$JOBMGR -f $REG_RSL
+     $GLOBUS_LOCATION/bin/globusrun -b -s -r ${HOST_JOB_MGR} -f $REG_RSL_FILE
     ;;
     cog)
      echo "Using COG globus"
-     $COG_INSTALL_PATH/bin/globusrun -s -r $HOST/$JOBMGR -f $REG_RSL &
+     $COG_INSTALL_PATH/bin/globusrun -s -r ${HOST_JOB_MGR} -f $REG_RSL_FILE &
     ;;
     ssh)
         chmod a+x $REG_TMP_FILE
@@ -56,6 +78,12 @@ case $ReG_LAUNCH in
         ssh -f $USER@$HOST $REG_TMP_FILE
     ;;
     *)
-     echo "Usage: ./reg_globusrun host jobmanager file.rsl"
+     echo "ReG_LAUNCH must be set to one of 'globus', 'cog' or 'ssh'"
     ;;
 esac
+
+if [ $? -gt "0" ]
+then
+  echo "Error with starting simulation"
+  exit
+fi

@@ -53,18 +53,18 @@ CHECKPOINT_GSH=$3
 else
 CHECKPOINT_GSH=""
 fi
+export CHECKPOINT_GSH
 echo "Checkpoint GSH = $CHECKPOINT_GSH"
 
 # Thirdly: Setup REG_STEER_HOME for library location
 
 REG_STEER_HOME=$HOME/RealityGrid/reg_steer_lib
-export REG_STEER_HOME REG_SGS_ADDRESS
+export REG_STEER_HOME
 
 # Fourthly: Export these variables for use in child scripts
 
 REG_TMP_FILE=/tmp/reg_sim_remote.$$
-REG_RSL_FILE=/tmp/sim_stage.$$.rsl
-export CHECKPOINT_GSH SIM_HOSTNAME SIM_STD_ERR_FILE SIM_STD_OUT_FILE SIM_PROCESSORS 
+export REG_TMP_FILE 
 
 case $ReG_LAUNCH in
      cog)
@@ -91,7 +91,7 @@ case $ReG_LAUNCH in
     ;;
 esac
 
-# Setup the script for running the lbe3d wrapper
+# Setup the script for running the mini_app_para wrapper
 
 echo "#!/bin/sh" > $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>$REG_TMP_FILE
@@ -125,27 +125,7 @@ echo "\$HOME/RealityGrid/bin/start_mini_app_para" >> $REG_TMP_FILE
 
 echo "Starting simulation..."
 
-# Build the RSL file
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
 
-echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)" > $REG_RSL_FILE
-
-case $SIM_HOSTNAME in
-       green.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf-green $REG_RSL_FILE $SIM_USER
-          ;;
-       fermat.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf-fermat $REG_RSL_FILE $SIM_USER
-          ;;
-       wren.cfs.ac.uk)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun wren.cfs.ac.uk jobmanager-lsf $REG_RSL_FILE $SIM_USER
-          ;;
-       *)
-        $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun $SIM_HOSTNAME jobmanager-fork $REG_RSL_FILE $SIM_USER
-          ;;
-esac
-
-if [ $? -gt "0" ]
-then
-  echo "Error with starting simulation"
-  exit
-fi
+echo "...done."
+echo "-----------------"

@@ -38,12 +38,12 @@
 #
 #---------------------------------------------------------------------------*/
 
-
 #  Source the GUI generated configuration file
 . $1
 
 # Get the time to run
 TIME_TO_RUN=$2
+export TIME_TO_RUN
 
 # Optionally get the checkpoint data file name from the command line args
 if [ $# -eq 3 ]
@@ -52,60 +52,76 @@ CHECKPOINT_GSH=$3
 else
 CHECKPOINT_GSH=""
 fi
-
+export CHECKPOINT_GSH
 echo "Checkpoint GSH = $CHECKPOINT_GSH"
+
+# Thirdly: Setup REG_STEER_HOME for library location
+
+REG_STEER_HOME=$HOME/RealityGrid/reg_steer_lib
+export REG_STEER_HOME
+
+case $ReG_LAUNCH in
+     cog)
+       GLOBUS_BIN_PATH=$COG_INSTALL_PATH/bin
+      ;;
+     globus)
+       GLOBUS_BIN_PATH=$GLOBUS_LOCATION/bin
+      ;;
+     *)
+       echo "Using ssh/scp for launching only...check public-key is correctly installed"
+      ;;
+esac
 
 # Ascertain whether we have a valid grid-proxy 
 
-if [ $SSH -eq 0 ]
+if [ $SIM_HOSTNAME != "localhost" ]
 then
-echo "Using Globus"
-   $GLOBUS_LOCATION/bin/grid-proxy-info -e
-   if [ $? -ne "0" ]
-     then
-       echo "No grid proxy, please invoke grid-proxy-init"
-       exit
-   fi
-else
-echo "Using SSH for launching only...check public-key is correctly installed"
+  case $ReG_LAUNCH in
+      globus|cog)
+      $GLOBUS_BIN_PATH/grid-proxy-info -exists
+       if [ $? -ne "0" ]
+       then
+         echo "No grid proxy, please invoke grid-proxy-init"
+         exit
+       fi
+      ;;
+  esac
 fi
 
-# Do the setup for the perl launcher
+# Setup the script for running the 'sink' wrapper
 
-REG_STEER_HOME=$HOME/RealityGrid/reg_steer_lib
-export REG_STEER_HOME REG_SGS_ADDRESS
+REG_TMP_FILE=/tmp/reg_sim_remote.$$
+export  REG_TMP_FILE
 
-# Setup the script for running the mini_app wrapper
-
-echo "#!/bin/sh" > /tmp/reg_sim_remote.$$
-echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>/tmp/reg_sim_remote.$$
-echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch" >> /tmp/reg_sim_remote.$$
-echo "export REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-echo "SSH=\$SSH" >> /tmp/reg_sim_remote.$$
-echo "export SSH" >> /tmp/reg_sim_remote.$$
-echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-echo "export REG_STEER_DIRECTORY" >> /tmp/reg_sim_remote.$$
-echo "echo \"Working directory is \$REG_WORKING_DIR\"" >> /tmp/reg_sim_remote.$$
-echo "echo \"Steering directory is \$REG_STEER_DIRECTORY\"" >> /tmp/reg_sim_remote.$$
-echo "if [ ! -d \$REG_WORKING_DIR ]" >> /tmp/reg_sim_remote.$$
-echo "then" >> /tmp/reg_sim_remote.$$
-echo "  mkdir \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-echo "fi" >> /tmp/reg_sim_remote.$$
-echo "cd \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-echo "UC_PROCESSORS=$SIM_PROCESSORS" >> /tmp/reg_sim_remote.$$
-echo "export UC_PROCESSORS" >> /tmp/reg_sim_remote.$$
-echo "TIME_TO_RUN=$TIME_TO_RUN" >> /tmp/reg_sim_remote.$$
-echo "export TIME_TO_RUN" >> /tmp/reg_sim_remote.$$
-echo "GS_INFILE=.reg.input-file.$$" >> /tmp/reg_sim_remote.$$
-echo "export GS_INFILE" >> /tmp/reg_sim_remote.$$
-echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> /tmp/reg_sim_remote.$$
-echo "export SIM_STD_ERR_FILE" >> /tmp/reg_sim_remote.$$
-echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> /tmp/reg_sim_remote.$$
-echo "export SIM_STD_OUT_FILE" >> /tmp/reg_sim_remote.$$
-echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> /tmp/reg_sim_remote.$$
-echo "export REG_SGS_ADDRESS" >> /tmp/reg_sim_remote.$$
-echo "echo \"Starting job...\"" >> /tmp/reg_sim_remote.$$
-echo "\$HOME/RealityGrid/bin/sink" >> /tmp/reg_sim_remote.$$
+echo "#!/bin/sh" > $REG_TMP_FILE
+echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>$REG_TMP_FILE
+echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch" >> $REG_TMP_FILE
+echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "SSH=\$SSH" >> $REG_TMP_FILE
+echo "export SSH" >> $REG_TMP_FILE
+echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "export REG_STEER_DIRECTORY" >> $REG_TMP_FILE
+echo "echo \"Working directory is \$REG_WORKING_DIR\"" >> $REG_TMP_FILE
+echo "echo \"Steering directory is \$REG_STEER_DIRECTORY\"" >> $REG_TMP_FILE
+echo "if [ ! -d \$REG_WORKING_DIR ]" >> $REG_TMP_FILE
+echo "then" >> $REG_TMP_FILE
+echo "  mkdir \$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "fi" >> $REG_TMP_FILE
+echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "UC_PROCESSORS=$SIM_PROCESSORS" >> $REG_TMP_FILE
+echo "export UC_PROCESSORS" >> $REG_TMP_FILE
+echo "TIME_TO_RUN=$TIME_TO_RUN" >> $REG_TMP_FILE
+echo "export TIME_TO_RUN" >> $REG_TMP_FILE
+echo "GS_INFILE=.reg.input-file.$$" >> $REG_TMP_FILE
+echo "export GS_INFILE" >> $REG_TMP_FILE
+echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
+echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
+echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
+echo "echo \"Starting job...\"" >> $REG_TMP_FILE
+echo "\$HOME/RealityGrid/bin/sink" >> $REG_TMP_FILE
 
 echo ""
 
@@ -113,56 +129,7 @@ echo ""
 
 echo "Starting simulation..."
 
-# SIM_NODE_HOSTNAME is needed for running on a linux cluster
-# viking has a unique script on the machine itself configured to put the job
-# into SGE queues
-if [ $SSH -eq 0 ]
-then
-  case $SIM_HOSTNAME in
-       viking-i00.viking.lesc.doc.ic.ac.uk)
-          SIM_NODE_HOSTNAME=viking000.viking.lesc.doc.ic.ac.uk
-          globus-job-run $SIM_HOSTNAME -stdout $SIM_STD_OUT_FILE.initial -stderr $SIM_STD_ERR_FILE.initial -s /tmp/reg_sim_remote.$$ &  
-          ;;
-       green.cfs.ac.uk)
-#          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})(queue=testq)" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
-          ;;
-       fermat.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
-          ;;
-       wren.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
-          ;;
-       localhost)
-	  chmod a+x /tmp/reg_sim_remote.$$
-          /tmp/reg_sim_remote.$$ &> ${HOME}/${SIM_STD_ERR_FILE} &
-          ;;
-       *)
-          globus-job-run $SIM_HOSTNAME/jobmanager-fork -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
-#          globus-job-run $SIM_HOSTNAME/jobmanager-fork -stdout $SIM_STD_OUT_FILE -stderr /home/bezier1/zzcgurp/$SIM_STD_ERR_FILE -s /tmp/reg_sim_remote.$$ &
-#          globus-job-run $SIM_HOSTNAME/jobmanager-lsf -m 10 -np 4 -x '(jobType=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -s /tmp/reg_sim_remote.$$ &
-          ;;
-  esac
-else
-  case $SIM_HOSTNAME in
-       viking-i00.viking.lesc.doc.ic.ac.uk)
-          SIM_NODE_HOSTNAME=viking000.viking.lesc.doc.ic.ac.uk
-          chmod a+x /tmp/reg_sim_remote.$$
-          scp /tmp/reg_sim_remote.$$ $SIM_USER@$SIM_HOSTNAME:/tmp/reg_sim_remote.$$
-          ssh -f $SIM_USER@$SIM_HOSTNAME /tmp/reg_sim_remote.$$   
-          ;;
-       *)
-          chmod a+x /tmp/reg_sim_remote.$$
-          scp /tmp/reg_sim_remote.$$ $SIM_USER@$SIM_HOSTNAME:/tmp/reg_sim_remote.$$
-          ssh -f $SIM_USER@$SIM_HOSTNAME /tmp/reg_sim_remote.$$   
-          ;;
-  esac
-fi
+$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
 
-if [ $? -gt "0" ]
-then
-  echo "Error with starting simulation"
-  exit
-fi
-
-echo ""
+echo "...done."
+echo "-----------------"
