@@ -78,6 +78,9 @@ TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
 export REG_TMP_FILE
 
+REG_TMP_FILE_ONLY=reg_sim_remote.$$
+export  REG_TMP_FILE_ONLY
+
 case $ReG_LAUNCH in
      cog)
        GLOBUS_BIN_PATH=$COG_INSTALL_PATH/bin

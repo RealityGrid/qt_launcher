@@ -96,6 +96,9 @@ fi
 REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_viz_remote.$$
 export REG_TMP_FILE
 
+REG_TMP_FILE_ONLY=reg_sim_remote.$$
+export  REG_TMP_FILE_ONLY
+
 echo "#!/bin/sh" > $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
 echo "SSH=$SSH" >> $REG_TMP_FILE
