@@ -41,6 +41,9 @@ int checkPointTreeListViewPreviousSelection = -1;
 void RegLauncher::init(){
   config.readConfig("default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
+
+  //statusBar()->hide();
+  //statusBar()->setSizeGripEnabled(false);
 }
 
 void RegLauncher::setApplication(QApplication *aApplication){

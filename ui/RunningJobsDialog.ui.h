@@ -22,6 +22,8 @@ void RunningJobsDialog::setConfig(LauncherConfig *aConfig )
 
   // populate the viz's simulation gsh entry box with a good default
   runningGSHLineEdit->setText(mConfig->simulationGSH);
+  if (mResultString != NULL)
+    *mResultString = runningGSHLineEdit->text();
 
   // populate the gsh tag list view - spawn a process
   // to do this, read the results in from a slot here
@@ -61,4 +63,5 @@ void RunningJobsDialog::runningGSHSelectedSlot( int row, int col, int button, co
  */
 void RunningJobsDialog::setResultString(QString *aResultString){
   mResultString = aResultString;
+  *mResultString = runningGSHLineEdit->text();
 }

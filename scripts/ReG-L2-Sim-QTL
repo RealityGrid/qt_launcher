@@ -137,7 +137,7 @@ then
 #  Transfer the checkpoint data files to target machine
 #   do this by calling Mark McKeown's rgcpc script
 echo "Calling Mark McKeown's rgcpc script"
-./rgcpc.pl -x -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
+./rgcpc.pl -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
 echo "Done calling script"
 fi
 
