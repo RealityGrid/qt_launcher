@@ -293,6 +293,10 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
   // parameters file
   QString paramName = QString("parameters");
           paramName += "           ";
+  // fep input file (is a pdb)
+  QString fepName = QString("fepFile");
+          fepName += "           ";
+  bool hasFepFile = FALSE;
           
   QStringList::iterator file = fileNames.begin();
   while(file != fileNames.end()){
@@ -324,8 +328,13 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
       paramName += (*file).section('/', -1) + "\n";
       //cout << "ARPDBG param: " << paramName << endl;
     }
+    else if((*file).endsWith(".pdb")){
+
+      fepName += (*file).section('/',-1) + "\n";
+      hasFepFile = TRUE;
+    }
     
-	  ++file;
+    ++file;
   }
   
   int nextLine = 0;
@@ -334,7 +343,8 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     // Replace exisiting line
     nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
-      inputFileText = inputFileText.left(index) + coordName + inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(index) + coordName + 
+                      inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
@@ -342,7 +352,8 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     index = inputFileText.find("\ncoordinates");
     if(index > 0){
       nextLine = inputFileText.find("\n", ++index);
-      inputFileText = inputFileText.left(nextLine) + "\n" + coordName + inputFileText.right(nextLine);
+      inputFileText = inputFileText.left(nextLine) + "\n" + 
+                      coordName + inputFileText.right(nextLine);
     }
   }
 
@@ -351,7 +362,8 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     // Replace exisiting line
     nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
-      inputFileText = inputFileText.left(index) + velName + inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(index) + velName + 
+                      inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
@@ -359,7 +371,8 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     index = inputFileText.find("\ncoordinates");
     if(index > 0){
       nextLine = inputFileText.find("\n", ++index);
-      inputFileText = inputFileText.left(nextLine) + "\n" + velName + inputFileText.right(nextLine);
+      inputFileText = inputFileText.left(nextLine) + "\n" + 
+                      velName + inputFileText.right(nextLine);
     }
   }
 
@@ -368,7 +381,9 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     // Replace exisiting line
     nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
-      inputFileText = inputFileText.left(index) + extSysName + inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(index) + 
+                      extSysName + inputFileText.right(inputFileText.length() 
+                      - nextLine - 1);
     }
   }
   else{
@@ -376,7 +391,8 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
     index = inputFileText.find("\ncoordinates");
     if(index > 0){
       nextLine = inputFileText.find("\n", ++index);
-      inputFileText = inputFileText.left(nextLine) + "\n" + extSysName + inputFileText.right(nextLine);
+      inputFileText = inputFileText.left(nextLine) + "\n" + 
+                      extSysName + inputFileText.right(nextLine);
     }
   }
 
@@ -384,63 +400,93 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
   index = inputFileText.find("\ntemperature");
   if( index != -1 ){
 
-    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+    inputFileText = inputFileText.left(index+1) + "#" + 
+                    inputFileText.right(inputFileText.length() - index - 1);
   }
 
   // We're specifying the basis vectors in a file so comment out if in input deck
-  index = inputFileText.find("cellBasisVector1");
-  if(!(index == 0 || inputFileText.at(index-1) == '#')){
+  index = inputFileText.find("\ncellBasisVector1");
+  if((index != -1) && !(inputFileText.at(index-1) == '#')){
 
-    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+    inputFileText = inputFileText.left(index+1) + "#" + 
+                    inputFileText.right(inputFileText.length() - index - 1);
   }
-  index = inputFileText.find("cellBasisVector2", ++index);
-  if(!(inputFileText.at(index-1) == '#')){
+  index = inputFileText.find("\ncellBasisVector2", ++index);
+  if((index != -1) && !(inputFileText.at(index-1) == '#')){
 
-    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+    inputFileText = inputFileText.left(index+1) + "#" + 
+                    inputFileText.right(inputFileText.length() - index - 1);
   }
-  index = inputFileText.find("cellBasisVector3", ++index);
-  if(!(inputFileText.at(index-1) == '#')){
+  index = inputFileText.find("\ncellBasisVector3", ++index);
+  if((index != -1) && !(inputFileText.at(index-1) == '#')){
 
-    inputFileText = inputFileText.left(index) + "#" + inputFileText.right(inputFileText.length() - index);
+    inputFileText = inputFileText.left(index+1) + "#" + 
+                    inputFileText.right(inputFileText.length() - index - 1);
   }
 
   // structure file
-  index = inputFileText.find("structure");
+  index = inputFileText.find("\nstructure");
   if(index > 0){
     // Replace exisiting line
-    nextLine = inputFileText.find("\n", index);
+    nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
-      inputFileText = inputFileText.left(index) + structName + inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(index) + structName + 
+                  inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
     // Insert new line
-    index = inputFileText.find("coordinates");
+    index = inputFileText.find("\ncoordinates");
     if(index > 0){
-      nextLine = inputFileText.find("\n", index);
-      inputFileText = inputFileText.left(nextLine) + "\n" + structName + inputFileText.right(nextLine);
+      nextLine = inputFileText.find("\n", ++index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + structName + 
+                      inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
 
   // parameters file
-  index = inputFileText.find("parameters");
+  index = inputFileText.find("\nparameters");
   if(index > 0){
     // Replace exisiting line
-    nextLine = inputFileText.find("\n", index);
+    nextLine = inputFileText.find("\n", ++index);
     if (nextLine > index){
-      inputFileText = inputFileText.left(index) + paramName + inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(index) + paramName + 
+                    inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
   else{
     // Insert new line
-    index = inputFileText.find("coordinates");
+    index = inputFileText.find("\ncoordinates");
     if(index > 0){
-      nextLine = inputFileText.find("\n", index);
-      inputFileText = inputFileText.left(nextLine) + "\n" + paramName + inputFileText.right(nextLine);
+      nextLine = inputFileText.find("\n", ++index);
+      inputFileText = inputFileText.left(nextLine) + "\n" + paramName + 
+                      inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
 
-  //cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
+  // fep file
+  if(hasFepFile){
+    index = inputFileText.find("\nfepFile", 0, FALSE);
+    if(index > 0){
+      // Replace exisiting line
+      nextLine = inputFileText.find("\n", ++index);
+      if (nextLine > index){
+      	inputFileText = inputFileText.left(index) + fepName + 
+                  inputFileText.right(inputFileText.length() - nextLine - 1);
+      }
+    }
+    else{
+      // Insert new line
+      index = inputFileText.find("\ncoordinates");
+      if(index > 0){
+      	nextLine = inputFileText.find("\n", ++index);
+      	inputFileText = inputFileText.left(nextLine) + "\n" + fepName + 
+                 inputFileText.right(inputFileText.length() - nextLine - 1);
+      }
+    }
+  }
+  
+  cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
 }
 
 /** Slot launches a simulation or visualization component.
@@ -561,7 +607,7 @@ void RegLauncher::launchSimSlot()
       inputFile.close();
     }
   }
-
+  
   // now launch!
   commonLaunchCode();
 }
