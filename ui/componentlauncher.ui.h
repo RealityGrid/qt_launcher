@@ -231,7 +231,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
     //if (pageName == title(page(1))){
     //  componentSelectedSlot();
     //}
-    cout << string << endl;
+    //cout << string << endl;
     
     if (string == title(page(10))){
     	// Find out who we are - could query our certificate at this stage
@@ -239,7 +239,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 
       // Get the current date and time
       QDateTime dt = QDateTime::currentDateTime();
-      sgsCreationTimeLineEdit->setText(dt.toString());
+      sgsCreationTimeLineEdit->setText(dt.toString(Qt::ISODate));
 
       // What is it we're launching?
       switch (componentComboBox->currentItem()){
