@@ -223,7 +223,12 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
 }
 
 
-QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &checkPointGSH, const QString &inputFileName, const QString &optionalChkPtTag){
+QString Gridifier::makeSimSGS(const QString &factory, const QString &tag,
+                              const QString &topLevelRegistry,
+                              const QString &checkPointGSH,
+                              const QString &inputFileName,
+                              const QString &optionalChkPtTag,
+                              const int maxRunTime){
   QString result;
   
   QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
@@ -234,6 +239,7 @@ QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const 
   makeSimSGSProcess->addArgument(topLevelRegistry);
   makeSimSGSProcess->addArgument(checkPointGSH);
   makeSimSGSProcess->addArgument(inputFileName);
+  makeSimSGSProcess->addArgument(QString::number(maxRunTime));
   if (optionalChkPtTag.length() > 0)
     makeSimSGSProcess->addArgument(optionalChkPtTag);
  
@@ -251,7 +257,10 @@ QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const 
   return result;
 }
 
-QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &simSGS){
+QString Gridifier::makeVizSGS(const QString &factory, const QString &tag,
+                              const QString &topLevelRegistry,
+                              const QString &simSGS,
+                              const int maxRunTime){
   QString result;
 
   QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
@@ -260,6 +269,7 @@ QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const 
   makeVizSGSProcess->addArgument(tag);
   makeVizSGSProcess->addArgument(topLevelRegistry);
   makeVizSGSProcess->addArgument(simSGS);
+  makeVizSGSProcess->addArgument(QString::number(maxRunTime));
   makeVizSGSProcess->start();
 
   while (makeVizSGSProcess->isRunning()){

@@ -7,9 +7,9 @@ use XML::Parser;
 use XML::DOM;
 
 
-if( @ARGV != 4  )
+if( @ARGV != 5  )
 {
-  print "Usage: make_vis_sgs.pl <GSH of factory> <tag for SGS> <GSH of registry> <GSH of data source>\n";
+  print "Usage: make_vis_sgs.pl <GSH of factory> <tag for SGS> <GSH of registry> <GSH of data source> <Max run time (min)>\n";
   exit;
 }
 
@@ -17,6 +17,7 @@ my $sgs_factory_GSH = $ARGV[0];
 my $content = $ARGV[1];
 my $registry_GSH = $ARGV[2];
 my $source_GSH = $ARGV[3];
+my $run_time = $ARGV[4];
 
 #----------------------------------------------------------------------
 # Create SGS
@@ -24,7 +25,17 @@ my $source_GSH = $ARGV[3];
 $target = $sgs_factory_GSH;
 $uri = "factory";
 $func = "createService";
-$timeToLive = "<ogsi:terminationTime after=\"infinity\"/>";
+
+# Get the time and date
+my $time_now = time;
+
+# Give the GS an initial lifetime of 24 hours
+($sec,$min,$hour,$mday,$mon,$year,$wday,$yday,$isdst) = 
+                                         gmtime($time_now + 24*60*60);
+$timeStr = sprintf "%4d-%02d-%02dT%02d:%02d:%02dZ",
+                     $year+1900,$mon+1,$mday,$hour,$min,$sec;
+$timeToLive = "<ogsi:terminationTime after=\"".$timeStr."\"/>";
+#$timeToLive = "<ogsi:terminationTime after=\"infinity\"/>";
 
 $result =  SOAP::Lite
                  -> uri($uri)              #set the namespace
@@ -94,7 +105,7 @@ for($i=0; $i<$count; $i++){
 die "Failed to find a valid data source\n" unless (length($source_label) > 0);
 
 #-------------------------------------------------------------------------
-# Set-up Vis. SGS with data sources
+# Set-up Vis. SGS with data sources and max. run time
 
 my $dataSources = "<SGS:Data_source_list>
 <SGS:Data_source>
@@ -104,8 +115,14 @@ my $dataSources = "<SGS:Data_source_list>
 </SGS:Data_source_list>";
 
 $func = "setServiceData";
+# Configure the SGS with the max. run-time of the job (is used to 
+# control life-time of the service). Allow 5 more
+# minutes than specified, just to be on the safe side.
+$run_time += 5;
 $arg = "<ogsi:setByServiceDataNames>".$dataSources.
-    "</ogsi:setByServiceDataNames>";
+    "<SGS:Max_run_time>" . $run_time . "</SGS:Max_run_time>
+    </ogsi:setByServiceDataNames>";
+
 my $ans = SOAP::Lite
           -> uri("SGS")
           -> proxy("$sgs_GSH")
