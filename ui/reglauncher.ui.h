@@ -484,6 +484,12 @@ cout << "Common Launch Code" << endl;
     // then we'll be ok for testing purposes
     sgs = gridifier.makeVizSGS(factory, config.vizTag, config.topLevelRegistryGSH, config.simulationGSH);
 
+    // Check that the sgs was created properly, if not die
+    if (sgs.length()==0 || !sgs.startsWith("http://")){
+      consoleOutSlot("Failed to create a visualization SGS - is the simulation SGS valid and running?");
+      return;
+    }
+
     // Copy the value to the config
     config.visualizationGSH = sgs;
 
