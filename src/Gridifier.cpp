@@ -217,7 +217,6 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
   // this functionality is left in a seperate slot since it could be better
   // to allow the standard qt events to handle it, rather than sitting in the
   // above loop
-  //result = makeSGSFactoryProcessEnded().stripWhiteSpace();
   result = QString(makeSGSFactoryProcess->readStdout()).stripWhiteSpace();
 
   return result;
@@ -237,7 +236,7 @@ QString Gridifier::makeSimSGS(const QString &factory, const QString &tag, const 
   makeSimSGSProcess->addArgument(inputFileName);
   if (optionalChkPtTag.length() > 0)
     makeSimSGSProcess->addArgument(optionalChkPtTag);
-  // cout << makeSimSGSProcess->arguments().join(" ") << endl;
+ 
   makeSimSGSProcess->start();
 
   while(makeSimSGSProcess->isRunning()){
@@ -261,9 +260,6 @@ QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const 
   makeVizSGSProcess->addArgument(tag);
   makeVizSGSProcess->addArgument(topLevelRegistry);
   makeVizSGSProcess->addArgument(simSGS);
-
-  // cout << makeVizSGSProcess->arguments().join(" ") << endl;
-  
   makeVizSGSProcess->start();
 
   while (makeVizSGSProcess->isRunning()){
@@ -410,7 +406,6 @@ if ( logFile.open(IO_WriteOnly) ){
 void Gridifier::launchVizScript(const QString &scriptConfigFileName,
                                 const LauncherConfig &config){
                                 
-  //QProcess *launchVizScriptProcess = new QProcess(QString("./ReG-L2-Viz-QTL"));
   // Construct name of script from name of application
   QProcess *launchVizScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
   launchVizScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
