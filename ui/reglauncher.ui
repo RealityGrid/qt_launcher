@@ -468,8 +468,6 @@
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
     <slot>migrateSimSlot()</slot>
-    <slot>getInputFileFromCheckPoint( const QString &amp; checkPointGSH, QString * result )</slot>
-    <slot>getDataFileFromCheckPoint( const QString &amp; checkPointGSH, QString * result )</slot>
     <slot>patchInputFileText(QString &amp; inputFileText, const QString &amp; checkPointDataText)</slot>
     <slot>launchSimSlot()</slot>
     <slot>commonLaunchCode()</slot>
@@ -488,6 +486,8 @@
 </slots>
 <functions>
     <function>setApplication(QApplication *)</function>
+    <function returnType="QString">getInputFileFromCheckPoint( const QString &amp; checkPointGSH)</function>
+    <function returnType="QString">getDataFileFromCheckPoint( const QString &amp; checkPointGSH)</function>    
 </functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

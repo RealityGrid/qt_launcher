@@ -15,6 +15,7 @@
 
 #include "componentlauncher.h"
 #include "RunningJobsDialog.h"
+#include "textviewdialog.h"
 
 #include "CheckPointTreeItem.h"
 #include "Gridifier.h"
@@ -139,12 +140,10 @@ void RegLauncher::migrateSimSlot()
   checkPointGSH = checkPointGSH.stripWhiteSpace();
   config.currentCheckpointGSH = checkPointGSH;
 
-  QString inputFileText;
-  getInputFileFromCheckPoint(checkPointGSH, &inputFileText);
+  QString inputFileText = getInputFileFromCheckPoint(checkPointGSH);
 
   if (inputFileText.length() != 0){
-    QString checkPointDataText;
-    getDataFileFromCheckPoint(checkPointGSH, &checkPointDataText);
+    QString checkPointDataText = getDataFileFromCheckPoint(checkPointGSH);
 
     // cache the checkpoint data on disk - we'll use it later
     QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
@@ -200,8 +199,10 @@ void RegLauncher::migrateSimSlot()
 }
 
 // Consider sticking these two methods in a seperate soap class
-void RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH, QString *result)
+QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
 {
+  QString result;
+  
   struct soap soap;
   soap_init(&soap);
   
@@ -209,14 +210,18 @@ void RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH, QStri
   if (soap_call_tree__getInputFile(&soap, checkPointGSH, "", inputFileResponse))
     soap_print_fault(&soap, stderr);
   else{
-    if (result == NULL)
-      result = new QString();
-    *result = inputFileResponse->_getInputFileReturn;
+    //if (result == NULL)
+    //  result = new QString();
+    result = inputFileResponse->_getInputFileReturn;
   }
+
+  return result;
 }
 
-void RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH, QString *result)
+QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 {
+  QString result;
+  
   struct soap soap;
   soap_init(&soap);
 
@@ -224,11 +229,15 @@ void RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH, QStrin
   if (soap_call_tree__getCheckPointData(&soap, checkPointGSH, "", chkptDataResponse))
     soap_print_fault(&soap, stderr);
   else{
-    if (result == NULL)
-      result = new QString();
-    *result = chkptDataResponse->_getCheckPointDataReturn;
+    //if (result == NULL)
+    //  result = new QString();
+    result = chkptDataResponse->_getCheckPointDataReturn;
   }
+
+  return result;
 }
+
+
 
 void RegLauncher::patchInputFileText(QString &inputFileText, const QString &checkPointDataText)
 {
@@ -301,12 +310,11 @@ void RegLauncher::launchSimSlot()
     componentLauncher->setCheckPointGSH(tGSH);
 
     // and then go get the input file associated with the selected checkpoint,
-    getInputFileFromCheckPoint(tGSH, &inputFileText);
+    inputFileText = getInputFileFromCheckPoint(tGSH);
 
     if (inputFileText.length() != 0){
-      QString checkPointDataText;
-      getDataFileFromCheckPoint(tGSH, &checkPointDataText);
-          
+      QString checkPointDataText = getDataFileFromCheckPoint(tGSH);
+
       // cache the checkpoint data on disk - we'll use it later
       QFile checkPointDataFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
       if ( checkPointDataFile.open(IO_WriteOnly) ){
@@ -414,6 +422,8 @@ void RegLauncher::commonLaunchCode(){
 
     gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
 
+    consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
+    
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
@@ -425,6 +435,8 @@ void RegLauncher::commonLaunchCode(){
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun);
 
     }
+
+    consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(statusBar(), config.selectedContainer+":50000/", config.simulationGSH);
     aJobStatusThread->start();
@@ -621,20 +633,31 @@ void RegLauncher::checkPointListViewExpanded(QListViewItem *item)
 }
 
 
-
 void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
 {
   if (selectedItem == NULL){
     checkPointTreeListViewPreviousSelection = -1;
+
+    checkPointTreeListView->clearSelection();
+
+    // Be nice and tell the user what's going to happen if they click the launch button
+    launchButton->setText("Launch");
+    
     return;
   }
 
   // if the current selection is already highlighted - deselect it
   if (checkPointTreeListView->itemPos(selectedItem) == checkPointTreeListViewPreviousSelection){
-    checkPointTreeListView->clearSelection();
+    // toggle the status
+    if (launchButton->text() == "Launch"){
+      launchButton->setText("Restart");
+    }
+    else {
+      checkPointTreeListView->clearSelection();
 
-    // Be nice and tell the user what's going to happen if they click the launch button
-    launchButton->setText("Launch");
+      // Be nice and tell the user what's going to happen if they click the launch button
+      launchButton->setText("Launch");
+    }
   }
   else {
     checkPointTreeListViewPreviousSelection = checkPointTreeListView->itemPos(selectedItem);
@@ -661,9 +684,12 @@ void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem, const Q
   QPopupMenu popupMenu;
   popupMenu.insertItem(QString("View Parameters"), 0);
   popupMenu.insertItem(QString("View GSH"), 1);
+  popupMenu.insertItem(QString("View Input File"), 2);
+  popupMenu.insertItem(QString("View CheckPoint Data"), 3);
   connect(&popupMenu, SIGNAL(activated(int)), this, SLOT(contextMenuItemSelectedSlot(int)));
   popupMenu.exec(pnt);
 }
+
 
 void RegLauncher::contextMenuItemSelectedSlot(int itemId)
 {
@@ -675,22 +701,47 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
 
     // Get a copy of the parameters that we want
     if (rightMouseCheckPointTreeItem != NULL){
-      CheckPointParamsList hope = rightMouseCheckPointTreeItem->getParamsList();
+      CheckPointParamsList cpParamList = rightMouseCheckPointTreeItem->getParamsList();
 
-      tmp.num_param = (int)hope.size();
-      for (unsigned int i=0; i<hope.size(); i++){
-        strcpy(tmp.param_labels[i], hope[i].mLabel);
-        strcpy(tmp.param_values[i], hope[i].mValue);
+      tmp.num_param = (int)cpParamList.size();
+      for (unsigned int i=0; i<cpParamList.size(); i++){
+        strcpy(tmp.param_labels[i], cpParamList[i].mLabel);
+        strcpy(tmp.param_values[i], cpParamList[i].mValue);
       }
     }
 
     ChkPtVariableForm *aChkPtVariableForm = new ChkPtVariableForm(&tmp, this, "testDialog");
     aChkPtVariableForm->show();
   }
+
   // or if we've selected to 'View GSH'
   else if (itemId == 1){
-    //QMessageBox::information(this, "GSH", config.currentCheckpointGSH, QMessageBox::Ok);
-    QInputDialog::getText("GSH", "Checkpoint GSH", QLineEdit::Normal, config.currentCheckpointGSH, NULL, this);
+    if (rightMouseCheckPointTreeItem != NULL)
+      QInputDialog::getText("GSH", "Checkpoint GSH", QLineEdit::Normal, rightMouseCheckPointTreeItem->getCheckPointGSH(), NULL, this);
+  }
+  // or if we've selected to 'View Input File'
+  else if (itemId == 2){
+    if (rightMouseCheckPointTreeItem != NULL){
+      // TODO - subclass QDialog to get a better pop-up window for this
+      QString inputFileText = getInputFileFromCheckPoint(rightMouseCheckPointTreeItem->getCheckPointGSH());
+
+      TextViewDialog *textViewDialog = new TextViewDialog();
+      textViewDialog->mTextEdit->setText(inputFileText);
+      textViewDialog->mTextEdit->setReadOnly(TRUE);
+      textViewDialog->show();
+    }
+  }
+  // or if we've selected to 'View CheckPoint Data'
+  else if (itemId == 3){
+    if (rightMouseCheckPointTreeItem != NULL){
+      // TODO - subclass QDialog to get a better pop-up window for this
+      QString dataFileText = getDataFileFromCheckPoint(rightMouseCheckPointTreeItem->getCheckPointGSH());
+
+      TextViewDialog *textViewDialog = new TextViewDialog();
+      textViewDialog->mTextEdit->setText(dataFileText);
+      textViewDialog->mTextEdit->setReadOnly(TRUE);
+      textViewDialog->show();
+    }
   }
   
 }
