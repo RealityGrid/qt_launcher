@@ -145,12 +145,12 @@ fi
 if [ $SSH -eq 0 ]
 then
      case $VIZ_HOSTNAME in
-       dirac.chem.ucl.ac.uk)
-   globus-job-run $VIZ_HOSTNAME -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
-          ;;
        bezier.man.ac.uk)
    globus-job-run $VIZ_HOSTNAME/jobmanager-fork -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
           ;;
+       *)
+	  globus-job-run $VIZ_HOSTNAME -stderr $VIZ_STD_ERR_FILE -stdout $VIZ_STD_OUT_FILE -s /tmp/reg_viz_remote.$$ &
+	  ;;
      esac
 else
     chmod a+x /tmp/reg_viz_remote.$$
