@@ -57,8 +57,13 @@ class JobStatusThread: public QThread {
     QString mContainer;
     QString mGSH;
     bool done;
+    long age;
+    long lifespan;
 
     void getJobStatus();
+
+  public slots:
+    void timeout();
 };
 
 #endif
