@@ -1,0 +1,27 @@
+Some important tips for getting the RealityGrid QT Launcher application built and running.
+
+* Environment - make sure these are set
+  - REG_STEER_HOME to your RealityGrid Steering Library home
+  - SSH to 0
+  - QTDIR to wherever your QT version 3.1 is installed
+
+* Dirs and links
+  - make sure a 'tmp' directory exists in the top level dir (where this file is)
+  - make sure that there is a symbolic link 'OGSI' in the scripts dir to wherever your OGSI-Lite/OGSI directory lives.
+
+* Libs
+  - make sure libxml2 is avaiable on the system you're running / building on.
+
+* Configuration
+  - the 'default.conf' file in the top level dir holds the GSH of the top level registry, plus lists of target machines and containers. Edit at will.
+
+* Input files
+  - the 'input-file-mark' & 'input-file-mark32' are the best input files to use (I should in fact remove the others....)
+
+
+************
+Good Luck!
+
+Mark
+
+(0161 275 0605)
