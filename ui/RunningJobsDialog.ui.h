@@ -74,3 +74,13 @@ void RunningJobsDialog::setResultString(QString *aResultString){
   mResultString = aResultString;
   *mResultString = runningGSHLineEdit->text();
 }
+
+/** A short-cut - allows the user to select an entry and exit
+    the dialog in a single action */
+void RunningJobsDialog::tableDoubleClicked(int row, int col, int button, 
+					   const QPoint &mousePos)
+{
+  runningGSHSelectedSlot(row, col, button, mousePos);
+
+  done(QDialog::Accepted);
+}
