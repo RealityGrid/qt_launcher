@@ -11,6 +11,7 @@ Some important tips for getting the RealityGrid QT Launcher application built an
 
 * Libs
   - make sure libxml2 is avaiable on the system you're running / building on.
+  - make sure you check 'reg_gsoap_build' out of cvs, follow it's Readme and build - you'll need to link to the result libREGgsoap.a
 
 * Configuration
   - the 'default.conf' file in the top level dir holds the GSH of the top level registry, plus lists of target machines and containers. Edit at will.
