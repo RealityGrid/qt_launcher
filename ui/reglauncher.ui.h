@@ -155,7 +155,7 @@ void RegLauncher::migrateSimSlot()
     }
 */
     // patch it
-    patchInputFileText(inputFileText, checkPointDataText);
+    patchLb3dInputFileText(inputFileText, checkPointDataText);
 
     // cache it
     // we need to copy the selected/edited input file to the target machine
@@ -184,12 +184,7 @@ void RegLauncher::migrateSimSlot()
     if (!wizardOk)
       return;
 
-cout << "About to get the input file text from gsoap" << endl;
-
     migrater->getInputFileTextEditText(&inputFileText);
-
-// lockup debug
-cout << "Done that" << endl << "About to write the input file to " << inputFileText << endl;
 
     QFile inputFile( inputFileName );
     if ( inputFile.open( IO_WriteOnly ) ) {
@@ -197,9 +192,6 @@ cout << "Done that" << endl << "About to write the input file to " << inputFileT
       stream << inputFileText;
       inputFile.close();
     }
-
-// lockup debug
-cout << "Done that - now going over to the common launch code" << endl;
     
     // now launch!
     commonLaunchCode();    
@@ -248,7 +240,7 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 
 
 
-void RegLauncher::patchInputFileText(QString &inputFileText, const QString &checkPointDataText)
+void RegLauncher::patchLb3dInputFileText(QString &inputFileText, const QString &checkPointDataText)
 {
   QString chkUIDString;
 
@@ -332,9 +324,26 @@ void RegLauncher::launchSimSlot()
         checkPointDataFile.close();
       }
 */
+
+      // Get the ID string of the app. that created this checkpoint
+      QDomDocument doc("Checkpoint meta-data");
+      doc.setContent(checkPointDataText);
+
+      QDomNodeList nodes = doc.elementsByTagName(QString("Checkpoint_data"));
+
       // patch it
-      patchInputFileText(inputFileText, checkPointDataText);
-        
+      patchLb3dInputFileText(inputFileText, checkPointDataText);
+/*
+      switch(){
+
+      case():
+        patchLb3dInputFileText(inputFileText, checkPointDataText);
+        break;
+
+        default:
+        break;
+      }
+*/
       // cache it
       // we need to copy the selected/edited input file to the target machine
       QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
