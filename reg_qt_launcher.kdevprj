@@ -11,7 +11,7 @@ email=mark.riding@man.ac.uk
 kdevprj_version=1.3
 lfv_open_groups=
 make_options=-j1
-makefiles=Makefile.am,docs/Makefile.am,docs/en/Makefile.am,src/Makefile.am,include/Makefile.am,ui/Makefile.am
+makefiles=Makefile.am,docs/Makefile.am,docs/en/Makefile.am,src/Makefile.am,include/Makefile.am,ui/Makefile.am,include/CVS/Makefile.am
 project_name=ReG_QT_Launcher
 project_type=normal_empty
 sub_dir=
@@ -38,6 +38,25 @@ type=normal
 [docs/en/Makefile.am]
 sub_dirs=
 type=normal
+
+[include/CVS/Makefile.am]
+files=include/CVS/jobmetadata.cpp,include/CVS/jobmetadata.h
+sharedlib_LDFLAGS=-version-info 0:0:0
+sharedlib_rootname=CVS
+sub_dirs=
+type=static_library
+
+[include/CVS/jobmetadata.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[include/CVS/jobmetadata.h]
+dist=true
+install=false
+install_location=
+type=HEADER
 
 [include/CheckPointTree.h]
 dist=true
@@ -70,8 +89,8 @@ install_location=
 type=HEADER
 
 [include/Makefile.am]
-files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h,include/ProgressBarThread.h
-sub_dirs=
+files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h,include/ProgressBarThread.h,include/jobmetadata.h,include/StatusMessageData.h
+sub_dirs=CVS
 type=normal
 
 [include/ProgressBarThread.h]
@@ -80,7 +99,19 @@ install=false
 install_location=
 type=HEADER
 
+[include/StatusMessageData.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
 [include/Utility.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[include/jobmetadata.h]
 dist=true
 install=false
 install_location=
@@ -129,7 +160,7 @@ install_location=
 type=SOURCE
 
 [src/Makefile.am]
-files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp,src/ProgressBarThread.cpp
+files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp,src/ProgressBarThread.cpp,src/jobmetadata.cpp
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=src
 sub_dirs=
@@ -153,6 +184,12 @@ install=false
 install_location=
 type=SOURCE
 
+[src/jobmetadata.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
 [src/main.cpp]
 dist=true
 install=false
@@ -160,7 +197,7 @@ install_location=
 type=SOURCE
 
 [ui/Makefile.am]
-files=ui/RunningJobsDialog.ui
+files=ui/RunningJobsDialog.ui,ui/reglauncher.ui.h,ui/reglauncher.ui,ui/RunningJobsDialog.ui.h,ui/componentlauncher.ui.h,ui/componentlauncher.ui
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=ui
 sub_dirs=
@@ -171,3 +208,33 @@ dist=true
 install=false
 install_location=
 type=SOURCE
+
+[ui/RunningJobsDialog.ui.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[ui/componentlauncher.ui]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[ui/componentlauncher.ui.h]
+dist=true
+install=false
+install_location=
+type=HEADER
+
+[ui/reglauncher.ui]
+dist=true
+install=false
+install_location=
+type=SOURCE
+
+[ui/reglauncher.ui.h]
+dist=true
+install=false
+install_location=
+type=HEADER

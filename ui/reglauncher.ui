@@ -205,20 +205,6 @@
     </action>
     <action>
         <property name="name">
-            <cstring>filePrintAction</cstring>
-        </property>
-        <property name="text">
-            <string>Print</string>
-        </property>
-        <property name="menuText">
-            <string>&amp;Print...</string>
-        </property>
-        <property name="accel">
-            <string>Ctrl+P</string>
-        </property>
-    </action>
-    <action>
-        <property name="name">
             <cstring>fileExitAction</cstring>
         </property>
         <property name="text">
@@ -273,48 +259,6 @@
             <string>Ctrl+D</string>
         </property>
     </action>
-    <action>
-        <property name="name">
-            <cstring>helpContentsAction</cstring>
-        </property>
-        <property name="text">
-            <string>Contents</string>
-        </property>
-        <property name="menuText">
-            <string>&amp;Contents...</string>
-        </property>
-        <property name="accel">
-            <string></string>
-        </property>
-    </action>
-    <action>
-        <property name="name">
-            <cstring>helpIndexAction</cstring>
-        </property>
-        <property name="text">
-            <string>Index</string>
-        </property>
-        <property name="menuText">
-            <string>&amp;Index...</string>
-        </property>
-        <property name="accel">
-            <string></string>
-        </property>
-    </action>
-    <action>
-        <property name="name">
-            <cstring>helpAboutAction</cstring>
-        </property>
-        <property name="text">
-            <string>About</string>
-        </property>
-        <property name="menuText">
-            <string>&amp;About...</string>
-        </property>
-        <property name="accel">
-            <string></string>
-        </property>
-    </action>
 </actions>
 <connections>
     <connection>
@@ -342,12 +286,6 @@
         <slot>fileSaveAs()</slot>
     </connection>
     <connection>
-        <sender>filePrintAction</sender>
-        <signal>activated()</signal>
-        <receiver>RegLauncher</receiver>
-        <slot>filePrint()</slot>
-    </connection>
-    <connection>
         <sender>fileExitAction</sender>
         <signal>activated()</signal>
         <receiver>RegLauncher</receiver>
@@ -370,24 +308,6 @@
         <signal>activated()</signal>
         <receiver>RegLauncher</receiver>
         <slot>proxyDestroy()</slot>
-    </connection>
-    <connection>
-        <sender>helpIndexAction</sender>
-        <signal>activated()</signal>
-        <receiver>RegLauncher</receiver>
-        <slot>helpIndex()</slot>
-    </connection>
-    <connection>
-        <sender>helpContentsAction</sender>
-        <signal>activated()</signal>
-        <receiver>RegLauncher</receiver>
-        <slot>helpContents()</slot>
-    </connection>
-    <connection>
-        <sender>helpAboutAction</sender>
-        <signal>activated()</signal>
-        <receiver>RegLauncher</receiver>
-        <slot>helpAbout()</slot>
     </connection>
     <connection>
         <sender>discoveryButton</sender>
@@ -454,11 +374,7 @@
     <slot>fileOpen()</slot>
     <slot>fileSave()</slot>
     <slot>fileSaveAs()</slot>
-    <slot>filePrint()</slot>
     <slot>fileExit()</slot>
-    <slot>helpIndex()</slot>
-    <slot>helpContents()</slot>
-    <slot>helpAbout()</slot>
     <slot>migrateSimSlot()</slot>
     <slot>patchNamdInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString, QStringList &amp; fileNames )</slot>
     <slot>launchSimSlot()</slot>
