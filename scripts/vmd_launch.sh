@@ -157,14 +157,6 @@ echo "\$HOME/RealityGrid/bin/start_vmd .reg.input-file.$$" >> $REG_TMP_FILE
 
 echo "Transferring simulation input file..."
 
-if [ $CHECKPOINT_GSH ]
-then 
-# Build RSL
-  echo "&(executable="/home/bezier1/globus/bin/rg-cp")(arguments="-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH")" > /tmp/rgcp.rsl
-  echo "Calling MM's rgcpc script on Bezier..."
-  $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun bezier.man.ac.uk jobmanager-fork /tmp/rgcp.rsl 
-fi
-
 case $SIM_HOSTNAME in
      localhost)
        cp -f $SIM_INFILE $HOME/RealityGrid/scratch/.reg.input-file.$$
