@@ -179,7 +179,6 @@ void RegLauncher::migrateSimSlot()
     config.restart = false;
     config.newTree = false;
     migrater->setConfig(&config);
-    migrater->setApplication(this);
     
     // and insert it into the wizard's text edit box
     migrater->setInputFileTextEdit(inputFileText);
@@ -456,7 +455,6 @@ void RegLauncher::launchSimSlot()
   // Component launcher will fill in our current config with the user's requests
   ComponentLauncher *componentLauncher = new ComponentLauncher();
 
-  componentLauncher->setApplication(this);
   QString inputFileText = "";
 
   // Find out if the user has selected a checkpoint, and if so
@@ -465,7 +463,6 @@ void RegLauncher::launchSimSlot()
     config.restart = true;
 
     QString tGSH = ((CheckPointTreeItem*)checkPointTreeListView->selectedItem())->getCheckPointGSH();
-    componentLauncher->setCheckPointGSH(tGSH); // ARPDBG should get rid of this call
     config.currentCheckpointGSH = tGSH;
 
     // and then go get the input file associated with the selected checkpoint,

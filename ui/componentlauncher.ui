@@ -901,10 +901,8 @@
     <slot>accept()</slot>
     <slot>simInputPushButton_clicked()</slot>
     <slot>gshTagSelectedSlot( int row, int col, int button, const QPoint &amp; mousePos )</slot>
-    <slot>setCheckPointGSH( const QString &amp; checkPointGSH )</slot>
     <slot>setInputFileTextEdit( const QString &amp; text )</slot>
     <slot>getInputFileTextEditText( QString * returnPtr )</slot>
-    <slot>setApplication( RegLauncher * aRegLauncher )</slot>
     <slot>multicastToggleSlot()</slot>
     <slot>vizTargetSelectedSlot( QListBoxItem * selectedMachine )</slot>
     <slot>containerListBoxSelectedSlot( QListBoxItem * selectedContainer )</slot>

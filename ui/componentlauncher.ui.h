@@ -353,20 +353,6 @@ void ComponentLauncher::gshTagSelectedSlot( int row, int col, int button, const 
 /** if the user's selected an item from the checkpoint tree, then fill
  *  it in in the wizard.
  */
-void ComponentLauncher::setCheckPointGSH(const QString &checkPointGSH)
-{
-    //checkPointGSHLineEdit->setText(checkPointGSH);
-    
-    // if we're starting from a checkpoint tree then allow the user to
-    // edit the input file.  This may be overridden if the user has
-    // chosen to launch an app that's not restartable (i.e. wasn't
-    // used to generate the checkpoint tree in the first place).
-    setAppropriate(page(2), true);
-    // don't allow them to select their own file
-    // that's now done on p.0 anyway
-    //setAppropriate(page(4), false);
-}
-
 /** if the user's restarting from a checkpoint, then grab the input file,
  *  tweak it, and allow them to add their own changes
  */
@@ -378,12 +364,6 @@ void ComponentLauncher::getInputFileTextEditText(QString *returnPtr){
     *returnPtr = inputFileTextEdit->text();
 }
 
-
-// ????????????????????
-// not used - remove //
-void ComponentLauncher::setApplication(RegLauncher *aRegLauncher){
-    mRegLauncher = aRegLauncher;
-}
 
 
 /** When the user selects Multicast - turn the address input
