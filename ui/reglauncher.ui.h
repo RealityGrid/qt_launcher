@@ -670,7 +670,7 @@ void RegLauncher::commonLaunchCode(){
 
     // At this point we want to specialise for the Argonne Cluster.
     // Check to see where we are rendering and act accordingly
-    if (config.mTargetMachine == "tg-master.uc.teragrid.org"){
+    if (config.mTargetMachine->mName == "tg-master.uc.teragrid.org"){
       gridifier.launchArgonneViz(config);
     }
     else {
@@ -678,7 +678,10 @@ void RegLauncher::commonLaunchCode(){
 
       gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
     }
-    
+
+    JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
+                                                            config.visualizationGSH);
+    aJobStatusThread->start();
   }
 }
 

@@ -237,10 +237,18 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 
         // List of available hardware depends on whether app. is a viz.
         // or not
-        targetMachineListBox->insertStringList((mConfig->machineList));
+        targetMachineListBox->clear();
+        for ( QValueList<Machine>::Iterator it = mConfig->machineList.begin();
+                                        it != mConfig->machineList.end(); ++it ){
+          targetMachineListBox->insertItem((*it).mName, -1);  // append to list
+        }
       }
       else{
-        targetMachineListBox->insertStringList((mConfig->vizMachineList));
+        targetMachineListBox->clear();
+        for ( QValueList<Machine>::Iterator it = mConfig->vizMachineList.begin();
+                                        it != mConfig->vizMachineList.end(); ++it ){
+          targetMachineListBox->insertItem((*it).mName, -1); // append to list
+        }
       } 
     }
 }
@@ -257,71 +265,69 @@ void ComponentLauncher::accept(){
       mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
     }
     // Target machine
-    mConfig->mTargetMachine = targetMachineListBox->currentText();
+    //mConfig->mTargetMachine = targetMachineListBox->currentText();
+    if(mConfig->mAppToLaunch->mIsViz){
+      mConfig->mTargetMachine = &(mConfig->vizMachineList[targetMachineListBox->currentItem()]);
+    }
+    else{
+      mConfig->mTargetMachine = &(mConfig->machineList[targetMachineListBox->currentItem()]);
+    }
+    
     // Number processors
     mConfig->mNumberProcessors = numProcLineEdit->text().toInt();
- 	  // Container
-	  mConfig->selectedContainer = containerListBox->currentText();
+    // Container
+    mConfig->selectedContainer = containerListBox->currentText();
 
-    // CheckPoint GSH - note that this is entirely optional if we're not migrating
-/*
-	  if (!mConfig->migration){
-	    if (checkPointGSHLineEdit->text().length() == 0)
-		    mConfig->currentCheckpointGSH = "";
-	    else
-		    mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
-	  }
-*/
-	  // Input file name
-	  if (mConfig->mAppToLaunch->mHasInputFile && simInputLineEdit->text().length() != 0){
-	    mConfig->mInputFileName = simInputLineEdit->text();
-	  }
-
-	  // Tree tag
-	  if (mConfig->newTree){
-	    mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
-	  }
-
-	  // Time to run
-	  mConfig->mTimeToRun = runTimeLineEdit->text().toInt();
-
-	  // Container port number
-	  mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
-
-	  if(mConfig->mAppToLaunch->mIsViz){
-	    // Number pipes
-	    mConfig->mNumberPipes = vizPipesLineEdit->text().toInt();
-
-	    // VizServer
-	    mConfig->vizServer = vizServerCheckBox->isChecked();
-	  
-	    // Multicast
-	    mConfig->multicast = mcastCheckBox->isChecked();
-	    mConfig->multicastAddress = mcastAddrLineEdit->text();
-
-	    // Visualization type
-	    mConfig->vizType = vizTypeComboBox->currentItem();
+    // Input file name
+    if (mConfig->mAppToLaunch->mHasInputFile && simInputLineEdit->text().length() != 0){
+      mConfig->mInputFileName = simInputLineEdit->text();
     }
 
-	  // GSH of data source
-	  if(mConfig->mAppToLaunch->mNumInputs > 0){
+    // Tree tag
+    if (mConfig->newTree){
+      mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
+    }
 
-	  	if (simulationGSHLineEdit->text().length() == 0){
-	    	// if the user's not entered anything - then use the value from the config
-	  	}
-	  	else{
-	      // otherwise replace the config value with what the user wants
-	      // be aware that this should really need to happen
-	      mConfig->simulationGSH = simulationGSHLineEdit->text();
-	    }
+    // Time to run
+    mConfig->mTimeToRun = runTimeLineEdit->text().toInt();
+
+    // Container port number
+    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+
+    if(mConfig->mAppToLaunch->mIsViz){
+      // Number pipes
+      mConfig->mNumberPipes = vizPipesLineEdit->text().toInt();
+
+      // VizServer
+      mConfig->vizServer = vizServerCheckBox->isChecked();
+	  
+      // Multicast
+      mConfig->multicast = mcastCheckBox->isChecked();
+      mConfig->multicastAddress = mcastAddrLineEdit->text();
+
+      // Visualization type
+      mConfig->vizType = vizTypeComboBox->currentItem();
+    }
+
+    // GSH of data source
+    if(mConfig->mAppToLaunch->mNumInputs > 0){
+
+      if (simulationGSHLineEdit->text().length() == 0){
+        // if the user's not entered anything - then use the value from the config
+      }
+      else{
+        // otherwise replace the config value with what the user wants
+        // be aware that this should really need to happen
+        mConfig->simulationGSH = simulationGSHLineEdit->text();
+      }
     }
         
     // Store meta-data about this job
-	  mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
-	  mConfig->mJobData->mOrganisation = sgsOrganisationLineEdit->text();
-	  mConfig->mJobData->mLaunchTime = sgsCreationTimeLineEdit->text();
-	  mConfig->mJobData->mSoftwareDescription = sgsSoftwarePackageLineEdit->text();
-	  mConfig->mJobData->mPurposeOfJob = tagTextEdit->text();
+    mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
+    mConfig->mJobData->mOrganisation = sgsOrganisationLineEdit->text();
+    mConfig->mJobData->mLaunchTime = sgsCreationTimeLineEdit->text();
+    mConfig->mJobData->mSoftwareDescription = sgsSoftwarePackageLineEdit->text();
+    mConfig->mJobData->mPurposeOfJob = tagTextEdit->text();
 
     done(1);
 }
