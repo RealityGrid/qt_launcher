@@ -70,9 +70,15 @@ install_location=
 type=HEADER
 
 [include/Makefile.am]
-files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h
+files=include/LauncherConfig.h,include/Gridifier.h,include/Utility.h,include/CheckPointTreeItem.h,include/CheckPointTree.h,include/JobStatusThread.h,include/ProgressBarThread.h
 sub_dirs=
 type=normal
+
+[include/ProgressBarThread.h]
+dist=true
+install=false
+install_location=
+type=HEADER
 
 [include/Utility.h]
 dist=true
@@ -123,11 +129,17 @@ install_location=
 type=SOURCE
 
 [src/Makefile.am]
-files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp
+files=src/main.cpp,src/LauncherConfig.cpp,src/Gridifier.cpp,src/Utility.cpp,src/CheckPointTreeItem.cpp,src/CheckPointTree.cpp,src/chkptvariableform.cpp,src/JobStatusThread.cpp,src/ProgressBarThread.cpp
 sharedlib_LDFLAGS=-version-info 0:0:0
 sharedlib_rootname=src
 sub_dirs=
 type=static_library
+
+[src/ProgressBarThread.cpp]
+dist=true
+install=false
+install_location=
+type=SOURCE
 
 [src/Utility.cpp]
 dist=true
