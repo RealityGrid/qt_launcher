@@ -148,12 +148,12 @@ then
   case $SIM_HOSTNAME in
       iam764.psc.edu)
           # Pittsburgh has a special ftp server - put input file in home directory there....
-	  globus-url-copy file:$SIM_INFILE gsiftp://panhead.psc.edu/~/.reg.input-file.$$
+	  globus-url-copy file:$SIM_INFILE gsiftp://panhead.psc.edu/\~/.reg.input-file.$$
           # ...and then copy it over to LeMieux
-	  globus-job-run iam764.psc.edu /usr/psc/bin/far get .reg.input-file.$$ ~/RealityGrid/scratch/.
+	  globus-job-run iam764.psc.edu /usr/psc/bin/far get .reg.input-file.$$ \~/RealityGrid/scratch/.
           ;;
       *)
-	  globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
+	  globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/\~/RealityGrid/scratch/.reg.input-file.$$
 	  ;;
   esac
 else
