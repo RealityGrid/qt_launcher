@@ -93,6 +93,8 @@ class LauncherConfig {
     int vizNumberProcessors;
     int vizNumberPipes;
     bool vizServer;
+    bool multicast;
+    QString multicastAddress;
     bool migration;
     bool restart;
     bool newTree;
