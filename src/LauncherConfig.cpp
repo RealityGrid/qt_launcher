@@ -45,13 +45,13 @@
 #include "LauncherConfig.h"
 #include <iostream>
 #include "libxml/parser.h"
+#include "qmdcodec.h"
+#include <qdom.h>
+#include <qfile.h>
 
 using namespace std;
 
 LauncherConfig::LauncherConfig(){
-  // Some default values for testing
-  //simComponentType = notused;
-  //vizComponentType = notused;
 
   migration  = false;
   restart    = false;
@@ -361,10 +361,6 @@ void LauncherConfig::readConfig(QString file){
       }
     }
 
-    //for ( int i = 0; i < applicationList.count(); i++ )
-    //    cout << applicationList[i].mAppName.latin1() << ", " <<
-    //            applicationList[i].mNumInputs << endl;
-
     childOfRoot = childOfRoot->next;
   }
 }
@@ -471,4 +467,112 @@ void LauncherConfig::writeConfig(QString file){
   // And save it!
   xmlSaveFile(file.latin1(), doc);
 }
+
+/**
+ * Use Qt XML support to generate XML document describing the
+ * job to be launched.
+ */
+QString LauncherConfig::toXML(){
+
+	QDomDocument *doc = new QDomDocument();
+
+  // Get root node
+  QDomElement root = doc->createElement("LaunchSimulation");
+  doc->appendChild(root);
+
+  // Where to launch job
+  QDomElement eMachine = doc->createElement("TargetHostname");
+  root.appendChild(eMachine);
+
+  QDomText tMachineName = doc->createTextNode(mTargetMachine->mName);
+  eMachine.appendChild(tMachineName);
+
+  // What the jobmanager is called
+  QDomElement eJobMgr = doc->createElement("TargetHostJobManager");
+  root.appendChild(eJobMgr);
+
+  QDomText tJobMgr = doc->createTextNode(mTargetMachine->mJobManager);
+  eJobMgr.appendChild(tJobMgr);
+
+  // Wall-clock time of job in minutes
+  QDomElement eRunTime = doc->createElement("RunTime");
+  root.appendChild(eRunTime);
+
+  QDomText tRunTime = doc->createTextNode(QString::number(mTimeToRun));
+  eRunTime.appendChild(tRunTime);
+
+  // Checkpoint GSH
+  QDomElement eChkGSH;
+  QDomText tChkGSH;
+  if(restart || migration){
+    eChkGSH = doc->createElement("CheckPointGSH");
+    root.appendChild(eChkGSH);
+
+    tChkGSH = doc->createTextNode(currentCheckpointGSH);
+    eChkGSH.appendChild(tChkGSH);
+  }
+
+  // No. of processors
+  QDomElement eNumProc = doc->createElement("NoProcessors");
+  root.appendChild(eNumProc);
+
+  QDomText tNumProc = doc->createTextNode(QString::number(mNumberProcessors));
+  eNumProc.appendChild(tNumProc);
+
+  // Input file(s) for simulation
+  QDomElement eInputFiles = doc->createElement("SimulationInputFiles");
+  root.appendChild(eInputFiles);
+
+  QDomElement eFile;
+  QDomText tFile;
+  if(mAppToLaunch->mHasInputFile){
+  
+    eFile =  doc->createElement("File");
+    eInputFiles.appendChild(eFile);
+
+    // Read input file
+    QFile file(mInputFileName);
+    file.open( IO_ReadOnly );
+    QByteArray fileData = file.readAll();
+    file.close();
+  
+    // Encode input file as base64
+    QCString fileDataB64 = QCodecs::base64Encode(fileData, true);
+  
+    tFile = doc->createTextNode(fileDataB64);
+    eFile.appendChild(tFile);
+  }
+
+  // Pull out GSH of SGS and use to create job ID too
+  QString outputFile("ReGJob.");
+  QDomText tSGS;
+  if(mAppToLaunch->mNumInputs == 0){
+    tSGS = doc->createTextNode(simulationGSH);
+    outputFile.append(simulationGSH.right(simulationGSH.length() - simulationGSH.findRev('/') - 1));
+  }
+  else{
+    tSGS = doc->createTextNode(visualizationGSH);
+    outputFile.append(visualizationGSH.right(visualizationGSH.length() - visualizationGSH.findRev('/') - 1));
+  }
+
+  // Name of file to write job stdout to
+  QDomElement eStdOut = doc->createElement("SimulationSTDOUTfile");
+  root.appendChild(eStdOut);
+  QDomText tStdOut = doc->createTextNode(outputFile+".stdout");
+  eStdOut.appendChild(tStdOut);
+
+  // Name of file to write job stderr to
+  QDomElement eStdErr = doc->createElement("SimulationSTDERRfile");
+  root.appendChild(eStdErr);
+  QDomText tStdErr = doc->createTextNode(outputFile+".stderr");
+  eStdErr.appendChild(tStdErr);
+
+  // GSH of associated SGS
+  QDomElement eSGS = doc->createElement("ReGSGSAddress");
+  root.appendChild(eSGS);
+  eSGS.appendChild(tSGS);
+  
+  return doc->toString();
+}
+
 

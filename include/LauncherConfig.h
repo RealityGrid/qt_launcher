@@ -167,6 +167,8 @@ class LauncherConfig {
 
     void writeConfig(QString file);
     void readConfig(QString file);
+    QString toXML();
+
 };
 
 #endif
