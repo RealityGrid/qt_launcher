@@ -7,17 +7,20 @@ Some important tips for getting the RealityGrid QT Launcher application built an
 
 * Dirs and links
   - make sure a 'tmp' directory exists in the top level dir (where this file is)
-  - make sure that there is a symbolic link 'OGSI' in the scripts dir to wherever your OGSI-Lite/OGSI directory lives.
 
 * Libs
   - make sure libxml2 is avaiable on the system you're running / building on.
-  - make sure you check 'reg_gsoap_build' out of cvs, follow it's Readme and build - you'll need to link to the result libREGgsoap.a
 
 * Configuration
   - the 'default.conf' file in the top level dir holds the GSH of the top level registry, plus lists of target machines and containers. Edit at will.
 
 * Input files
-  - the 'input-file-mark' & 'input-file-mark32' are the best input files to use (I should in fact remove the others....)
+  - you will need whatever input files that job is going to require
+
+* Scripts
+  - if you're adding a new application to be launched you'll need to create an
+    <name>_launch.sh script in the scripts directory.  Have a look at the others
+    for guidance.
 
 
 ************
