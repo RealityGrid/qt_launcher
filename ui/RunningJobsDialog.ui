@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.0" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
 <class>RunningJobsDialog</class>
 <widget class="QDialog">
     <property name="name">
@@ -8,7 +8,7 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>346</width>
+            <width>389</width>
             <height>270</height>
         </rect>
     </property>
@@ -63,10 +63,16 @@
                         <property name="text">
                             <string>GSH</string>
                         </property>
+                        <property name="pixmap">
+                            <pixmap></pixmap>
+                        </property>
                     </column>
                     <column>
                         <property name="text">
                             <string>Tag</string>
+                        </property>
+                        <property name="pixmap">
+                            <pixmap></pixmap>
                         </property>
                     </column>
                     <property name="name">
@@ -176,8 +182,8 @@
 <includes>
     <include location="local" impldecl="in declaration">LauncherConfig.h</include>
     <include location="local" impldecl="in declaration">Gridifier.h</include>
-    <include location="local" impldecl="in implementation">RunningJobsDialog.ui.h</include>
     <include location="local" impldecl="in declaration">qstring.h</include>
+    <include location="local" impldecl="in implementation">RunningJobsDialog.ui.h</include>
 </includes>
 <variables>
     <variable>LauncherConfig *mConfig</variable>

@@ -11,8 +11,8 @@ void RunningJobsDialog::init()
   // hide the horizontal header in the gshTagTable
   runningGSHTagTable->verticalHeader()->hide();
   runningGSHTagTable->setLeftMargin(0);
-  runningGSHTagTable->setColumnWidth(0, 250);
-  runningGSHTagTable->setColumnWidth(1, 50);
+  runningGSHTagTable->setColumnWidth(0, 50);
+  runningGSHTagTable->setColumnWidth(1, 315);
 
   // set the result string pointer to NULL
   mResultString = NULL;
