@@ -105,15 +105,16 @@ echo "then" >> /tmp/reg_sim_remote.$$
 echo "  mkdir \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
 echo "fi" >> /tmp/reg_sim_remote.$$
 echo "cd \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file ]" >> /tmp/reg_sim_remote.$$
+echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> /tmp/reg_sim_remote.$$
 echo "then" >> /tmp/reg_sim_remote.$$
 echo "  echo \"Input file not found - exiting\"" >> /tmp/reg_sim_remote.$$
 echo "  exit" >> /tmp/reg_sim_remote.$$
 echo "fi" >> /tmp/reg_sim_remote.$$
-echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file ." >> /tmp/reg_sim_remote.$$
+echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> /tmp/reg_sim_remote.$$
+echo "chmod a+w .reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> /tmp/reg_sim_remote.$$
 echo "export UC_PROCESSORS" >> /tmp/reg_sim_remote.$$
-echo "GS_INFILE=.reg.input-file" >> /tmp/reg_sim_remote.$$
+echo "GS_INFILE=.reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 echo "export GS_INFILE" >> /tmp/reg_sim_remote.$$
 echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> /tmp/reg_sim_remote.$$
 echo "export SIM_STD_ERR_FILE" >> /tmp/reg_sim_remote.$$
@@ -140,10 +141,10 @@ fi
 
 if [ $SSH -eq 0 ]
 then
-#globus-url-copy file:$PWD/$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file
-globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file
+#globus-url-copy file:$PWD/$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
+globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
 else
-scp $PWD/$SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file
+scp $PWD/$SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file.$$
 fi
 
 if [ $? -gt "0" ]
