@@ -38,7 +38,9 @@ void ComponentLauncher::init(){
   gshTagTable->setLeftMargin(0);
   gshTagTable->setColumnWidth(0, 250);
   gshTagTable->setColumnWidth(1, 50);
-  
+
+  // turn off the multicast address input box by default
+  mcastAddrLineEdit->setEnabled(false);
 }
 
 void ComponentLauncher::componentSelectedSlot()
@@ -212,7 +214,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 /** This method overrides the default accept method.
  *  Use it to pick all the selections that the user has made,
  *  and enter them into the LauncherConfig data object.
- */;
+ */
 void ComponentLauncher::accept(){
 
   // Check if it's a Sim or Viz
@@ -288,6 +290,10 @@ void ComponentLauncher::accept(){
       // otherwise replace the config value with what the user wants
       // be aware that this should really need to happen
       mConfig->simulationGSH = simulationGSHLineEdit->text();
+
+    // Multicast
+    mConfig->multicast = mcastCheckBox->isChecked();
+    mConfig->multicastAddress = mcastAddrLineEdit->text();
   }
 
   // Deal with the tag
@@ -319,7 +325,6 @@ void ComponentLauncher::simInputButtonPushedSlot()
 /** When the user double clicks on an item in the list view, promote it to the
  *  GSH line edit.
  */
-//#include "unistd.h"
 void ComponentLauncher::gshTagSelectedSlot( int row, int col, int button, const QPoint & mousePos )
 {
   // Stick the result in the Line edit
@@ -359,5 +364,15 @@ void ComponentLauncher::setApplication(RegLauncher *aRegLauncher){
 }
 
 
+/** When the user selects Multicast - turn the address input
+ *  line edit on. Otherwise have it greyed out.
+ */
+void ComponentLauncher::multicastToggleSlot()
+{
+  if (mcastCheckBox->isChecked())
+    mcastAddrLineEdit->setEnabled(true);
+  else
+    mcastAddrLineEdit->setEnabled(false);
+}
 
 

@@ -8,8 +8,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>367</width>
-            <height>229</height>
+            <width>371</width>
+            <height>234</height>
         </rect>
     </property>
     <property name="caption">
@@ -307,37 +307,141 @@
             <property name="name">
                 <cstring>unnamed</cstring>
             </property>
-            <property name="margin">
-                <number>11</number>
-            </property>
-            <property name="spacing">
-                <number>6</number>
-            </property>
-            <widget class="QLabel" row="3" column="1">
+            <widget class="QLayoutWidget" row="1" column="2" rowspan="1" colspan="2">
                 <property name="name">
-                    <cstring>TextLabel2_2</cstring>
+                    <cstring>layout17</cstring>
                 </property>
-                <property name="text">
-                    <string>Number of Processors</string>
-                </property>
+                <vbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>TextLabel2_2_2</cstring>
+                        </property>
+                        <property name="text">
+                            <string>Multicast Address</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>mcastAddrLineEdit</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>150</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>180</width>
+                                <height>32767</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>123.456.789.012/34567</string>
+                        </property>
+                    </widget>
+                </vbox>
             </widget>
-            <widget class="QLabel" row="1" column="1">
+            <widget class="QLayoutWidget" row="1" column="1">
                 <property name="name">
-                    <cstring>TextLabel2_3</cstring>
+                    <cstring>layout18</cstring>
                 </property>
-                <property name="text">
-                    <string>Number of Pipes</string>
-                </property>
+                <vbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>TextLabel2_2</cstring>
+                        </property>
+                        <property name="text">
+                            <string>Num Processors</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>vizNumProcLineEdit</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>60</width>
+                                <height>32767</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>1</string>
+                        </property>
+                    </widget>
+                </vbox>
             </widget>
-            <widget class="QCheckBox" row="0" column="1">
+            <widget class="QLayoutWidget" row="1" column="0">
                 <property name="name">
-                    <cstring>vizServerCheckBox</cstring>
+                    <cstring>layout16</cstring>
                 </property>
-                <property name="text">
-                    <string>VizServer</string>
-                </property>
+                <vbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLabel">
+                        <property name="name">
+                            <cstring>TextLabel2_3</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="text">
+                            <string>Num Pipes</string>
+                        </property>
+                    </widget>
+                    <widget class="QLineEdit">
+                        <property name="name">
+                            <cstring>vizPipesLineEdit</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>60</width>
+                                <height>32767</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>1</string>
+                        </property>
+                    </widget>
+                </vbox>
             </widget>
-            <widget class="QListBox" row="0" column="0" rowspan="5" colspan="1">
+            <widget class="QListBox" row="0" column="0" rowspan="1" colspan="3">
                 <item>
                     <property name="text">
                         <string>bezier.man.ac.uk</string>
@@ -347,37 +451,47 @@
                     <cstring>vizTargetListBox</cstring>
                 </property>
             </widget>
-            <widget class="QLineEdit" row="4" column="1">
+            <widget class="QLayoutWidget" row="0" column="3">
                 <property name="name">
-                    <cstring>vizNumProcLineEdit</cstring>
+                    <cstring>layout21</cstring>
                 </property>
-                <property name="sizePolicy">
-                    <sizepolicy>
-                        <hsizetype>0</hsizetype>
-                        <vsizetype>0</vsizetype>
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                    </sizepolicy>
-                </property>
-                <property name="text">
-                    <string>1</string>
-                </property>
-            </widget>
-            <widget class="QLineEdit" row="2" column="1">
-                <property name="name">
-                    <cstring>vizPipesLineEdit</cstring>
-                </property>
-                <property name="sizePolicy">
-                    <sizepolicy>
-                        <hsizetype>0</hsizetype>
-                        <vsizetype>0</vsizetype>
-                        <horstretch>0</horstretch>
-                        <verstretch>0</verstretch>
-                    </sizepolicy>
-                </property>
-                <property name="text">
-                    <string>1</string>
-                </property>
+                <vbox>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>vizServerCheckBox</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="text">
+                            <string>VizServer</string>
+                        </property>
+                    </widget>
+                    <widget class="QCheckBox">
+                        <property name="name">
+                            <cstring>mcastCheckBox</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>0</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="text">
+                            <string>Multicast</string>
+                        </property>
+                    </widget>
+                </vbox>
             </widget>
         </grid>
     </widget>
@@ -572,6 +686,12 @@
         <receiver>ComponentLauncher</receiver>
         <slot>gshTagSelectedSlot(int,int,int,const QPoint&amp;)</slot>
     </connection>
+    <connection>
+        <sender>mcastCheckBox</sender>
+        <signal>clicked()</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>multicastToggleSlot()</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in declaration">LauncherConfig.h</include>
@@ -603,6 +723,7 @@
     <slot>setInputFileTextEdit( const QString &amp; text )</slot>
     <slot>getInputFileTextEditText( QString * returnPtr )</slot>
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
+    <slot>multicastToggleSlot()</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>
