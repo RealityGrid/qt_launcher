@@ -134,6 +134,8 @@ void LauncherConfig::readConfig(QString file){
     if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"settings")){
       settings = childOfRoot->xmlChildrenNode;
 
+      // The location of the perl scripts used to do job launching
+      // and web-servicey things
       while(settings != NULL){
         if (!xmlStrcmp(settings->name, 
 		       (const xmlChar*)"scriptsDirectory")){
@@ -143,6 +145,7 @@ void LauncherConfig::readConfig(QString file){
 	  xmlFree(val);
 	}
 
+	// The location of our 'tmp' directory
         if (!xmlStrcmp(settings->name, 
 		       (const xmlChar*)"scratchDirectory")){
 
@@ -151,6 +154,16 @@ void LauncherConfig::readConfig(QString file){
 	  // Use this value to set an environment variable so our
 	  // various perl scripts know where scratch is
 	  setenv("REG_SCRATCH_DIRECTORY", mScratchDirectory.ascii(), 1);
+	  xmlFree(val);
+	}
+
+	// How we're going to launch remote jobs - via globus, cog
+	// or ssh.
+        if (!xmlStrcmp(settings->name, 
+		       (const xmlChar*)"launchMethod")){
+          xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
+	  mLaunchMethod = QString((const char*)val);
+	  setenv("ReG_LAUNCH", mLaunchMethod.ascii(), 1);
 	  xmlFree(val);
 	}
 

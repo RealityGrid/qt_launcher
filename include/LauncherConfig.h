@@ -169,6 +169,7 @@ class LauncherConfig {
     bool    mIsCoupledModel;
     QString mScriptsDirectory;
     QString mScratchDirectory;
+    QString mLaunchMethod; // "globus", "cog" or "ssh"
 
     // Methods
 
