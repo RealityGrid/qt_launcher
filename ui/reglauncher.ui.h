@@ -184,7 +184,12 @@ void RegLauncher::migrateSimSlot()
     if (!wizardOk)
       return;
 
+cout << "About to get the input file text from gsoap" << endl;
+
     migrater->getInputFileTextEditText(&inputFileText);
+
+// lockup debug
+cout << "Done that" << endl << "About to write the input file to " << inputFileText << endl;
 
     QFile inputFile( inputFileName );
     if ( inputFile.open( IO_WriteOnly ) ) {
@@ -193,6 +198,9 @@ void RegLauncher::migrateSimSlot()
       inputFile.close();
     }
 
+// lockup debug
+cout << "Done that - now going over to the common launch code" << endl;
+    
     // now launch!
     commonLaunchCode();    
   }
@@ -374,6 +382,8 @@ void RegLauncher::launchSimSlot()
 }
 
 void RegLauncher::commonLaunchCode(){
+// lockup debug
+cout << "Common Launch Code" << endl;
   bool restartingFromCheckpoint = checkPointTreeListView->selectedItem()!=NULL;
   if (config.migration)
     restartingFromCheckpoint = true;
@@ -497,7 +507,10 @@ void RegLauncher::commonLaunchCode(){
 
 void RegLauncher::discoverySlot()
 {
+  launchButton->setText("Launch");
+  
   checkPointTreeListView->clear();
+  checkPointTreeListView->clearSelection();
   consoleOutSlot("Searching for CheckPoint Trees");
   
   cpt = new CheckPointTree(checkPointTreeListView);
