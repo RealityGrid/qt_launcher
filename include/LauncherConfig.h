@@ -55,6 +55,7 @@
 
 #include "qstring.h"
 #include "qstringlist.h"
+#include "qvaluelist.h"
 
 // ************************************** //
 // Be aware that only some of the values  //
@@ -63,6 +64,19 @@
 // readConfig call. I'll highlight which  //
 // when I get a moment!                   //
 // ************************************** //
+
+class Container {
+  public:
+    QString mContainer;
+    int mPort;
+
+    Container(){};
+    Container(const QString aContainer, const int aPort){
+      mContainer = aContainer;
+      mPort = aPort;
+    }
+    ~Container(){}
+};
 
 class LauncherConfig {
   public:
@@ -104,7 +118,8 @@ class LauncherConfig {
     int simTimeToRun;
     int vizTimeToRun;
     
-    QStringList containerList;
+    //QStringList containerList;
+    QValueList<Container> containerList;
     QStringList machineList;
     QStringList vizMachineList;
     QString selectedContainer;

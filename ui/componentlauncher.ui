@@ -538,19 +538,6 @@
         <attribute name="title">
             <string>Select a Container</string>
         </attribute>
-        <widget class="QListBox">
-            <property name="name">
-                <cstring>containerListBox</cstring>
-            </property>
-            <property name="geometry">
-                <rect>
-                    <x>10</x>
-                    <y>10</y>
-                    <width>200</width>
-                    <height>128</height>
-                </rect>
-            </property>
-        </widget>
         <widget class="QLabel">
             <property name="name">
                 <cstring>TextLabel2_4</cstring>
@@ -589,6 +576,19 @@
             </property>
             <property name="text">
                 <string>50000</string>
+            </property>
+        </widget>
+        <widget class="QListBox">
+            <property name="name">
+                <cstring>containerListBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>200</width>
+                    <height>128</height>
+                </rect>
             </property>
         </widget>
     </widget>
@@ -730,6 +730,12 @@
         <receiver>ComponentLauncher</receiver>
         <slot>vizTargetSelectedSlot(QListBoxItem*)</slot>
     </connection>
+    <connection>
+        <sender>containerListBox</sender>
+        <signal>clicked(QListBoxItem*)</signal>
+        <receiver>ComponentLauncher</receiver>
+        <slot>containerListBoxSelectedSlot(QListBoxItem*)</slot>
+    </connection>
 </connections>
 <includes>
     <include location="local" impldecl="in declaration">LauncherConfig.h</include>
@@ -763,6 +769,7 @@
     <slot>setApplication( RegLauncher * aRegLauncher )</slot>
     <slot>multicastToggleSlot()</slot>
     <slot>vizTargetSelectedSlot(QListBoxItem *)</slot>
+    <slot>containerListBoxSelectedSlot(QListBoxItem *)</slot>
 </slots>
 <pixmapinproject/>
 <layoutdefaults spacing="6" margin="11"/>

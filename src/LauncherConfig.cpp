@@ -253,8 +253,12 @@ void LauncherConfig::readConfig(QString file){
         
         if (!xmlStrcmp(containers->name, (const xmlChar*)"container")){
           xmlChar *containerName = xmlNodeListGetString(doc, containers->xmlChildrenNode, 1);
-          containerList += (const char*)containerName;
+          xmlChar *port = xmlGetProp(containers, (const xmlChar*)"port");
+          //containerList += (const char*)containerName;
+          Container tContainer((const char*)containerName, QString((const char*)port).toInt());
+          containerList += tContainer;
           xmlFree(containerName);
+          xmlFree(port);
         }
         
         containers = containers->next;
@@ -378,8 +382,10 @@ void LauncherConfig::writeConfig(QString file){
   }
 
   containers = xmlNewTextChild(root, NULL, (const xmlChar*)"containers", NULL);
-  for ( QStringList::Iterator it = containerList.begin(); it != containerList.end(); ++it ) {
-      xmlNewTextChild(containers, NULL, (const xmlChar*)"container", (const xmlChar*)(*it).latin1());
+  for ( QValueList<Container>::Iterator it = containerList.begin(); it != containerList.end(); ++it ) {
+      xmlNodePtr t = xmlNewTextChild(containers, NULL, (const xmlChar*)"container", (const xmlChar*)((*it).mContainer).latin1());
+      sprintf(buff, "%d", (*it).mPort);
+      xmlNewProp(t, (const xmlChar*)"port", (const xmlChar*)buff);
   }
 
   machines = xmlNewTextChild(root, NULL, (const xmlChar*)"targets", NULL);

@@ -138,7 +138,11 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
   mConfig = aConfig;
   
   // populate the containerListBox
-  containerListBox->insertStringList((mConfig->containerList));
+  //containerListBox->insertStringList((mConfig->containerList));
+  int numContainers = mConfig->containerList.size();
+  for (int i=0; i<numContainers; i++){
+    containerListBox->insertItem(mConfig->containerList[i].mContainer);
+  }
   // and the simTargetListBox too
   simTargetListBox->insertStringList((mConfig->machineList));
   // and the vizTargetListBox too
@@ -431,5 +435,18 @@ void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
     vizPipesLineEdit->setEnabled(true);
   }
 }
+
+/** Method is called when the user clicks on a container.
+ *  It's merely a nicety that fills in the correct port num.
+ */
+void ComponentLauncher::containerListBoxSelectedSlot( QListBoxItem *selectedContainer )
+{
+  if (selectedContainer != NULL){
+    int containerIndex = containerListBox->index(selectedContainer);
+    int selectedPortNum = mConfig->containerList[containerIndex].mPort;
+    containerPortNumLineEdit->setText(QString::number(selectedPortNum));
+  }
+}
+
 
 
