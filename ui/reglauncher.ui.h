@@ -424,6 +424,12 @@ cout << "Common Launch Code" << endl;
     else
       sgs = gridifier.makeSimSGS(factory, config.simTag, config.topLevelRegistryGSH, config.currentCheckpointGSH, config.lb3dInputFileName, "");    
 
+    // Check that the sgs was created properly, if not die
+    if (sgs.length()==0 || !sgs.startsWith("http://")){
+      consoleOutSlot("Failed to create a simulation SGS - is the factory valid?");
+      return;
+    }
+      
     // Copy the value to the config
     config.simulationGSH = sgs;
 
