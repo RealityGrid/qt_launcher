@@ -4,7 +4,6 @@ use XML::Parser;
 use LWP::Simple;
 #use SOAP::Lite +trace =>  debug => sub {};
 use SOAP::Lite;
-use OGSI::Lite;
 
 if( @ARGV != 1  )
 {
