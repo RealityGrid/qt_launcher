@@ -102,12 +102,11 @@ sub query_registry
 {
     my($gsh, $search_string) = @_;
 
-    $func = "findServiceData";
     $arg  = "<ogsi:queryByServiceDataNames names=\"".$search_string."\"/>";
     $list = SOAP::Lite
 	-> uri("ServiceGroupRegistration")
 	-> proxy("$gsh")
-	-> $func("$arg")
+	-> findServiceData("$arg")
 	-> result;
 
     #print "\nGot entries from Registry: >>$list<<\n\n";
