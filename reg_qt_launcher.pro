@@ -1,5 +1,5 @@
-HEADERS += include/LauncherConfig.h include/Gridifier.h include/Utility.h include/CheckPointTree.h include/CheckPointTreeItem.h include/chkptvariableform.h include/JobStatusThread.h
-SOURCES	+= src/main.cpp src/LauncherConfig.cpp src/Gridifier.cpp src/Utility.cpp src/CheckPointTree.cpp src/CheckPointTreeItem.cpp src/chkptvariableform.cpp src/JobStatusThread.cpp
+HEADERS += include/LauncherConfig.h include/Gridifier.h include/Utility.h include/CheckPointTree.h include/CheckPointTreeItem.h include/chkptvariableform.h include/JobStatusThread.h include/ProgressBarThread.h
+SOURCES	+= src/main.cpp src/LauncherConfig.cpp src/Gridifier.cpp src/Utility.cpp src/CheckPointTree.cpp src/CheckPointTreeItem.cpp src/chkptvariableform.cpp src/JobStatusThread.cpp src/ProgressBarThread.cpp
 unix {
   UI_DIR = .ui
   MOC_DIR = .moc

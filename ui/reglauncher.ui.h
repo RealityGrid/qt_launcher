@@ -21,6 +21,7 @@
 #include "Gridifier.h"
 #include "LauncherConfig.h"
 #include "JobStatusThread.h"
+#include "ProgressBarThread.h"
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
@@ -427,8 +428,12 @@ void RegLauncher::commonLaunchCode(){
       // and copy the checkpoint files too - this could take a looong time
       // then start the job
       consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
+
+      ProgressBarThread *test = new ProgressBarThread();
+      test->start();
       gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config.simTimeRoRun, config.currentCheckpointGSH);
       //QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/checkPointDataCache.xml");
+      test->kill();
       consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {
@@ -514,7 +519,7 @@ void RegLauncher::steerSlot()
 
     cout << getenv("REG_STEER_HOME") << endl;
     cout << steerer->arguments().join(" ") << endl;
-    connect(steerer, SIGNAL(readyReadStdout()), this, SLOT(readSteerStdoutSlot()));
+    //connect(steerer, SIGNAL(readyReadStdout()), this, SLOT(readSteerStdoutSlot()));
     
     steerer->start();
 
@@ -540,6 +545,7 @@ void RegLauncher::steerSlot()
 }
 
 void RegLauncher::readSteerStdoutSlot(){
+  // dump this in a file so we don't make the console useless...
   cout << "SLOT: " << QString(steerer->readStdout()) << endl;
 }
 
