@@ -47,10 +47,13 @@
 # Instead source the GUI generated configuration file
 . $1
 
+# Get the time to run
+TIME_TO_RUN=$2
+
 # Optionally get the checkpoint data file name from the command line args
-if [ $# -eq 2 ]
+if [ $# -eq 3 ]
 then
-CHECKPOINT_DATA_FILE=$2
+CHECKPOINT_DATA_FILE=$3
 else
 CHECKPOINT_DATA_FILE=""
 fi
@@ -131,7 +134,7 @@ then
 #  Transfer the checkpoint data files to target machine
 #   do this by calling Mark McKeown's rgcpc script
 echo "Calling Mark McKeown's rgcpc script"
-./rgcpc.pl -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
+./rgcpc.pl -x -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -f $CHECKPOINT_DATA_FILE
 echo "Done calling script"
 fi
 
@@ -165,7 +168,7 @@ then
           globus-job-run $SIM_HOSTNAME -stdout $SIM_STD_OUT_FILE.initial -stderr $SIM_STD_ERR_FILE.initial -s /tmp/reg_sim_remote.$$ &  
           ;;
        green.cfs.ac.uk)
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -m 30 -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -m $TIME_TO_RUN -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        fermat.cfs.ac.uk)
           globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &

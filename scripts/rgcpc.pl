@@ -231,12 +231,16 @@ for ( my $i = 0; $i < $NoFileNodes; $i++ )
   #check the files are not already on the target machine
   if(  $TargetHostName =~ m/$hostname/  )
   {
-    print "WARNING::Chekpoint files Already on Target Machine\n";
+    # we may already have the files on the machine in a different
+    # user account - need to be aware of this
+
+
+    print "WARNING::Checkpoint files Already on Target Machine\n";
     #if the user forces us we copy the files over again - maybe
     #the originals have become corrupt
     if ( $FORCE eq "FALSE" )
     {
-      print "Not Copying Files - to force the copy use the \"-s\" option.\n";
+      print "Not Copying Files - to force the copy use the \"-x\" option.\n";
       exit 0;
     }
   }
@@ -332,6 +336,7 @@ my $NewNode = "<Files location=\"$TargetHostName\">\n";
 
 #foreach file copy it to the target location
 foreach my $file (@files) {
+
    my $targetfilename = shift @targetfilename;
    my $AddArgs = "";
    #check we do not have a better interface for the machine
@@ -344,6 +349,9 @@ foreach my $file (@files) {
        $AddArgs = " -ss \"".$MachineInterFace->{$key}{'DN'}."\" ";
      }   
    }
+
+   print "\n".$file."\n";
+   printf "\n".$Target."/".$targetfilename."\n";
    
    #line to be added to the new CP data 
    $NewNode .="<file type=\"gsiftp-URL\">".$SavedTarget."/".$targetfilename."</file>\n";

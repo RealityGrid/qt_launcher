@@ -55,7 +55,9 @@ LauncherConfig::LauncherConfig(){
   selectedComponentType = notused;
 
   migration = false;
+  restart = false;
   newTree = false;
+  simTimeRoRun = 30;
 /*
   topLevelRegistryGSH = "https://maise.mvc.mcc.ac.uk:50000/1023421312312932";
   simComponentType = lb3d;

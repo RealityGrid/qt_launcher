@@ -44,6 +44,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include "qapplication.h"
 #include "qfile.h"
 
 using namespace std;
@@ -59,12 +60,16 @@ Gridifier::~Gridifier(){
 }
 
 
+void Gridifier::setApplication(QApplication *aApplication){
+  mApplication = aApplication;
+}
+
+
 /** The following static methods wrap around QProcess objects to
  *  run the reg_perl_launcher scripts. Ultimately replace with
  *  code that uses an API to perform the same function programatically.
  */
- 
-QString Gridifier::getSGSFactories(const QString &topLevelRegistry){
+QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer){
   QString result;
 
   getSGSFactoriesProcess = new QProcess(QString("./get_sgs_factories.pl"));
@@ -83,12 +88,13 @@ QString Gridifier::getSGSFactories(const QString &topLevelRegistry){
   while (getSGSFactoriesProcess->isRunning()){
     // don't sit in an exhaustive loop - waste of electricity :)
     usleep(10000);
+    mApplication->processEvents();
   }
 
   // this functionality is left in a seperate slot since it could be better
   // to allow the standard qt events to handle it, rather than sitting in the
   // above loop
-  result = getSGSFactoriesProcessEnded();
+  result = getSGSFactoriesProcessEnded(desiredContainer);
   
   return result;
 }
@@ -128,6 +134,7 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
 
   while (makeSGSFactoryProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
   // this functionality is left in a seperate slot since it could be better
@@ -156,6 +163,7 @@ cout << makeSimSGSProcess->arguments().join(" ") << endl;
 
   while(makeSimSGSProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
   // this functionality is left in a seperate slot since it could be better
@@ -176,12 +184,13 @@ QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const 
   makeVizSGSProcess->addArgument(topLevelRegistry);
   makeVizSGSProcess->addArgument(simSGS);
 
-cout <<makeVizSGSProcess->arguments().join(" ") << endl;
+cout << makeVizSGSProcess->arguments().join(" ") << endl;
   
   makeVizSGSProcess->start();
 
   while (makeVizSGSProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
   result = makeVizSGSProcessEnded().stripWhiteSpace();
@@ -191,19 +200,31 @@ cout <<makeVizSGSProcess->arguments().join(" ") << endl;
 
 /** Slots to receive process finished events
  */
-QString Gridifier::getSGSFactoriesProcessEnded(){
+QString Gridifier::getSGSFactoriesProcessEnded(const QString &desiredContainer){
   QString results = getSGSFactoriesProcess->readStdout();
-
+ 
   if (results.length() == 0){
     // then no SGS Factories exist - so create one - actually do this elsewhere
     
   }
   else {
-    // choose a factory at random
     QStringList factories = QStringList::split("\n", results);
 
     int numFactories = factories.size();
 
+    // prune the list - remove any factories not on the desired container
+    for (int i=0; i<numFactories; i++){
+      if (!factories[i].contains(desiredContainer)){
+        factories.erase(factories.at(i));
+        numFactories--;
+      }
+    }
+
+    // if there's no factories left - return the blank string
+    if (numFactories <= 0)
+      return "";
+    
+    // choose a factory at random
     int randomNum = rand();
     randomNum = (int)((randomNum / (float)RAND_MAX) * numFactories);
     QString randomFactory = factories[randomNum];
@@ -265,6 +286,16 @@ QString Gridifier::makeSimSGSProcessEnded(){
 QString Gridifier::makeVizSGSProcessEnded(){
   QString result = makeVizSGSProcess->readStdout();
 
+// Debugging going on here
+QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
+if ( logFile.open(IO_WriteOnly) ){
+  QTextStream stream(&logFile);
+  stream << makeVizSGSProcess->arguments().join(" ") << endl;
+  stream << result << endl;
+  stream << endl << QString(makeVizSGSProcess->readStderr()) << endl;
+  logFile.close();
+}
+  
   return result;
 }
 
@@ -291,12 +322,12 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "VIZ_ANSWER=no\n";
   fileText += "CLIENT_DISPLAY="+Utility::getHostName()+":0.0\n";
   fileText += "VIZ_HOSTNAME="+config.vizTargetMachine+"\n\n";
-  fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.txt\n";
-  fileText += "SIM_STD_ERR_FILE=RealityGrid/scratch/ReG-sim-stderr.txt\n";
-  fileText += "VIZ_STD_OUT_FILE=RealityGrid/scratch/ReG-viz-stdout.txt\n";
-  fileText += "VIZ_STD_ERR_FILE=RealityGrid/scratch/ReG-viz-stderr.txt\n";
-  fileText += "STEER_STD_OUT_FILE=RealityGrid/scratch/ReG-steer-stdout.txt\n";
-  fileText += "STEER_STD_ERR_FILE=RealityGrid/scratch/ReG-steer-stderr.txt\n\n";
+  fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.$$.txt\n";
+  fileText += "SIM_STD_ERR_FILE=RealityGrid/scratch/ReG-sim-stderr.$$.txt\n";
+  fileText += "VIZ_STD_OUT_FILE=RealityGrid/scratch/ReG-viz-stdout.$$.txt\n";
+  fileText += "VIZ_STD_ERR_FILE=RealityGrid/scratch/ReG-viz-stderr.$$.txt\n";
+  fileText += "STEER_STD_OUT_FILE=RealityGrid/scratch/ReG-steer-stdout.$$.txt\n";
+  fileText += "STEER_STD_ERR_FILE=RealityGrid/scratch/ReG-steer-stderr.$$.txt\n\n";
   
   
   QString vizTypeStr;
@@ -350,21 +381,33 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
 /** Method calls Robin's ReG-L2-Sim-QTL script to
  *  actually launch the job on the target machine
  */
-void Gridifier::launchSimScript(const QString &scriptConfigFileName, const QString &checkPointDataFile){
+void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointDataFile){
   launchSimScriptProcess = new QProcess(QString("./ReG-L2-Sim-QTL"));
   launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchSimScriptProcess->addArgument(scriptConfigFileName);
+  launchSimScriptProcess->addArgument(QString::number(timeToRun));
   if (checkPointDataFile != NULL)
     launchSimScriptProcess->addArgument(checkPointDataFile);
 
   cout << launchSimScriptProcess->arguments().join(" ") << endl;
-    
+            
   launchSimScriptProcess->start();
 
   while (launchSimScriptProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
+// Debugging going on here
+QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
+if ( logFile.open(IO_WriteOnly) ){
+  QTextStream stream(&logFile);
+  stream << launchSimScriptProcess->arguments().join(" ") << endl;
+  stream << QString(launchSimScriptProcess->readStdout()) << endl;
+  stream << endl << QString(launchSimScriptProcess->readStderr()) << endl;
+  logFile.close();
+}
+  
   cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
   cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
 }
@@ -381,6 +424,7 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName){
 
   while (launchVizScriptProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
 }
@@ -411,6 +455,7 @@ void Gridifier::copyCheckPointFiles(const QString &host){
  */
 
  // NOT USED!?
+QProcess *gsiFtpProcess;
 void Gridifier::gsiFtp(const QString &aFile, const QString &aDestination){
   QString file = aFile;
   QString destination = aDestination;
@@ -422,10 +467,24 @@ void Gridifier::gsiFtp(const QString &aFile, const QString &aDestination){
     file = "file://"+file;
   }
 
-  QProcess *gsiFtpProcess = new QProcess(QString("globus-url-copy"));
+  gsiFtpProcess = new QProcess(QString("globus-url-copy"));
+  gsiFtpProcess->addArgument("-vb");
   gsiFtpProcess->addArgument(file);
   gsiFtpProcess->addArgument(destination);
   gsiFtpProcess->start();
+
+  connect(gsiFtpProcess, SIGNAL(readyReadStdout()), this, SLOT(gsiFtpStdoutSlot()));
+  connect(gsiFtpProcess, SIGNAL(readyReadStderr()), this, SLOT(gsiFtpStderrSlot()));
+}
+
+void Gridifier::gsiFtpStdoutSlot()
+{
+  cout << "Stdout:" << endl << gsiFtpProcess->readStdout() << endl;
+}
+
+void Gridifier::gsiFtpStderrSlot()
+{
+  cout << "Stderr:" << endl << gsiFtpProcess->readStderr() << endl;
 }
 
 
@@ -437,6 +496,7 @@ QString Gridifier::checkPointAndStop(const QString &sgsGSH){
 
   while (checkPointAndStopProcess->isRunning()){
     usleep(10000);
+    mApplication->processEvents();
   }
 
   QString result = checkPointAndStopProcess->readStdout();

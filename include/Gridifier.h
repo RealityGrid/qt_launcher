@@ -54,7 +54,7 @@ public:
   Gridifier();
   ~Gridifier();
 
-  QString getSGSFactories(const QString &topLevelRegistry);
+  QString getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer);
   void getSGSies(const QString &topLevelRegistry, QTable *gshTagTable);
   QString makeSGSFactory(const QString &container, const QString &topLevelRegistry);
   QString makeSimSGS(const QString &factory, const QString &tag, const QString &topLevelRegistry, const QString &checkPointGSH, const QString &inputFileName, const QString &optionalChkPtTag);
@@ -62,12 +62,13 @@ public:
   QString checkPointAndStop(const QString &sgsGSH);
 
   void makeReGScriptConfig(const QString &filename, const LauncherConfig &config);
-  void launchSimScript(const QString &scriptConfigFileName, const QString &checkPointDataFile = NULL);
+  void launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointDataFile = NULL);
   void launchVizScript(const QString &scriptConfigFileName);
 
   void copyCheckPointFiles(const QString &host);
   void gsiFtp(const QString &file, const QString &destination);
 
+  void setApplication(QApplication *);
 
 private:
   QProcess *getSGSFactoriesProcess;
@@ -81,13 +82,17 @@ private:
 
   // Keep a reference to the sgs/tag listview
   QTable *gshTagTable;
+
+  QApplication *mApplication;
   
 public slots:
-  QString getSGSFactoriesProcessEnded();
+  QString getSGSFactoriesProcessEnded(const QString &desiredContainer);
   void getSGSiesProcessEnded();
   QString makeSGSFactoryProcessEnded();
   QString makeSimSGSProcessEnded();
   QString makeVizSGSProcessEnded();
+  void gsiFtpStdoutSlot();
+  void gsiFtpStderrSlot();
   
 };
 

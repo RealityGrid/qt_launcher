@@ -94,10 +94,13 @@ class LauncherConfig {
     int vizNumberPipes;
     bool vizServer;
     bool migration;
+    bool restart;
     bool newTree;
     int vizType;
     QString lb3dInputFileName;
 
+    int simTimeRoRun;
+    
     QStringList containerList;
     QStringList machineList;
     QString selectedContainer;
