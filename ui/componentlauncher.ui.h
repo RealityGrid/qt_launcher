@@ -395,9 +395,9 @@ void ComponentLauncher::multicastToggleSlot()
     vizServerCheckBox->setChecked(false);
     vizServerCheckBox->setEnabled(false);
     // and pretend we're setting 9 nodes for the viz
-    vizNumProcLineEdit->setText("18");
+    vizNumProcLineEdit->setText("8");
     vizNumProcLineEdit->setEnabled(false);
-    vizPipesLineEdit->setText("9");
+    vizPipesLineEdit->setText("4");
     vizPipesLineEdit->setEnabled(false);
     return;
   }

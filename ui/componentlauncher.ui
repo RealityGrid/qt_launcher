@@ -348,7 +348,7 @@
                             </size>
                         </property>
                         <property name="text">
-                            <string>233.33.100.3/40004</string>
+                            <string>233.33.100.12/40040</string>
                         </property>
                     </widget>
                 </vbox>
