@@ -42,7 +42,8 @@
 
 #include "qstring.h"
 
-/**Holds the description of the job being launched
+/**@file jobmetadata.h
+  *Holds the description of the job being launched
   *@author Mark Riding
   */
 
@@ -51,14 +52,22 @@ public:
 	JobMetaData();
 	~JobMetaData();
 
-	QString  toXML();
+	/** Convert the description to an xml doc */
+	QString  toXML(const QString &serviceType);
 
+	/** Who launched it */
 	QString  mPersonLaunching;
+	/** Which organisation the person launching it belongs to */
 	QString  mOrganisation;
+	/** The data and time at which the job was launched */
 	QString  mLaunchTime;
+	/** What software was launched */
 	QString  mSoftwareDescription;
+	/** What the job is doing */
 	QString  mPurposeOfJob;
+	/** Which machine the job is running on */
 	QString  mMachineName;
+	/** How many processors the job is using */
 	QString  mNumProc;
 };
 
