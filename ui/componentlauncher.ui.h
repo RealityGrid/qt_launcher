@@ -74,74 +74,7 @@ void ComponentLauncher::componentSelectedSlot()
 	  }
 	  else{
 	    setAppropriate(page(11), false);
-    }
-    
-//    // now set all other pages in the wizard to be appropriate to the current context
-//    switch (componentComboBox->currentItem()){
-//
-//    case lb3d:
-//		  // temporarily disable the checkPointGSHLineEdit page
-//		  setAppropriate(page(1), false);
-//	    // setAppropriate(page(1), true);
-//	    setAppropriate(page(2), mConfig->migration);
-//	    // Input file can only be edited if we're doing a restart
-//	    setAppropriate(page(3), inputFileEditFlag);
-//	    setAppropriate(page(4), !inputFileEditFlag);
-//	    setAppropriate(page(5), true);
-//	    setAppropriate(page(6), false);
-//	    setAppropriate(page(7), false);
-//	    setAppropriate(page(9), true);
-//	    if (mConfig->newTree)
-//	      setAppropriate(page(11), true);
-//	    else
-//	      setAppropriate(page(11), false);
-//
-//	    break;
-//
-//    case miniapp:
-//	    // temporarily disable the checkPointGSHLineEdit page
-//	    setAppropriate(page(1), false);
-//	    // setAppropriate(page(1), true);
-//	    setAppropriate(page(2), false);
-//	    setAppropriate(page(3), false);
-//	    setAppropriate(page(4), false);
-//	    setAppropriate(page(5), true);
-//	    setAppropriate(page(6), false);
-//	    setAppropriate(page(7), false);
-//	    setAppropriate(page(9), true);
-//	    if (mConfig->newTree)
-//	      setAppropriate(page(11), true);
-//	    else
-//	      setAppropriate(page(11), false);
-//
-//	    break;
-//
-//    case lb3dviz:
-//	    setAppropriate(page(1), false);
-//	    setAppropriate(page(2), true);
-//	    setAppropriate(page(3), false);
-//	    setAppropriate(page(4), false);
-//	    setAppropriate(page(5), false);
-//	    setAppropriate(page(6), true);
-//	    setAppropriate(page(7), true);
-//	    setAppropriate(page(9), false);
-//	    setAppropriate(page(11), false);
-//
-//	    break;
-//
-//    default:
-//	    setAppropriate(page(1), false);
-//	    setAppropriate(page(2), false);
-//	    setAppropriate(page(3), false);
-//	    setAppropriate(page(4), false);
-//	    setAppropriate(page(5), false);
-//	    setAppropriate(page(6), false);
-//	    setAppropriate(page(7), false);
-//	    setAppropriate(page(9), true);
-//	    setAppropriate(page(11), false);
-//
-//	    break;
-//    }
+    }    
 }
 
 
@@ -264,7 +197,6 @@ void ComponentLauncher::containerSelectedSlot()
  */
 void ComponentLauncher::pageSelectedSlot(const QString &string)
 {
-    //cout << string << endl;
 
     // Automatically generate as much of the meta data for the job
     // as possible
@@ -288,7 +220,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
         mcastAddrLineEdit->setEnabled(false);
         vizPipesLineEdit->setEnabled(false);
 
-        // List of available machines depends on whether app. is a viz.
+        // List of available hardware depends on whether app. is a viz.
         // or not
         targetMachineListBox->insertStringList((mConfig->machineList));
       }
@@ -364,103 +296,7 @@ void ComponentLauncher::accept(){
 	      mConfig->simulationGSH = simulationGSHLineEdit->text();
 	    }
     }
-    
-    // Check if it's a Sim or Viz
-//    int componentType = componentComboBox->currentItem();
-//    mConfig->selectedComponentType = componentType;
-//
-//    if (chosenApp->mNumInputs == 0){
-//	    mConfig->simComponentType = componentType;
-//
-//	    // Target machine
-//			mConfig->simTargetMachine = simTargetListBox->currentText();
-//
-//      // Number processors
-//	    mConfig->simNumberProcessors = simNumProcLineEdit->text().toInt();
-//
-//	    // Container
-//	    mConfig->selectedContainer = containerListBox->currentText();
-//
-//	    // CheckPoint GSH - note that this is entirely optional if we're not migrating
-//	    if (!mConfig->migration){
-//	      if (checkPointGSHLineEdit->text().length() == 0)
-//		      mConfig->currentCheckpointGSH = "";
-//	      else
-//		      mConfig->currentCheckpointGSH = checkPointGSHLineEdit->text();
-//	    }
-//
-//	    // Input file name
-//	    if (chosenApp->mHasInputFile && simInputLineEdit->text().length() != 0){
-//	     mConfig->lb3dInputFileName = simInputLineEdit->text();
-//	    }
-//
-//	    // Tree tag
-//	    if (mConfig->newTree){
-//	      mConfig->treeTag = treeTagTextEdit->text().stripWhiteSpace();
-//	    }
-//
-//	    // Time to run
-//	    mConfig->simTimeToRun = runTimeLineEdit->text().toInt();
-//
-//	    // Container port number
-//	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
-//    }
-//    // Viz test
-//    else{
-//	    mConfig->vizComponentType = componentType;
-//
-//	    // Target machine
-//	    mConfig->vizTargetMachine = vizTargetListBox->currentText();
-//
-//	    // Number processors
-//	    mConfig->vizNumberProcessors = vizNumProcLineEdit->text().toInt();
-//
-//	    // Number pipes
-//	    mConfig->vizNumberPipes = vizPipesLineEdit->text().toInt();
-//
-//	    // VizServer
-//	    mConfig->vizServer = vizServerCheckBox->isChecked();
-//
-//	    // Container
-//	    mConfig->selectedContainer = containerListBox->currentText();
-//
-//    	// Job meta data
-//	    mConfig->vizTag = tagTextEdit->text();
-//
-//	    // Visualization type
-//	    mConfig->vizType = vizTypeComboBox->currentItem();
-//
-//	    // Simulation GSH
-//	    if (simulationGSHLineEdit->text().length() == 0){
-//	      // if the user's not entered anything - then use the value from the config
-//	    }
-//	    else
-//	      // otherwise replace the config value with what the user wants
-//	      // be aware that this should really need to happen
-//	      mConfig->simulationGSH = simulationGSHLineEdit->text();
-//
-//	    // Multicast
-//	    mConfig->multicast = mcastCheckBox->isChecked();
-//	    mConfig->multicastAddress = mcastAddrLineEdit->text();
-//
-//	    // Container port number
-//	    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
-//
-//	    // Time to run
-//	    mConfig->vizTimeToRun = runTimeLineEdit->text().toInt();
-//    }
-    
-    // Deal with the tag
-//    if (tagTextEdit->length()!=0){
-//
-//	    if (mConfig->simComponentType == lb3d || mConfig->simComponentType == miniapp){
-//	      mConfig->simTag = tagTextEdit->text();
-//	    }
-//	    else if (mConfig->vizComponentType == lb3dviz){
-//	      mConfig->vizTag = tagTextEdit->text();
-//	    }
-//    }
-    
+        
     // Store meta-data about this job
 	  mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
 	  mConfig->mJobData->mOrganisation = sgsOrganisationLineEdit->text();
