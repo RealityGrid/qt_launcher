@@ -39,9 +39,10 @@
 
 #include "jobmetadata.h"
 #include <qdom.h>
-
 #include <iostream>
 
+/** @file jobmetadata.cpp
+ *  @brief Small class to hold metadata about a job and convert to xml */
 using std::cout;
 using std::endl;
 
@@ -51,9 +52,9 @@ JobMetaData::~JobMetaData(){
 }
 
 
-QString JobMetaData::toXML(){
+QString JobMetaData::toXML(const QString &serviceType){
 
-	QDomDocument *doc = new QDomDocument();
+  QDomDocument *doc = new QDomDocument();
 	
   // Get root node
   QDomElement root = doc->createElement( "registryEntry");
@@ -63,7 +64,7 @@ QString JobMetaData::toXML(){
   QDomElement eType = doc->createElement( "serviceType");
   root.appendChild(eType);
 
-  QDomText tServiceType = doc->createTextNode("SGS");
+  QDomText tServiceType = doc->createTextNode(serviceType);
   eType.appendChild(tServiceType);
   
   // Component description
