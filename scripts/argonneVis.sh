@@ -23,20 +23,20 @@ echo $REG_SGS_ADDRESS
 echo $MAXTIME 
 
 # Make things work with nasty hacks!
-export X509_USER_PROXY=/tmp/x509up_u6818
+#export X509_USER_PROXY=/tmp/x509up_u6818
 xhost +
 
 # Run the job, depending on which type of visualization we want
 
 if [ $VIS_TYPE = "vol" ]; then
-globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="10:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_vol.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
+globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="5:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn4.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_vol4.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
 else
 
 if [ $VIS_TYPE = "iso" ]; then
-globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="10:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_iso.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
+globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="5:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn4.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_iso4.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
 else
 
-globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="10:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_cut.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
+globusrun -o -r "tg-master.uc.teragrid.org/jobmanager-pbs_gcc" "&(count=1)(host_count="5:activemural")${MAXTIME}(executable=/home/zzcgurh/RealityGrid/ReG-vis-scripts/globus_spawn4.sh)(arguments=/home/zzcgurh/RealityGrid/ReG-vis-scripts/online_cut4.conf)(environment = (DISPLAY ${DISP}) (REG_SGS_ADDRESS ${REG_SGS_ADDRESS}) (REG_MCAST_ADDRESS ${REG_MCAST_ADDRESS}))"
 
 fi
 
