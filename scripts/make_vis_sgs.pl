@@ -35,7 +35,6 @@ my $time_now = time;
 $timeStr = sprintf "%4d-%02d-%02dT%02d:%02d:%02dZ",
                      $year+1900,$mon+1,$mday,$hour,$min,$sec;
 $timeToLive = "<ogsi:terminationTime after=\"".$timeStr."\"/>";
-#$timeToLive = "<ogsi:terminationTime after=\"infinity\"/>";
 
 $result =  SOAP::Lite
                  -> uri($uri)              #set the namespace
@@ -52,13 +51,16 @@ my $sgs_GSH = $node->item(0)->getFirstChild->getNodeValue;
 #-------------------------------------------------------------------------
 # Query App. SGS for IOType definitions
 
-$func = "findServiceData";
 my $arg = "<ogsi:queryByServiceDataNames names=\"SGS:IOType_defs\"/>";
 
+my @fields = split(/\/service/, $source_GSH);
+my @bits =split(/\//, $fields[0]);
+my $namespace = pop @bits;
+
 my $iotypes = SOAP::Lite
-              -> uri("SGS")
+              -> uri("$namespace")
               -> proxy("$source_GSH")
-              -> $func("$arg")
+              -> findServiceData("$arg")
               -> result;
 
 #print "findServiceData returned: >>$iotypes<<\n";
