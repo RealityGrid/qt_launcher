@@ -136,20 +136,12 @@
         <action name="fileSaveAction"/>
         <action name="fileSaveAsAction"/>
         <separator/>
-        <action name="filePrintAction"/>
-        <separator/>
         <action name="fileExitAction"/>
     </item>
     <item text="&amp;Proxy" name="proxyMenu">
         <action name="proxyInfoAction"/>
         <action name="proxyInitAction"/>
         <action name="proxyDestroyAction"/>
-    </item>
-    <item text="&amp;Help" name="helpMenu">
-        <action name="helpContentsAction"/>
-        <action name="helpIndexAction"/>
-        <separator/>
-        <action name="helpAboutAction"/>
     </item>
 </menubar>
 <toolbars>
@@ -468,6 +460,7 @@
     <slot>helpContents()</slot>
     <slot>helpAbout()</slot>
     <slot>migrateSimSlot()</slot>
+    <slot>patchNamdInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString, QStringList &amp; fileNames )</slot>
     <slot>launchSimSlot()</slot>
     <slot>commonLaunchCode()</slot>
     <slot>discoverySlot()</slot>
@@ -482,15 +475,14 @@
     <slot>checkPointListViewClickedSlot( QListViewItem * selectedItem )</slot>
     <slot>contextMenuRequestedSlot( QListViewItem * listViewItem, const QPoint &amp; pnt, int column )</slot>
     <slot>contextMenuItemSelectedSlot( int itemId )</slot>
+    <slot>parseChkPtMetaData( const QString &amp; chkMetaData, QString &amp; appName, QString &amp; chkUID, QStringList &amp; fileNames )</slot>
 </slots>
 <functions>
-    <function>setApplication(QApplication *)</function>
-    <function returnType="QString">getInputFileFromCheckPoint( const QString &amp; checkPointGSH)</function>
-    <function returnType="QString">getDataFileFromCheckPoint( const QString &amp; checkPointGSH)</function>
+    <function>setApplication( QApplication * aApplication )</function>
+    <function returnType="QString">getInputFileFromCheckPoint( const QString &amp; checkPointGSH )</function>
+    <function returnType="QString">getDataFileFromCheckPoint( const QString &amp; checkPointGSH )</function>
     <function>patchLb3dInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString )</function>
-    <function>patchNamdInputFileText( QString &amp; inputFileText, QString &amp; chkUIDString )</function>
-    <function>parseChkPtMetaData(const QString &amp;chkMetaData, QString &amp;appName, QString &amp;chkUID)</function>
-    <function>customEvent( QCustomEvent * )</function>
+    <function>customEvent( QCustomEvent * e )</function>
 </functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>

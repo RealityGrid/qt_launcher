@@ -82,31 +82,10 @@ void RegLauncher::fileSaveAs()
 
 }
 
-void RegLauncher::filePrint()
-{
-
-}
-
 void RegLauncher::fileExit()
 {
     close();
 }
-
-void RegLauncher::helpIndex()
-{
-
-}
-
-void RegLauncher::helpContents()
-{
-
-}
-
-void RegLauncher::helpAbout()
-{
-
-}
-
 
 void RegLauncher::migrateSimSlot()
 {
@@ -1013,7 +992,7 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
                                       QString &appName, QString &chkUID,
                                       QStringList &fileNames )
 {
-  int i;
+  unsigned int i;
   
   QDomDocument doc("Checkpoint meta-data");
   doc.setContent(chkMetaData);
