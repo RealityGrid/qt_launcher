@@ -43,22 +43,24 @@
 #include "qthread.h"
 
 #include "qapplication.h"
-#include "qstatusbar.h"
+#include "launcherstatusbar.h"
 
 class JobStatusThread: public QThread {
   public:
-    JobStatusThread(QStatusBar *aStatusBar, const QString &aGSH);
+    JobStatusThread(QApplication *aApp, LauncherStatusBar *aStatusBar,
+                    const QString &aGSH);
     
   protected:
     virtual void run();
 
   private:
-    QStatusBar *mainWindowStatusBar;
+    LauncherStatusBar *mainWindowStatusBar;
+    QApplication *mApp;
     QString mGSH;
     bool done;
     long age;
     long lifespan;
-
+    
     void getJobStatus();
 
   public slots:
