@@ -278,7 +278,8 @@ QString Gridifier::makeVizSGS(const QString &factory, const QString &tag, const 
 
 
 
-void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConfig &config){
+void Gridifier::makeReGScriptConfig(const QString & filename,
+                                    const LauncherConfig &config){
   QFile file(filename);
 
   file.open(IO_WriteOnly);
@@ -290,8 +291,8 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
     fileText += "GLOBUS_LOCATION="+config.globusLocation+"\n";
   else
     fileText += "# Couldn't find a globus location in the default.conf\n# Going with the default environment if it is set\n";
-  fileText += "SIM_HOSTNAME="+config.simTargetMachine+"\n";
-  fileText += "SIM_PROCESSORS="+QString::number(config.simNumberProcessors)+"\n";
+  fileText += "SIM_HOSTNAME="+config.mTargetMachine+"\n";
+  fileText += "SIM_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
   fileText += "SIM_INFILE="+config.lb3dInputFileName+"\n\n";
   fileText += QString("SIM_USER=")+getenv("USER")+"\n";
   fileText += "STEER_ANSWER=yes\n";
@@ -299,7 +300,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   fileText += "VIZ_ANSWER=no\n";
 //  fileText += "CLIENT_DISPLAY="+Utility::getHostName()+":0.0\n";
   fileText += "CLIENT_DISPLAY="+Utility::getCurrentDisplay()+"\n";
-  fileText += "VIZ_HOSTNAME="+config.vizTargetMachine+"\n\n";
+  fileText += "VIZ_HOSTNAME="+config.mTargetMachine+"\n\n";
   fileText += "SIM_STD_OUT_FILE=RealityGrid/scratch/ReG-sim-stdout.$$.txt\n";
   fileText += "SIM_STD_ERR_FILE=RealityGrid/scratch/ReG-sim-stderr.$$.txt\n";
   fileText += "VIZ_STD_OUT_FILE=RealityGrid/scratch/ReG-viz-stdout.$$.txt\n";
@@ -335,7 +336,7 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
   }
   fileText += "VIZ_TYPE="+vizTypeStr+"\n";
 
-  fileText += "VIZ_PROCESSORS="+QString::number(config.vizNumberProcessors)+"\n";
+  fileText += "VIZ_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
   fileText += "REG_SGS_ADDRESS="+config.simulationGSH+"\n";
   fileText += "REG_VIS_GSH="+config.visualizationGSH+"\n";
 
@@ -363,14 +364,21 @@ void Gridifier::makeReGScriptConfig(const QString & filename, const LauncherConf
 /** Method calls Robin's ReG-L2-Sim-QTL script to
  *  actually launch the job on the target machine
  */
-void Gridifier::launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointGSH){
-  QProcess *launchSimScriptProcess = new QProcess(QString("./ReG-L2-Sim-QTL"));
+void Gridifier::launchSimScript(const QString &scriptConfigFileName,
+                                const LauncherConfig &config){
+
+  //QProcess *launchSimScriptProcess = new QProcess(QString("./ReG-L2-Sim-QTL"));
+  // Construct name of script from name of application
+  QProcess *launchSimScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
   launchSimScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchSimScriptProcess->addArgument(scriptConfigFileName);
-  launchSimScriptProcess->addArgument(QString::number(timeToRun));
-  if (checkPointGSH != NULL)
-    launchSimScriptProcess->addArgument(checkPointGSH);
-            
+  launchSimScriptProcess->addArgument(QString::number(config.mTimeToRun));
+  
+  if(config.currentCheckpointGSH.length() != 0)
+    launchSimScriptProcess->addArgument(config.currentCheckpointGSH);
+ //if (checkPointGSH != NULL)
+  //  launchSimScriptProcess->addArgument(checkPointGSH);
+             
   launchSimScriptProcess->start();
 
   while (launchSimScriptProcess->isRunning()){
@@ -396,8 +404,12 @@ if ( logFile.open(IO_WriteOnly) ){
 /** Method calls Robin's ReG-L2-Viz-QTL script to
  *  actually launch the job on the target machine
  */
-void Gridifier::launchVizScript(const QString &scriptConfigFileName){
-  QProcess *launchVizScriptProcess = new QProcess(QString("./ReG-L2-Viz-QTL"));
+void Gridifier::launchVizScript(const QString &scriptConfigFileName,
+                                const LauncherConfig &config){
+                                
+  //QProcess *launchVizScriptProcess = new QProcess(QString("./ReG-L2-Viz-QTL"));
+  // Construct name of script from name of application
+  QProcess *launchVizScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
   launchVizScriptProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchVizScriptProcess->addArgument(scriptConfigFileName);
 
@@ -422,7 +434,7 @@ void Gridifier::launchArgonneViz(const LauncherConfig &config){
   QProcess *launchArgonneVizProcess = new QProcess(QString("./argonneVis.sh"));
   launchArgonneVizProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   launchArgonneVizProcess->addArgument(config.visualizationGSH);
-  launchArgonneVizProcess->addArgument(QString::number(config.vizTimeToRun));
+  launchArgonneVizProcess->addArgument(QString::number(config.mTimeToRun));
   launchArgonneVizProcess->addArgument(config.multicastAddress);
 
   QString vizTypeStr = "";

@@ -62,8 +62,8 @@ public:
   void getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable);
   
   void makeReGScriptConfig(const QString &filename, const LauncherConfig &config);
-  void launchSimScript(const QString &scriptConfigFileName, int timeToRun, const QString &checkPointGSH = NULL);
-  void launchVizScript(const QString &scriptConfigFileName);
+  void launchSimScript(const QString &scriptConfigFileName, const LauncherConfig &config);
+  void launchVizScript(const QString &scriptConfigFileName, const LauncherConfig &config);
   void launchArgonneViz(const LauncherConfig &config);
 
   void copyCheckPointFiles(const QString &host);
