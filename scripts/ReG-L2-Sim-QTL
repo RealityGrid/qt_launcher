@@ -171,17 +171,13 @@ then
           globus-job-run $SIM_HOSTNAME -stdout $SIM_STD_OUT_FILE.initial -stderr $SIM_STD_ERR_FILE.initial -s /tmp/reg_sim_remote.$$ &  
           ;;
        green.cfs.ac.uk)
-          # -m arg. gets converted to total CPU time so need to multiply by no. of px requested
-          let WALL_CLOCK_TIME=TIME_TO_RUN*SIM_PROCESSORS
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -m $WALL_CLOCK_TIME -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-green -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        fermat.cfs.ac.uk)
-          let WALL_CLOCK_TIME=TIME_TO_RUN*SIM_PROCESSORS
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -m $WALL_CLOCK_TIME -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf-fermat -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        wren.cfs.ac.uk)
-          let WALL_CLOCK_TIME=TIME_TO_RUN*SIM_PROCESSORS
-          globus-job-run wren.cfs.ac.uk/jobmanager-lsf -m $WALL_CLOCK_TIME -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
+          globus-job-run wren.cfs.ac.uk/jobmanager-lsf -x "(jobtype=single)(maxWallTime=${TIME_TO_RUN})" -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
           ;;
        *)
           globus-job-run $SIM_HOSTNAME/jobmanager-fork -x '(jobtype=single)' -stdout $SIM_STD_OUT_FILE -stderr $SIM_STD_ERR_FILE -np $SIM_PROCESSORS -s /tmp/reg_sim_remote.$$ &
