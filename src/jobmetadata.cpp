@@ -93,6 +93,20 @@ QString JobMetaData::toXML(){
   QDomText tnodeOrg = doc->createTextNode(mOrganisation);
   eOrg.appendChild(tnodeOrg);
 
+  // Which machine it's on
+  QDomElement eHost = doc->createElement( "componentHost" );
+  eContent.appendChild(eHost);
+
+  QDomText tnodeHost = doc->createTextNode(mMachineName);
+  eHost.appendChild(tnodeHost);
+
+  // How many processors
+  QDomElement eProc = doc->createElement( "componentNumPx" );
+  eContent.appendChild(eProc);
+
+  QDomText tnodeProc = doc->createTextNode(mNumProc);
+  eProc.appendChild(tnodeProc);
+
   // What the software is
   QDomElement eSoftware = doc->createElement("componentSoftwarePackage");
   eContent.appendChild(eSoftware);

@@ -58,6 +58,8 @@ public:
 	QString  mLaunchTime;
 	QString  mSoftwareDescription;
 	QString  mPurposeOfJob;
+	QString  mMachineName;
+	QString  mNumProc;
 };
 
 #endif
