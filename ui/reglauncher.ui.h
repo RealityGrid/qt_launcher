@@ -654,14 +654,11 @@ void RegLauncher::commonLaunchCode(){
 
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
-      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(), config.topLevelRegistryGSH,
-                                 config.currentCheckpointGSH, config.mInputFileName,
-                                 config.treeTag, config.mTimeToRun);
+      sgs = gridifier.makeSimSGS(factory, config);
     }
     else{
-      sgs = gridifier.makeSimSGS(factory, config.mJobData->toXML(),
-                                 config.topLevelRegistryGSH, config.currentCheckpointGSH,
-                                 config.mInputFileName, "", config.mTimeToRun);
+      config.treeTag = "";
+      sgs = gridifier.makeSimSGS(factory, config);
     }
       
     // Check that the sgs was created properly, if not die
@@ -722,9 +719,7 @@ void RegLauncher::commonLaunchCode(){
     // Remember to fill in the config.simulationGSH during the wizard stage - or we'll have problems!
     // for the time being though - if we make sure we create a simulation before creating a visualization
     // then we'll be ok for testing purposes
-    sgs = gridifier.makeVizSGS(factory, config.mJobData->toXML(),
-                               config.topLevelRegistryGSH, config.simulationGSH,
-                               config.mTimeToRun);
+    sgs = gridifier.makeVizSGS(factory, config);
 
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){

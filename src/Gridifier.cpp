@@ -222,27 +222,25 @@ QString Gridifier::makeSGSFactory(const QString &container, const QString &topLe
   return result;
 }
 
-
-QString Gridifier::makeSimSGS(const QString &factory, const QString &tag,
-                              const QString &topLevelRegistry,
-                              const QString &checkPointGSH,
-                              const QString &inputFileName,
-                              const QString &optionalChkPtTag,
-                              const int maxRunTime){
+/* Create an SGS to associate with a simulation
+ */
+QString Gridifier::makeSimSGS(const QString &factory,
+                              const LauncherConfig &config){
   QString result;
   
   QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
   makeSimSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   makeSimSGSProcess->addArgument(factory);
   // the tag is handled correctly if it contains spaces - thanks QT!
-  makeSimSGSProcess->addArgument(tag);
-  makeSimSGSProcess->addArgument(topLevelRegistry);
-  makeSimSGSProcess->addArgument(checkPointGSH);
-  makeSimSGSProcess->addArgument(inputFileName);
-  makeSimSGSProcess->addArgument(QString::number(maxRunTime));
-  if (optionalChkPtTag.length() > 0)
-    makeSimSGSProcess->addArgument(optionalChkPtTag);
- 
+  makeSimSGSProcess->addArgument(config.mJobData->toXML());
+  makeSimSGSProcess->addArgument(config.topLevelRegistryGSH);
+  makeSimSGSProcess->addArgument(config.currentCheckpointGSH);
+  makeSimSGSProcess->addArgument(config.mInputFileName);
+  makeSimSGSProcess->addArgument(QString::number(config.mTimeToRun));
+  if (config.treeTag.length() > 0){
+    makeSimSGSProcess->addArgument(config.treeTag);
+    makeSimSGSProcess->addArgument(config.checkPointTreeFactoryGSH);
+  }
   makeSimSGSProcess->start();
 
   while(makeSimSGSProcess->isRunning()){
@@ -257,19 +255,17 @@ QString Gridifier::makeSimSGS(const QString &factory, const QString &tag,
   return result;
 }
 
-QString Gridifier::makeVizSGS(const QString &factory, const QString &tag,
-                              const QString &topLevelRegistry,
-                              const QString &simSGS,
-                              const int maxRunTime){
+QString Gridifier::makeVizSGS(const QString &factory,
+                              const LauncherConfig &config){
   QString result;
 
   QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
   makeVizSGSProcess->setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
   makeVizSGSProcess->addArgument(factory);
-  makeVizSGSProcess->addArgument(tag);
-  makeVizSGSProcess->addArgument(topLevelRegistry);
-  makeVizSGSProcess->addArgument(simSGS);
-  makeVizSGSProcess->addArgument(QString::number(maxRunTime));
+  makeVizSGSProcess->addArgument(config.mJobData->toXML());
+  makeVizSGSProcess->addArgument(config.topLevelRegistryGSH);
+  makeVizSGSProcess->addArgument(config.simulationGSH);
+  makeVizSGSProcess->addArgument(QString::number(config.mTimeToRun));
   makeVizSGSProcess->start();
 
   while (makeVizSGSProcess->isRunning()){

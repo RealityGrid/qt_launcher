@@ -7,7 +7,7 @@ use XML::DOM;
 
 if( @ARGV < 6  )
 {
-  print "Usage: make_sgs.pl <GSH of factory> <tag for SGS> <GSH of registry> <GSH of checkpoint> <input file> <run time (min)> [<Tag for checkpoint tree>]\n";
+  print "Usage: make_sgs.pl <GSH of factory> <tag for SGS> <GSH of registry> <GSH of checkpoint> <input file> <run time (min)> [<Tag for checkpoint tree> <GSH of checkpoint tree factory>]\n";
   exit;
 }
 
@@ -25,18 +25,17 @@ my $run_time = $ARGV[5];
 # A GSH must have at least 'http' in it
 if(length($chkGSH) < 5){
 
-    if( @ARGV == 7  ){
+    if( @ARGV == 8  ){
 	my $tree_meta_data = $ARGV[6];
-
-	$target = "http://vermont.mvc.mcc.ac.uk:50000/Session/RealityGridTree/factory";
+	my $target = $ARGV[7];
+  
 	$uri = "factory";
-	$func = "createNewTree";
 	$timeToLive = "<ogsi:terminationTime />";
 
 	$result = SOAP::Lite
 	    -> uri($uri)              #set the namespace
 	    -> proxy("$target")       #location of service
-	    -> $func($timeToLive, "", "", $tree_meta_data)
+	    -> createNewTree($timeToLive, "", "", $tree_meta_data)
 	    -> result;
 
 	# Strip locator and handle tags from response to leave GSH

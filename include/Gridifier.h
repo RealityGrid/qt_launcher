@@ -56,13 +56,8 @@ public:
 
   QString getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer);
   QString makeSGSFactory(const QString &container, const QString &topLevelRegistry);
-  QString makeSimSGS(const QString &factory, const QString &tag,
-                     const QString &topLevelRegistry, const QString &checkPointGSH,
-                     const QString &inputFileName, const QString &optionalChkPtTag,
-                     const int maxRunTime);
-  QString makeVizSGS(const QString &factory, const QString &tag,
-                     const QString &topLevelRegistry, const QString &simGSH,
-                     const int maxRunTime);
+  QString makeSimSGS(const QString &factory, const LauncherConfig &config);
+  QString makeVizSGS(const QString &factory, const LauncherConfig &config);
   QString checkPointAndStop(const QString &sgsGSH);
   void getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable);
   
