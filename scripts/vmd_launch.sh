@@ -108,6 +108,25 @@ echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> /tmp/reg_sim_remote.$$
 echo "export SIM_STD_OUT_FILE" >> /tmp/reg_sim_remote.$$
 echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> /tmp/reg_sim_remote.$$
 echo "export REG_SGS_ADDRESS" >> /tmp/reg_sim_remote.$$
+
+# Really hacky bit to shift GLOBUS_TCP_PORT_RANGE if running on
+# local host.  This prevents sockets from self-connecting which
+# results in the connection back from vmd to namd failing.
+if [ "$SIM_HOSTNAME" == "localhost" ]
+then
+  echo "echo $GLOBUS_TCP_PORT_RANGE" >> /tmp/reg_sim_remote.$$
+  # Tell bash to treat these variables as int's, not strings
+  echo "declare -i PORT_MIN" >> /tmp/reg_sim_remote.$$
+  echo "declare -i PORT_MAX" >> /tmp/reg_sim_remote.$$
+  echo "PORT_MIN=\`echo \$GLOBUS_TCP_PORT_RANGE | awk -F, '{print \$1}'\`" >> /tmp/reg_sim_remote.$$
+  echo "PORT_MAX=\`echo \$GLOBUS_TCP_PORT_RANGE | awk -F, '{print \$2}'\`" >> /tmp/reg_sim_remote.$$
+  echo "PORT_MIN=\${PORT_MIN}+20" >> /tmp/reg_sim_remote.$$
+  echo "PORT_MAX=\${PORT_MAX}+20" >> /tmp/reg_sim_remote.$$
+  echo "GLOBUS_TCP_PORT_RANGE=\${PORT_MIN}\",\"\${PORT_MAX}" >> /tmp/reg_sim_remote.$$
+  echo "GLOBUS_TCP_PORT_RANGE=\$GLOBUS_TCP_PORT_RANGE" >> /tmp/reg_sim_remote.$$
+  echo "export GLOBUS_TCP_PORT_RANGE" >> /tmp/reg_sim_remote.$$
+fi
+
 echo "echo \"Starting vmd job...\"" >> /tmp/reg_sim_remote.$$
 echo "\$HOME/RealityGrid/bin/start_vmd .reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 
