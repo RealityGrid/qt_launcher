@@ -39,12 +39,7 @@
 #---------------------------------------------------------------------------*/
 
 
-# Script mode
-
-#. $PWD/ReG-L2.conf
-#. $PWD/ReG-L2-GUI.conf
-
-# Instead source the GUI generated configuration file
+#  Source the GUI generated configuration file
 . $1
 
 # Get the time to run
@@ -77,12 +72,6 @@ fi
 
 # Do the setup for the perl launcher
 
-#echo "Starting launcher"
-#$PWD/bin/launcher.pl $CONTAINER
-#. $HOME/RealityGrid/scratch/reg_app_info.sh
-
-#REG_SGS_ADDRESS=$REG_APP_GSH
-
 REG_STEER_HOME=$HOME/RealityGrid/reg_steer_lib
 export REG_STEER_HOME REG_SGS_ADDRESS
 
@@ -103,13 +92,6 @@ echo "then" >> /tmp/reg_sim_remote.$$
 echo "  mkdir \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
 echo "fi" >> /tmp/reg_sim_remote.$$
 echo "cd \$REG_WORKING_DIR" >> /tmp/reg_sim_remote.$$
-#echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> /tmp/reg_sim_remote.$$
-#echo "then" >> /tmp/reg_sim_remote.$$
-#echo "  echo \"Input file not found - exiting\"" >> /tmp/reg_sim_remote.$$
-#echo "  exit" >> /tmp/reg_sim_remote.$$
-#echo "fi" >> /tmp/reg_sim_remote.$$
-#echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> /tmp/reg_sim_remote.$$
-#echo "chmod a+w .reg.input-file.$$" >> /tmp/reg_sim_remote.$$
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> /tmp/reg_sim_remote.$$
 echo "export UC_PROCESSORS" >> /tmp/reg_sim_remote.$$
 echo "TIME_TO_RUN=$TIME_TO_RUN" >> /tmp/reg_sim_remote.$$
