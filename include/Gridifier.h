@@ -90,6 +90,11 @@ public:
   void setApplication(QApplication *);
   /** Set the location of the wrapper scripts */
   void setScriptsDirectory(const QString &dir);
+  /** Set the service data of the specified service.  This routine
+      adds the <ogsi:setByServiceDataNames> tags to the argument. */
+  void setServiceData(const QString &nameSpace,
+		      const QString &gsh,
+		      const QString &sdeText);
 
 private:
   QProcess *getSGSiesProcess;
@@ -108,7 +113,7 @@ private:
 
 public slots:
   void getSGSiesProcessEnded();
-  void getParamDefsProcessEnded();
+//  void getParamDefsProcessEnded();
   void gsiFtpStdoutSlot();
   void gsiFtpStderrSlot();
   

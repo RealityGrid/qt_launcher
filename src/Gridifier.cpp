@@ -566,7 +566,6 @@ void Gridifier::copyCheckPointFiles(const QString &host){
  *  to a remote machine. We don't check for the existance
  *  of a valid proxy.
  */
-
  // NOT USED!?
 QProcess *gsiFtpProcess;
 void Gridifier::gsiFtp(const QString &aFile, const QString &aDestination){
@@ -600,7 +599,9 @@ void Gridifier::gsiFtpStderrSlot()
   cout << "Stderr:" << endl << gsiFtpProcess->readStderr() << endl;
 }
 
-
+/** Instructs the simulation associated with the specified SGS
+    to take a checkpoint and then stop.  This call blocks until
+    job has stopped or a time-out occurs. */
 QString Gridifier::checkPointAndStop(const QString &sgsGSH){
   QProcess *checkPointAndStopProcess = new QProcess(QString("./checkpoint_and_stop.pl"));
   checkPointAndStopProcess->setWorkingDirectory(mScriptsDir);
@@ -638,4 +639,33 @@ void Gridifier::webServiceJobSubmit(const QString & scriptConfigFileName){
   cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
   if (launchSimScriptProcess->canReadLineStderr())
     cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
+}
+
+/** Calls setServiceData on the specified service using the
+    second argument as the basis for the argument to setServiceData. 
+    (The <ogsi:setByServiceDataNames> tags are added in this 
+    routine.) */
+void Gridifier::setServiceData(const QString &nameSpace,
+			       const QString &gsh,
+			       const QString &sdeText){
+
+  QString arg("<ogsi:setByServiceDataNames>");
+  arg.append(sdeText);
+  arg.append("</ogsi:setByServiceDataNames>");
+
+  QProcess *setServiceDataProcess = new QProcess(QString("./setServiceData.pl"));
+  setServiceDataProcess->setWorkingDirectory(mScriptsDir);
+  setServiceDataProcess->addArgument(nameSpace);
+  setServiceDataProcess->addArgument(gsh);
+  setServiceDataProcess->addArgument(arg);
+  setServiceDataProcess->start();
+
+  while (setServiceDataProcess->isRunning()){
+    usleep(10000);
+    mApplication->processEvents();
+  }
+
+  cout << "Stdout:" << endl << setServiceDataProcess->readStdout() << endl;
+  if (setServiceDataProcess->canReadLineStderr())
+    cout << "Stderr:" << endl << setServiceDataProcess->readStderr() << endl;
 }
