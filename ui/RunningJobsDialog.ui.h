@@ -6,6 +6,10 @@
 ** a constructor, and a destroy() slot in place of a destructor.
 *****************************************************************************/
 
+/** @file RunningJobsDialog.ui.h
+ *  @brief Qt Designer-generated code for dialog displaying list of
+ *         available services */
+
 void RunningJobsDialog::init()
 {
   // hide the horizontal header in the gshTagTable
@@ -24,18 +28,20 @@ void RunningJobsDialog::setConfig(LauncherConfig *aConfig )
   mConfig = aConfig;
 
   // populate the viz's simulation gsh entry box with a good default
-  runningGSHLineEdit->setText(mConfig->simulationGSH);
-  if (mResultString != NULL)
-    *mResultString = runningGSHLineEdit->text();
-
+  if(mConfig->simulationGSH){
+    runningGSHLineEdit->setText(mConfig->simulationGSH);
+    if (mResultString != NULL){
+      *mResultString = runningGSHLineEdit->text();
+    }
+  }
   // populate the gsh tag list view - spawn a process
   // to do this, read the results in from a slot here
   // when we're ready.
   mGridifier.getSGSies(mConfig->topLevelRegistryGSH, runningGSHTagTable);
-
 }
 
-void RunningJobsDialog::runningGSHSelectedSlot( int row, int col, int button, const QPoint & mousePos )
+void RunningJobsDialog::runningGSHSelectedSlot( int row, int col, int button, 
+						const QPoint & mousePos )
 {
   // Stick the result in the Line edit
   runningGSHLineEdit->setText(runningGSHTagTable->text(row,0));
