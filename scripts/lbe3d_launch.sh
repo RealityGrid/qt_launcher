@@ -142,7 +142,7 @@ then
 #  echo "&(executable="/home/zzcgurp/RealityGrid/bin/rg-cp")(arguments="-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH")" > /tmp/rgcp.rsl
 #  echo "Calling MM's rgcpc script on Bezier..."
 #  $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun bezier.man.ac.uk jobmanager-fork /tmp/rgcp.rsl 
-/home/zzcgurp/RealityGrid/bin/rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+${HOME}/RealityGrid/bin/rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
 fi
 
 case $ReG_LAUNCH in

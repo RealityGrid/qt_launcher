@@ -84,8 +84,8 @@ for($i=0; $i<$NodeSize; $i++){
     my $node = $nodes->item($i)->getElementsByTagName("Direction");
     my $direction = $node->item(0)->getFirstChild->getNodeValue;
 
-    # Find the first checkpoint type with direction INOUT
-    if($direction eq "INOUT"){
+    # Find the first checkpoint type with direction INOUT or OUT
+    if($direction eq "INOUT" || $direction eq "OUT"){
 	$done = 1;
 	last;
     }

@@ -1,4 +1,4 @@
-#! /usr/local/bin/perl
+#! /usr/bin/env perl
 #
 #
 # COPYRIGHT UNIVERSITY OF MANCHESTER, 2003
@@ -263,7 +263,7 @@ for ( my $i = 0; $i < $NoFileNodes; $i++ )
   #check the files are not already on the target machine
   if(  $TargetHostName =~ m/$hostname/  )
   {
-    print "WARNING::Chekpoint files Already on Target Machine\n";
+    print "WARNING::Checkpoint files already on target machine\n";
     #if the user forces us we copy the files over again - maybe
     #the originals have become corrupt
     if ( $FORCE eq "FALSE" )

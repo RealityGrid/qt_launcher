@@ -125,11 +125,16 @@ echo "  echo \"Input file not found - exiting\"" >> $REG_TMP_FILE
 echo "  exit" >> $REG_TMP_FILE
 echo "fi" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+
+if [ "$CHECKPOINT_GSH" == "" ]
+then 
 echo "mv -f \$HOME/RealityGrid/scratch/${COORD_FILE}.$$ ./${COORD_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${STRUCT_FILE}.$$ ./${STRUCT_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${PARAM_FILE}.$$ ./${PARAM_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${VECT_FILE}.$$ ./${VECT_FILE}" >> $REG_TMP_FILE
 echo "mv -f \$HOME/RealityGrid/scratch/${VEL_FILE}.$$ ./${VEL_FILE}" >> $REG_TMP_FILE
+fi
+
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> $REG_TMP_FILE
 echo "export UC_PROCESSORS" >> $REG_TMP_FILE
@@ -146,15 +151,12 @@ echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "echo \"Starting mpi job...\"" >> $REG_TMP_FILE
 echo "\$HOME/RealityGrid/bin/start_namd \$GS_INFILE" >> $REG_TMP_FILE
 
-echo "Transferring simulation input file..."
-
 if [ $CHECKPOINT_GSH ]
-then 
-# Build RSL
-  echo "&(executable=\"/home/bezier1/globus/bin/rg-cp\")(arguments=\"-vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH\")" > /tmp/rgcp.rsl
-  echo "Calling MM's rgcpc script on Bezier..."
-  $HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun bezier.man.ac.uk jobmanager-fork /tmp/rgcp.rsl 
+then
+./rg-cp -vb -p 10 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
 fi
+
+echo "Transferring simulation input file..."
 
 case $SIM_HOSTNAME in
       localhost)
