@@ -38,7 +38,7 @@ void RunningJobsDialog::setConfig(LauncherConfig *aConfig )
 void RunningJobsDialog::runningGSHSelectedSlot( int row, int col, int button, const QPoint & mousePos )
 {
   // Stick the result in the Line edit
-  runningGSHLineEdit->setText(runningGSHTagTable->text(row,col));
+  runningGSHLineEdit->setText(runningGSHTagTable->text(row,0));
 
   // and change the (nasty) result string to show it too
   if (mResultString != NULL)

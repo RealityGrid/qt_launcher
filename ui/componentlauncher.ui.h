@@ -346,7 +346,7 @@ void ComponentLauncher::simInputButtonPushedSlot()
 void ComponentLauncher::gshTagSelectedSlot( int row, int col, int button, const QPoint & mousePos )
 {
   // Stick the result in the Line edit
-  simulationGSHLineEdit->setText(gshTagTable->text(row,col));
+  simulationGSHLineEdit->setText(gshTagTable->text(row,0));
 }
 
 /** if the user's selected an item from the checkpoint tree, then fill
