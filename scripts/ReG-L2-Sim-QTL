@@ -136,27 +136,22 @@ echo "Transferring simulation input file..."
 
 if [ $CHECKPOINT_GSH ]
 then 
-#  Transfer the checkpoint data files to target machine
-#   do this by calling Mark McKeown's rgcpc script
-echo "Calling Mark McKeown's rgcpc script on Bezier"
-  case $SIM_HOSTNAME in
-       iam764.psc.edu)
-          # Pittsburgh has a special ftp server
-	  globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -t gsiftp://panhead.psc.edu/~/ -g $CHECKPOINT_GSH
-	  ;;
-      *)
-	  globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
-	  ;;
-  esac
-echo "Done calling script"
+  #  Transfer the checkpoint data files to target machine
+  #   do this by calling Mark McKeown's rgcpc script
+  echo "Calling Mark McKeown's rgcpc script on Bezier"
+  #globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -vb -p 20 -tcp-bs 16777216 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+  globus-job-run bezier.man.ac.uk /home/bezier1/globus/bin/rg-cp -vb -p 10 -t gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch -g $CHECKPOINT_GSH
+  echo "Done calling script"
 fi
 
 if [ $SSH -eq 0 ]
 then
   case $SIM_HOSTNAME in
       iam764.psc.edu)
-          # Pittsburgh has a special ftp server
-	  globus-url-copy file:$SIM_INFILE gsiftp://panhead.psc.edu/~/RealityGrid/scratch/.reg.input-file.$$
+          # Pittsburgh has a special ftp server - put input file in home directory there....
+	  globus-url-copy file:$SIM_INFILE gsiftp://panhead.psc.edu/~/.reg.input-file.$$
+          # ...and then copy it over to LeMieux
+	  globus-job-run iam764.psc.edu /usr/psc/bin/far get .reg.input-file.$$ ~/RealityGrid/scratch/.
           ;;
       *)
 	  globus-url-copy file:$SIM_INFILE gsiftp://$SIM_HOSTNAME/~/RealityGrid/scratch/.reg.input-file.$$
