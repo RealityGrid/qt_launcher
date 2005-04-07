@@ -1,0 +1,5 @@
+# If you edit the default.conf file and wish to include your changes in the
+# launcher binary (so that it can generate a default.conf if it is missing)
+# then you must execute the following command and then rebuild:
+
+scripts/configFileToIncludeFile.pl default.conf > include/ConfigFileContent.h
