@@ -131,7 +131,7 @@ echo "geomview" >> $REG_TMP_FILE
 
 echo "Starting geomview..."
 
-$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
+./reg_globusrun 
 
 echo "...done."
 echo "-----------------"

@@ -128,7 +128,7 @@ echo "\$HOME/RealityGrid/bin/start_mini_app_para" >> $REG_TMP_FILE
 
 echo "Starting simulation..."
 
-$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
+./reg_globusrun 
 
 echo "...done."
 echo "-----------------"

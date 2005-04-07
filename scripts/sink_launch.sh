@@ -132,7 +132,7 @@ echo ""
 
 echo "Starting simulation..."
 
-$HOME/RealityGrid/reg_qt_launcher/scripts/reg_globusrun 
+./reg_globusrun 
 
 echo "...done."
 echo "-----------------"
