@@ -70,8 +70,6 @@ esac
 # SIM_NODE_HOSTNAME is needed for running on a linux cluster
 # viking has a unique script on the machine itself configured to put the job
 # into SGE queues
-#if [ $SSH -eq 0 ]
-#then
 #  case $SIM_HOSTNAME in
 #       viking-i00.viking.lesc.doc.ic.ac.uk)
 #          SIM_NODE_HOSTNAME=viking000.viking.lesc.doc.ic.ac.uk
