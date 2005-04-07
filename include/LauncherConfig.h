@@ -128,62 +128,76 @@ class LauncherConfig {
 
   // Member variables
   
-    // Grid Service Handles for the various components
-    QString topLevelRegistryGSH;
-    QString checkPointTreeFactoryGSH;
-    QString registryOfFactoriesGSH;
-    QString SGSFactoryGSH;
-    QString SGSGSH;
+  /** Grid Service Handle for the top-level registry */
+  QString topLevelRegistryGSH;
+  /** Grid Service Handle for the checkpoint tree factory */
+  QString checkPointTreeFactoryGSH;
+  /** Grid Service Handle of the registry for factories */
+  QString registryOfFactoriesGSH;
+  QString SGSFactoryGSH;
+  QString SGSGSH;
 
-    QString currentCheckpointGSH;
-    QString simulationGSH;
-    QString visualizationGSH;
+  /** Holds the GSH of the currently selected checkpoint */
+  QString currentCheckpointGSH;
+  /** Holds the GSH of the most recently launched component that is not a 
+      visualization */
+  QString simulationGSH;
+  /** Holds the GSH of the most recently launched vis. component */
+  QString visualizationGSH;
     
-    bool    vizServer;
-    bool    multicast;
-    QString multicastAddress;
-    bool    migration;
-    bool    restart;
-    bool    newTree;
-    int     vizType;
-    QString mInputFileName;
-
-    //QString mTargetMachine;
-    Machine *mTargetMachine;
-    QString treeTag;
-    int     mNumberProcessors;
-    int     mNumberPipes;
-    int     mTimeToRun;
+  bool     vizServer;
+  bool     multicast;
+  QString  multicastAddress;
+  bool     migration;
+  bool     restart;
+  bool     newTree;
+  int      vizType;
+  QString  mInputFileName;
+  Machine *mTargetMachine;
+  QString  treeTag;
+  int      mNumberProcessors;
+  int      mNumberPipes;
+  int      mTimeToRun;
     
-    JobMetaData *mJobData;
+  JobMetaData *mJobData;
 
-    QValueList<Container> containerList;
-    QString selectedContainer;
-    int containerPortNum;
-    QString globusLocation;
-    QValueList<Application> applicationList;
-    Application *mAppToLaunch;
-    QValueList<Machine> machineList;
-    QValueList<Machine> vizMachineList;
+  QValueList<Container>   containerList;
+  QString                 selectedContainer;
+  int                     containerPortNum;
+  QString                 globusLocation;
+  QValueList<Application> applicationList;
+  QValueList<Machine>     machineList;
+  QValueList<Machine>     vizMachineList;
+  Application            *mAppToLaunch;
 
-    bool    mIsCoupledModel;
-    QString mScriptsDirectory;
-    QString mScratchDirectory;
-    QString mLaunchMethod; // "globus", "cog" or "ssh"
-    QString mConfigFileContent;
+  /** Whether we are launching a coupled model or not */
+  bool    mIsCoupledModel;
+  /** The location of the directory holding the perl scripts for doing SOAP */
+  QString mScriptsDirectory;
+  /** The location of our scratch directory */
+  QString mScratchDirectory;
+  /** How to launch remote jobs: one of "globus", "cog" or "ssh" */
+  QString mLaunchMethod; 
+  /** The content of the default default.conf file - used to generate a new
+      file if it is missing. */
+  QString mConfigFileContent;
+  /** Location of the steering client binary */
+  QString mSteererBinaryLocation;
 
-    // Methods
+  // Methods
 
-    LauncherConfig();
-    LauncherConfig(QString file);
-    ~LauncherConfig();
+  LauncherConfig();
+  LauncherConfig(QString file);
+  ~LauncherConfig();
 
-    void writeConfig(QString file);
-    void readConfig(QString file);
-    QString toXML();
+  void writeConfig(QString file);
+  void readConfig(QString file);
+  QString toXML();
 
  protected:
-    bool createNewConfigFile();
+  /** Create a new default.conf if it is missing
+      @see mConfigFileContent */
+  bool createNewConfigFile();
 };
 
 #endif

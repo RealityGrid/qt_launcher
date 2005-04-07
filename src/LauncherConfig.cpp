@@ -182,6 +182,15 @@ void LauncherConfig::readConfig(QString file){
 	  xmlFree(val);
 	}
 
+	// The location of the steering client binary (so we can launch it
+	// when the user clicks 'steer')
+        if (!xmlStrcmp(settings->name, 
+		       (const xmlChar*)"steerClientBinary")){
+          xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
+	  mSteererBinaryLocation = QString((const char*)val);
+	  xmlFree(val);
+	}
+
 	settings = settings->next;
       }
     }
