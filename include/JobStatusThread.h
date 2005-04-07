@@ -51,7 +51,7 @@
 class JobStatusThread: public QThread {
   public:
     JobStatusThread(QApplication *aApp, QObject *aMainWindow,
-                    const QString &aGSH);
+                    const QString &aGSH, const QString &scriptsDir);
     
   protected:
     /** Starts the thread */
@@ -64,6 +64,8 @@ class JobStatusThread: public QThread {
     QApplication *mApp;
     /** GSH of the service to poll for status */
     QString       mGSH;
+    /** Location of the scripts directory where the Perl scripts live */
+    QString       mScriptsDir;
     /** Namespace (SGS or MetaSGS) of service to talk to */
     QString       mNameSpace;
     bool done;

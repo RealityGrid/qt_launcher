@@ -48,12 +48,13 @@
 using namespace std;
 
 JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
-				 const QString &aGSH)
+				 const QString &aGSH, const QString &scriptsDir)
 : done(false)
 {
   mMainWin = aMainWindow;
   mGSH = aGSH;
   mApp = aApp;
+  mScriptsDir = scriptsDir;
   
   int index = mGSH.find("/service", 0, true);
   mNameSpace = mGSH.left(index);
@@ -90,7 +91,7 @@ void JobStatusThread::getJobStatus(){
   /// It's better that we run this process in stackspace rather than heapspace
   /// That way QT doesn't have to worry about garbage collecting it
   QProcess jobStatusProcess(QString("./jobStatus.pl"));
-  jobStatusProcess.setWorkingDirectory(QString(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/scripts"));
+  jobStatusProcess.setWorkingDirectory(mScriptsDir);
   jobStatusProcess.addArgument(mNameSpace);
   jobStatusProcess.addArgument(mGSH);
 
