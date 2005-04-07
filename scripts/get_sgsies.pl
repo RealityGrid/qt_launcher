@@ -32,7 +32,7 @@ if( @ARGV != 1  )
 }
 
 my $registry_GSH = $ARGV[0];
-open(SGS_FILE, "> sgs_list.txt") || die("can't open datafile: $!");
+#open(SGS_FILE, "> sgs_list.txt") || die("can't open datafile: $!");
 
 #----------------------------------------------------------------------
 # Get list of SGS factories
@@ -54,19 +54,13 @@ if(@{gsh_array} > 0){
 
 	if($content_array[$i] ne "factoryRegistry"){
 
-            # Remove new-line characters that may or may not be present 
-            # in the job meta-data
-	    #$content_array[$i] =~ s/\n/ /og;
-	    #print SGS_FILE "$gsh_array[$i] $content_array[$i]\n";
-	    #print "$gsh_array[$i] $content_array[$i]\n";
-
-	    print SGS_FILE "$gsh_array[$i] $users[$i] $descriptions[$i] $starttimes[$i] $machines[$i]  $num_pxs[$i] $apps[$i] $groups[$i]\n";
+	    #print SGS_FILE "$gsh_array[$i] $users[$i] $descriptions[$i] $starttimes[$i] $machines[$i]  $num_pxs[$i] $apps[$i] $groups[$i]\n";
 	    print "$gsh_array[$i] $users[$i] $descriptions[$i] $starttimes[$i] $machines[$i] $num_pxs[$i] $apps[$i] $groups[$i]\n";
 	}
     }
 } 
 
-close(SGS_FILE);
+#close(SGS_FILE);
 
 #-------------------------------------------------------------------------
 
