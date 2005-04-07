@@ -911,30 +911,23 @@ void RegLauncher::steerSlot()
 		   "gsiftp://bezier.man.ac.uk/tmp/aGSIFTPSpeedTest");
   if (1) return;
 #endif  
+
+  if(config.mSteererBinaryLocation.isEmpty()){
+
+    QMessageBox::warning(NULL, "Configuration error",
+			 "Steerer location is not set - default.conf should have\n"
+			 "a steerClientBinary entry\n\n",
+			 QMessageBox::Ok, 0, 0 );
+    return;
+  }
+
   // create an instance of the RealityGrid QT Steerer for the current GSH
-  steerer = new QProcess(QString(config.mScriptsDirectory+"/steerer_wrapper"));
+  steerer = new QProcess(config.mSteererBinaryLocation);
   if (config.simulationGSH.length() != 0){    
     steerer->addArgument(config.simulationGSH);
     steerer->setCommunication(QProcess::Stdout|QProcess::Stderr|QProcess::DupStderr);
 
-    cout << getenv("REG_STEER_HOME") << endl;
-    cout << steerer->arguments().join(" ") << endl;
-    
     steerer->start();
-
-    // Unfortunately the following code appears not to work.
-    // seemingly the QProcess->start environment variable passing
-    // technique doesn't work - many posts to the QT forums alluding
-    // to this ....
-    /*
-    QStringList env;
-    env += QString("REG_SGS_ADDRESS="+config.simulationGSH);
-
-    cout << env.join(" ");
-    cout << steerer->arguments().join(" ");
-    
-    steerer->start(&env);
-    */
   }
   else {
     steerer->start();
