@@ -101,6 +101,8 @@ export  REG_TMP_FILE_ONLY
 
 echo "#!/bin/sh" > $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >> $REG_TMP_FILE
+echo "SSH=$SSH" >> $REG_TMP_FILE
+echo "export SSH" >> $REG_TMP_FILE
 echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
 echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
 echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE

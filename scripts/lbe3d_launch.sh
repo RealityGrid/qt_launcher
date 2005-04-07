@@ -104,6 +104,8 @@ echo "#!/bin/sh" > $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>$REG_TMP_FILE
 echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch" >> $REG_TMP_FILE
 echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "SSH=$SSH" >> $REG_TMP_FILE
+echo "export SSH" >> $REG_TMP_FILE
 echo "REG_STEER_DIRECTORY=\$REG_WORKING_DIR" >> $REG_TMP_FILE
 echo "export REG_STEER_DIRECTORY" >> $REG_TMP_FILE
 echo "echo \"Working directory is \$REG_WORKING_DIR\"" >> $REG_TMP_FILE
