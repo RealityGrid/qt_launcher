@@ -179,6 +179,15 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *val = xmlGetProp(settings, (const xmlChar*)"value");
 	  mLaunchMethod = QString((const char*)val);
 	  setenv("ReG_LAUNCH", mLaunchMethod.ascii(), 1);
+	  // Also set env. variable that is passed over to remote machine
+	  // so that launching script knows whether or not it has been run
+	  // by ssh (may need to submit into queuing system).
+	  if(mLaunchMethod.find("ssh") > -1){
+	    setenv("SSH", "1", 1);
+	  }
+	  else{
+	    setenv("SSH", "0", 1);
+	  }
 	  xmlFree(val);
 	}
 
