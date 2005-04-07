@@ -46,12 +46,16 @@
 /* MORE IMPORTANTLY - I'll convert all this to QT xml support later.... */
 
 #include "LauncherConfig.h"
+#include "textviewdialog.h"
 #include <iostream>
 #include "libxml/parser.h"
 #include "qmdcodec.h"
 #include <qdom.h>
 #include <qfile.h>
+#include <qdir.h>
 #include <qmessagebox.h>
+#include <qtextstream.h>
+#include <qtextedit.h>
 
 using namespace std;
 
@@ -64,6 +68,13 @@ LauncherConfig::LauncherConfig(){
   mTimeToRun      = 30;
   mJobData        = new JobMetaData;
   mIsCoupledModel = false;
+
+  // Hacky way of ensuring we know what default.conf should be
+  // in case user hasn't got it in the right place
+  // - this include file is generated at build time and assigns
+  // the contents of default.conf to mConfigFileContent.
+#include "ConfigFileContent.h"
+
 }
 
 /** Constructor using configuration file (not used?) */
@@ -73,7 +84,7 @@ LauncherConfig::LauncherConfig(QString file){
 
 /** Destructor */
 LauncherConfig::~LauncherConfig(){
-	delete mJobData;
+  delete mJobData;
 }
 
 /** Method loads a configuration xml file, and parses it to
@@ -97,7 +108,11 @@ void LauncherConfig::readConfig(QString file){
   QFile *configFile = new QFile(file);
   if(!(configFile->exists())){
     cout << "Input file " << file << " does not exist :-(" <<endl;
-    return;
+
+    if(file.find("default.conf") > -1){
+
+      if(!createNewConfigFile()) return;
+    }
   }
 
   // Load it in and parse it with libxml2
@@ -587,4 +602,49 @@ QString LauncherConfig::toXML(){
   return doc->toString();
 }
 
+bool LauncherConfig::createNewConfigFile(){
+
+  QString homePath = QDir::homeDirPath();
+  cout << "Home directory = " << homePath << endl;
+  QDir testDir = QDir(homePath+"/.reg_launcher");
+  if(!testDir.exists()){
+    if(!testDir.mkdir(homePath+"/.reg_launcher")){
+      QMessageBox::critical( NULL, "Error with configuration file",
+			     "File ~/.reg_launcher/default.conf does not exist\n"
+			     "and I cannot create the ~/.reg_launcher directory.\n\n",
+			     QMessageBox::Ok, 0, 0 );
+      return false;
+    }
+  }
+
+  QFile configFile(homePath+"/.reg_launcher/default.conf");
+  if(!configFile.open(IO_WriteOnly)){
+      QMessageBox::critical( NULL, "Error with configuration file",
+			     "File ~/.reg_launcher/default.conf does not exist\n"
+			     "and I cannot create it.\n\n",
+			     QMessageBox::Ok, 0, 0 );
+      return false;
+  }
+
+  QMessageBox::warning( NULL, "New configuration file",
+			"The configuration file ~/.reg_launcher/default.conf was missing\n"
+			"so I will create one for you but you'll need to edit it.\n\n",
+			QMessageBox::Ok, 0, 0 );
+
+  TextViewDialog *textViewDialog = new TextViewDialog();
+  textViewDialog->mTextEdit->setTextFormat(QTextEdit::PlainText);
+  textViewDialog->mTextEdit->setText(mConfigFileContent);
+  textViewDialog->mTextEdit->setReadOnly(FALSE);
+  textViewDialog->exec();
+  mConfigFileContent = textViewDialog->mTextEdit->text();
+
+  // Now write a 'default' default.conf using the text originally held in 
+  // mConfigFileContent (obtained from include/ConfigFileContent.h) that the
+  // user has just edited.
+  QTextStream stream(&configFile);
+  stream << mConfigFileContent;
+  configFile.close();
+
+  return true;
+}
 

@@ -170,6 +170,7 @@ class LauncherConfig {
     QString mScriptsDirectory;
     QString mScratchDirectory;
     QString mLaunchMethod; // "globus", "cog" or "ssh"
+    QString mConfigFileContent;
 
     // Methods
 
@@ -181,8 +182,8 @@ class LauncherConfig {
     void readConfig(QString file);
     QString toXML();
 
-    QString mConfigFileContent;
-
+ protected:
+    bool createNewConfigFile();
 };
 
 #endif
