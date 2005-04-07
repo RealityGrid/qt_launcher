@@ -1,3 +1,0 @@
-#!/bin/sh
-
-${HOME}/RealityGrid/reg_qt_steerer/steerer $1
