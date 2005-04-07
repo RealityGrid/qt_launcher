@@ -178,7 +178,7 @@ void RegLauncher::migrateSimSlot()
 
     // cache it
     // we need to copy the selected/edited input file to the target machine
-    QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
+    QString inputFileName = config.mScratchDirectory+"/ReG_tmp_input_file";
 
     config.mInputFileName = inputFileName;
 
@@ -585,11 +585,9 @@ void RegLauncher::launchSimSlot()
 
     // cache it
     // we need to copy the selected/edited input file to the target machine
-    QString inputFileName = QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/ReG_tmp_input_file";
+    QString inputFileName = config.mScratchDirectory+"/ReG_tmp_input_file";
 
     config.mInputFileName = inputFileName;
-
-    //gridifier.gsiFtp(inputFileName, "gsiftp://"+config.simTargetMachine+"/tmp/ReG_launcher_test");
 
     // and insert it into the wizard's text edit box
     componentLauncher->setInputFileTextEdit(inputFileText);
@@ -704,7 +702,7 @@ void RegLauncher::commonLaunchCode(){
     consoleOutSlot(QString("SGS is "+config.simulationGSH).stripWhiteSpace());
 
     // Create xml job description and save to file
-    //QFile jobFile("tmp/job.xml");
+    //QFile jobFile(config.mScratchDirectory + "/job.xml");
     //jobFile.open( IO_WriteOnly );
 
     //QTextStream filestream(&jobFile);
@@ -713,13 +711,13 @@ void RegLauncher::commonLaunchCode(){
 
     // Launch job using remote web service and the xml job description
     //consoleOutSlot("Submitting job to web service...");
-    //gridifier.webServiceJobSubmit(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/job.xml");
+    //gridifier.webServiceJobSubmit(config.mScratchDirectory + "/job.xml");
     //consoleOutSlot("...done job submission");
     //return;//ARPDBG
     
     // Now launch the job
 
-    gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", config);
+    gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
 
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
@@ -729,18 +727,18 @@ void RegLauncher::commonLaunchCode(){
 
       ProgressBarThread *test = new ProgressBarThread();
       test->start();
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
+      gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf",
                                 config);
       test->kill();
       consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
     }
     else {
-      gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
-                                config);
+      gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
     }
     
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.simulationGSH);
+                                                            config.simulationGSH,
+							    config.mScriptsDirectory);
     aJobStatusThread->start();
 
   }
@@ -769,13 +767,13 @@ void RegLauncher::commonLaunchCode(){
       gridifier.launchArgonneViz(config);
     }
     else {
-      gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
-
-      gridifier.launchVizScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/viz.conf", config);
+      gridifier.makeReGScriptConfig(config.mScratchDirectory+"/viz.conf", config);
+      gridifier.launchVizScript(config.mScratchDirectory+"/viz.conf", config);
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.visualizationGSH);
+                                                            config.visualizationGSH,
+							    config.mScriptsDirectory);
     aJobStatusThread->start();
   }
 }
@@ -879,19 +877,15 @@ void RegLauncher::coupledModelLaunchCode(){
   consoleOutSlot(QString("2nd MetaSGS is "+config2.simulationGSH).stripWhiteSpace());
 
   // Now launch the jobs themselves
-  gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", 
-				config);
-  gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
-			    config);
-  gridifier.makeReGScriptConfig(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf", 
-				config2);
-  gridifier.launchSimScript(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/sim.conf",
-			    config2);
+  gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
+  gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
+  gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config2);
+  gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config2);
 
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-							  parentMetaSGS_GSH);
+							  parentMetaSGS_GSH,
+							  config.mScriptsDirectory);
   aJobStatusThread->start();
-
 }
 
 /** Searches for checkpoint trees using the root address specified in
@@ -905,7 +899,6 @@ void RegLauncher::discoverySlot()
   consoleOutSlot("Searching for CheckPoint Trees");
   
   cpt = new CheckPointTree(checkPointTreeListView, config.checkPointTreeFactoryGSH);
-  //cpt->start();
 }
 
 QProcess *steerer;
@@ -914,9 +907,9 @@ void RegLauncher::steerSlot()
   ////////////////// TEST /////////////////////
 
 #ifdef speedTest
-  gridifier.gsiFtp("file:///tmp/aBigFile", "gsiftp://bezier.man.ac.uk/tmp/aGSIFTPSpeedTest");
-  if (1)
-    return;
+  gridifier.gsiFtp("file:///tmp/aBigFile", 
+		   "gsiftp://bezier.man.ac.uk/tmp/aGSIFTPSpeedTest");
+  if (1) return;
 #endif  
   // create an instance of the RealityGrid QT Steerer for the current GSH
   steerer = new QProcess(QString(config.mScriptsDirectory+"/steerer_wrapper"));
@@ -961,7 +954,10 @@ void RegLauncher::proxyInit()
   // First - pop up a pass phrase entry dialog (non threaded - GUI blocking)
   bool ok = FALSE; 
 
-  QString passPhrase = QInputDialog::getText( tr("Enter GRID Pass Phrase"), tr("Enter Your Pass Phrase"), QLineEdit::Password, QString::null, &ok, this);
+  QString passPhrase = QInputDialog::getText( tr("Enter GRID Pass Phrase"), 
+					      tr("Enter Your Pass Phrase"), 
+					      QLineEdit::Password, QString::null, 
+					      &ok, this);
 
   // Check to see if the user entered anything and didn't click cancel - return if so
   if (!ok || passPhrase.isEmpty()){
@@ -1098,7 +1094,6 @@ void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem,
     return;
 
   // Cast the listViewItem to a CheckPointTreeItem
-  //CheckPointTreeItem *checkPointTreeItem = (CheckPointTreeItem*)listViewItem;
   rightMouseCheckPointTreeItem = (CheckPointTreeItem*)listViewItem;
     
   QPopupMenu popupMenu;
@@ -1166,48 +1161,6 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
   
 }
 
-
-/*
-THIS WON'T WORK WITHOUT NAMESPACES BECAUSE OF THE WAY GSOAP WORKS
-void RegLauncher::getInputFileFromSGSGSH(const QString &sgsGSH, QString *result)
-{
-  struct soap soap;
-  soap_init(&soap);
-
-  tree__findServiceDataResponse *serviceDataResponse = new tree__findServiceDataResponse();
-  if (soap_call_tree__findServiceData(&soap, sgsGSH, "", "", serviceDataResponse))
-    soap_print_fault(&soap, stderr);
-  else{
-    if (result == NULL)
-      result = new QString();
-    *result = serviceDataResponse->_findServiceDataReturn;
-  }
-}
-*/
-
-//void RegLauncher::getJobStatus(const QString &pSGSGSH){
-  // This code essentially cribbed from Andy Porter's steering lib
-/*
-  struct tns__findServiceDataResponse findServiceDataResponse;
-  struct msg_struct *msg = NULL;
-  struct soap soap;
-  char queryBuf[REG_MAX_STRING_LENGTH];
-  char *pChar = NULL;
-  char *pChar1 = NULL;
-
-  findServiceDataResponse._result = NULL;
-  sprintf(queryBuf, "<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>");
-
-  if(soap_call_tns__findServiceData(&soap, pSGSGSH, "", queryBuf, &findServiceDataResponse )){
-
-    fprintf(stderr, "Get_service_data: findServiceData failed:\n");
-    soap_print_fault(&soap, stderr);
-
-    return;
-  }
-*/
-//}
-
 /** Parse the checkpoint meta-data obtained from a node in the checkpoint
    tree in order to get the name of the application and the UID of
    the checkpoint
@@ -1253,9 +1206,9 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
           for(i=0; i<childNodes.count(); i++){
 
           	if(childNodes.item(i).isElement()){
-              cout << "ARPDBG File "<< i << " = " << childNodes.item(i).toElement().text() << endl;
-				      fileNames.append(childNodes.item(i).toElement().text());
-				    }
+		  //cout << "ARPDBG File "<< i << " = " << childNodes.item(i).toElement().text() << endl;
+		  fileNames.append(childNodes.item(i).toElement().text());
+		}
           }
           break;
         }

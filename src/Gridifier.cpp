@@ -465,7 +465,7 @@ void Gridifier::launchSimScript(const QString &scriptConfigFileName,
   }
 
 // Debugging going on here
-/*QFile logFile(QDir::homeDirPath()+"/RealityGrid/reg_qt_launcher/tmp/log");
+/*QFile logFile(config.mScratchDirectory+"/log");
 if ( logFile.open(IO_WriteOnly) ){
   QTextStream stream(&logFile);
   stream << launchSimScriptProcess->arguments().join(" ") << endl;
