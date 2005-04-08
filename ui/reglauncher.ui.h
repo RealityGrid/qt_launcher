@@ -1241,6 +1241,7 @@ void RegLauncher::coupledModelCreateGlobalParamSlot()
   cout << "result string = " << selectedGSH << endl;
   GlobalParamConstructionForm globalDlg;
   globalDlg.setConfig(&config);
+  globalDlg.setGridifier(&gridifier);
   globalDlg.setParentGSH(selectedGSH);
   globalDlg.exec();
 }
