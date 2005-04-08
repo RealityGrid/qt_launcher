@@ -87,7 +87,7 @@ case $ReG_LAUNCH in
     ssh)
         chmod a+x $REG_TMP_FILE
         scp $REG_TMP_FILE $USER@$SIM_HOSTNAME:RealityGrid/scratch/$REG_TMP_FILE_ONLY
-        ssh -f $USER@$SIM_HOSTNAME \~/RealityGrid/scratch/$REG_TMP_FILE_ONLY &> $REG_SCRATCH_DIRECTORY/stdeo.$$
+        ssh -f -X $USER@$SIM_HOSTNAME \~/RealityGrid/scratch/$REG_TMP_FILE_ONLY &> $REG_SCRATCH_DIRECTORY/stdeo.$$
     ;;
     *)
      echo "ReG_LAUNCH must be set to one of 'globus', 'cog' or 'ssh'"
