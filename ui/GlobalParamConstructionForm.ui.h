@@ -13,8 +13,10 @@
 void GlobalParamConstructionForm::init()
 {
   mConfig = NULL;
+  mGridifier = NULL;
   paramListTable->setLeftMargin(0);
   globalParamContentListBox->clear();
+  pushButton2->setEnabled(false);
 }
 
 void GlobalParamConstructionForm::addGlobal_clicked()
@@ -22,16 +24,23 @@ void GlobalParamConstructionForm::addGlobal_clicked()
   unsigned int i;
   unsigned int numSel;
 
+  // Clear out the list box and then put in the entries we
+  // already know about
   globalParamContentListBox->clear();
 
   numSel = selectionList.count();
+  // Enable the Create Global button if we have some values
+  if (numSel) pushButton2->setEnabled(true);
   for(i=0; i<numSel; i+=2){
     QString aText = paramListTable->text(selectionList[i],
 					 selectionList[i+1]);
     globalParamContentListBox->insertItem(aText);
- }
+  }
 
+  // Now we add entries from the new user selection
   numSel = paramListTable->numSelections();
+  // Enable the Create Global button if we have some values
+  if (numSel) pushButton2->setEnabled(true);
 
   for(i=0; i<numSel; i++){
     QTableSelection aSel = paramListTable->selection(i);
@@ -52,10 +61,11 @@ void GlobalParamConstructionForm::createGlobal_clicked()
 {
   bool ok;
   QString gName = QInputDialog::getText(
-            "Global parameter", "Enter name of global parameter:", QLineEdit::Normal,
+            "Global parameter", "Enter name of global parameter:", 
+	    QLineEdit::Normal,
             QString::null, &ok, this );
 
-  if( !(ok && !gName.isEmpty()) ){
+  if( !(ok && !gName.stripWhiteSpace().isEmpty()) ){
     // user entered nothing or pressed Cancel
     return;
   }
@@ -85,7 +95,14 @@ void GlobalParamConstructionForm::createGlobal_clicked()
 	     "</Global_param_list>\n</MSGS:Coupling_config>\n");
 
   cout << doc << endl;
-  gridifier.setServiceData(QString("MetaSGS"), mParentGSH, doc);
+
+  if(mGridifier){
+    mGridifier->setServiceData(QString("MetaSGS"), mParentGSH, doc);
+  }
+  else{
+    cout << "GlobalParamConstructionForm::createGlobal_clicked: "
+      "pointer to gridifier is NULL\n";
+  }
   globalParamContentListBox->clear();
   selectionList.clear();
 }
@@ -119,7 +136,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
 {
   QString      configFileList;
   QStringList  result;
-  unsigned int i;
+  int          i;
   QStringList::Iterator it;
 
   mParentGSH = aGSH;
@@ -130,10 +147,17 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
     return;
   }
 
+  if(!mGridifier){
+    cout << "WARNING: no pointer to gridifier in "
+      "GlobalParamConstructionForm::setParentGSH" << endl;
+    return;
+  }
+
   // Get param defs from service...
   // ...the output will be a space-delimited list of filenames
   if(!mParentGSH.isEmpty()){
-    gridifier.getCoupledParamDefs(mParentGSH, &configFileList);
+    mGridifier->setScriptsDirectory(mConfig->mScriptsDirectory);
+    mGridifier->getCoupledParamDefs(mParentGSH, &configFileList);
   }
   else{
     cout << "Have no GSH for parent service" << endl;
@@ -158,7 +182,6 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
   }
 
   // Insert the required number of columns in the table
-  cout << "Inserting " << count << " columns" << endl;
   paramListTable->insertColumns(0, count);
   // Make a hidden row to hold GSHs
   paramListTable->insertRows(0,1);
@@ -199,17 +222,15 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
       return;
     }
     QString gsh = list.item(0).toElement().attribute(QString("GSH"));
-    paramListTable->setText(0, count, gsh);
 
     list = doc.elementsByTagName(QString("Label"));
-
     // '-1' allows for first, hidden, row of GSH values
-    if( list.count() > (paramListTable->numRows()-1)){
+    if( (int)(list.count()) > ((int)(paramListTable->numRows())-1)){
       paramListTable->insertRows(paramListTable->numRows(),
-				 (list.count() + 1 - paramListTable->numRows()));
+		       	 (list.count() + 1 - paramListTable->numRows()));
     }
 
-    for(i=0; i<list.count(); i++){
+    for(i=0; i<(int)(list.count()); i++){
       QString label = list.item(i).firstChild().nodeValue();
       // Remove the 'GSH_ID/' bit from the beginning of each label
       // to make it more user friendly.
@@ -218,10 +239,21 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
 
       // Insert the label into the table - '+1' allows for initial
       // (hidden) row holding the GSH
-      paramListTable->setText(i+1, count, label);
+      paramListTable->setText(i+1, count, label.stripWhiteSpace());
     }
+
+    // Adjust the column width BEFORE putting the (hidden) gsh string
+    // into the top row of this column
+    paramListTable->adjustColumn(count);
+    paramListTable->setText(0, count, gsh);
 
     file.close();
     ++count;
   }
+}
+
+
+void GlobalParamConstructionForm::setGridifier( Gridifier *aGrid )
+{
+  mGridifier = aGrid;
 }

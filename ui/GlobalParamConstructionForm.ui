@@ -20,46 +20,6 @@
             <cstring>unnamed</cstring>
         </property>
         <widget class="QTable" row="0" column="0" rowspan="4" colspan="1">
-            <column>
-                <property name="text">
-                    <string>1</string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </column>
-            <column>
-                <property name="text">
-                    <string>2</string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </column>
-            <row>
-                <property name="text">
-                    <string>1</string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </row>
-            <row>
-                <property name="text">
-                    <string>2</string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </row>
-            <row>
-                <property name="text">
-                    <string>3</string>
-                </property>
-                <property name="pixmap">
-                    <pixmap></pixmap>
-                </property>
-            </row>
             <property name="name">
                 <cstring>paramListTable</cstring>
             </property>
@@ -183,11 +143,11 @@
     <include location="local" impldecl="in implementation">GlobalParamConstructionForm.ui.h</include>
 </includes>
 <variables>
-    <variable access="private">QString mParentGSH;</variable>
-    <variable access="private">LauncherConfig *mConfig;</variable>
-    <variable access="private">Gridifier gridifier;</variable>
     <variable>typedef QValueList&lt;int&gt; IntListType;</variable>
     <variable>IntListType selectionList;</variable>
+    <variable access="private">Gridifier *mGridifier;</variable>
+    <variable access="private">LauncherConfig *mConfig;</variable>
+    <variable access="private">QString mParentGSH;</variable>
 </variables>
 <slots>
     <slot>addGlobal_clicked()</slot>
@@ -200,6 +160,7 @@
     <function access="private" specifier="non virtual">init()</function>
     <function>setConfig( LauncherConfig * aConfig )</function>
     <function>setParentGSH( const QString &amp; aGSH )</function>
+    <function>setGridifier(Gridifier *aGrid)</function>
 </functions>
 <layoutdefaults spacing="6" margin="11"/>
 </UI>
