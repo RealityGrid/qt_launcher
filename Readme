@@ -8,7 +8,7 @@ The reg_qt_launcher.pro file is the project file produced and used by Designer. 
 
 So, the build process is simply:
 
-qmake reg_qt_launcher.pro
+qmake launcher.pro
 make
 
 Note - *.ui files and their accompanying headers are automatically converted into c++ classes, contained in the .ui/ directory. These are automatically generated files - and should therefore contain no user code. Any changes made to those files is wiped during the build process.
