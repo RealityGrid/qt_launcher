@@ -161,7 +161,9 @@ void Gridifier::getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable)
   getSGSiesProcess = new QProcess(QString("./get_sgsies.pl"));
   getSGSiesProcess->setWorkingDirectory(mScriptsDir);
   getSGSiesProcess->addArgument(topLevelRegistry);
-  getSGSiesProcess->start();
+  if(!getSGSiesProcess->start()){
+    cout << "getSGSies: ERROR - proces failed to launch"<< endl;
+  }
 
   connect(getSGSiesProcess, SIGNAL(processExited()), this, 
     SLOT(getSGSiesProcessEnded()));
@@ -173,8 +175,10 @@ void Gridifier::getSGSiesProcessEnded(){
   QStringList result;
 
   // check we've got a reference to the gshTagTable
-  if (mGSHTagTable == NULL)
+  if (mGSHTagTable == NULL){
+    cout << "getSGSiesProcessEnded: NULL reference to gshTagTable!" << endl;
     return;
+  }
 
   // clear out the table
   for (int i=mGSHTagTable->numRows(); i>0; i--){
