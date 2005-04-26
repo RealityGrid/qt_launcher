@@ -51,9 +51,41 @@ void RegLauncher::init(){
   config.readConfig(homeDir + "/.reg_launcher/default.conf");
   config2.readConfig(homeDir + "/.reg_launcher/default.conf");
   checkPointTreeListView->setRootIsDecorated(true);
+
+  QDir lDir(config.mScriptsDirectory);
+  if (!lDir.isReadable()){
+    QMessageBox::critical(this, "Configuration error",
+			  "Cannot read from the scripts directory\n("
+			  +config.mScriptsDirectory+")\n specified "
+			  "in ~/.reg_launcher/default.conf - launching will "
+			  "NOT work.",  QMessageBox::Ok, 0, 0);
+  }
+
+  lDir.setPath(config.mScratchDirectory);
+  if (!lDir.isReadable()){
+    QMessageBox::critical(this, "Configuration error",
+			  "Cannot read from the scratch directory\n("
+			  +config.mScratchDirectory+")\n specified "
+			  "in ~/.reg_launcher/default.conf - launching will "
+			  "NOT work.",  QMessageBox::Ok, 0, 0);
+  }
+
+  QFile lFile(config.mSteererBinaryLocation);
+  if(!lFile.exists()){
+    QMessageBox::warning( NULL, "Configuration error",
+			  "Steerer binary is not in the location \n("
+			  +config.mSteererBinaryLocation+")\n specified in "
+			  "~/.reg_launcher/default.conf.  Firing-up the\n"
+			  "steering client from within the Launcher will not "
+			  "be possible\n\n",
+			  QMessageBox::Ok, 0, 0 );
+  }
+
   gridifier.setScriptsDirectory(config.mScriptsDirectory);
 }
 
+/** Store a pointer to the object representing the type of application
+    that is being launched */
 void RegLauncher::setApplication(QApplication *aApplication){
   mApplication = aApplication;
   gridifier.setApplication(mApplication);
@@ -752,7 +784,10 @@ void RegLauncher::commonLaunchCode(){
 
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){
-      consoleOutSlot("Failed to create a visualization SGS - is the simulation SGS valid and running?");
+      consoleOutSlot("Failed to create a visualization SGS - is the "
+		     "simulation SGS valid and running?");
+      consoleOutSlot("Output was:");
+      consoleOutSlot(sgs);
       return;
     }
 
