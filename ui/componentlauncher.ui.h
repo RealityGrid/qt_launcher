@@ -112,12 +112,15 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     
     // populate the viz's simulation gsh entry box with a good default
     simulationGSHLineEdit->setText(mConfig->simulationGSH);
-    
+
+    // Tell the Gridifier object where the scripts live    
+    mGridifier.setScriptsDirectory(mConfig->mScriptsDirectory);
+
     // populate the gsh tag list view - spawn a process
     // to do this, read the results in from a slot here
     // when we're ready.
     mGridifier.getSGSies(mConfig->topLevelRegistryGSH, gshTagTable);
-    
+
     // Test to see if we're doing a migration
     // Things are a bit different if we're migrating
     if (mConfig->migration || mConfig->restart){
