@@ -116,7 +116,6 @@ my $dataSources = "<SGS:Data_source_list>
 </SGS:Data_source>
 </SGS:Data_source_list>";
 
-$func = "setServiceData";
 # Configure the SGS with the max. run-time of the job (is used to 
 # control life-time of the service). Allow 5 more
 # minutes than specified, just to be on the safe side.
@@ -128,7 +127,7 @@ $arg = "<ogsi:setByServiceDataNames>".$dataSources.
 my $ans = SOAP::Lite
           -> uri("SGS")
           -> proxy("$sgs_GSH")
-          -> $func("$arg")
+          -> setServiceData("$arg")
           -> result;
 
 #print "setServiceData for Data_source_list returned: >>$ans<<\n";
@@ -150,7 +149,7 @@ $func = "setServiceData";
 $arg = "<ogsi:setByServiceDataNames>".$dataSources.
     "</ogsi:setByServiceDataNames>";
 my $ans = SOAP::Lite
-          -> uri("SGS")
+          -> uri("$namespace")
           -> proxy("$source_GSH")
           -> $func("$arg")
           -> result;
