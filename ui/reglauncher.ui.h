@@ -27,7 +27,8 @@
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
 // gSoap
-#include "checkPointTreeH.h"
+//#include "checkPointTreeH.h"
+#include "soapH.h"
 
 /** @file reglauncher.ui.h
     @brief Main class for the GUI side of launcher
@@ -257,11 +258,14 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   struct soap soap;
   soap_init(&soap);
   
-  tree__getInputFileResponse *inputFileResponse = new tree__getInputFileResponse();
-  if (soap_call_tree__getInputFile(&soap, checkPointGSH, "", inputFileResponse))
+  //tree__getInputFileResponse *inputFileResponse = new tree__getInputFileResponse();
+  rgt__getInputFileResponse inputFileResponse;
+  //if (soap_call_tree__getInputFile(&soap, checkPointGSH, "", inputFileResponse))
+  if (soap_call_rgt__getInputFile(&soap, checkPointGSH, "", &inputFileResponse))
     soap_print_fault(&soap, stderr);
   else{
-    result = inputFileResponse->_getInputFileReturn;
+    //result = inputFileResponse->_getInputFileReturn;
+    result = inputFileResponse._getInputFileReturn;
   }
 
   return result;
@@ -275,11 +279,14 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
   struct soap soap;
   soap_init(&soap);
 
-  tree__getCheckPointDataResponse *chkptDataResponse = new tree__getCheckPointDataResponse();
-  if (soap_call_tree__getCheckPointData(&soap, checkPointGSH, "", chkptDataResponse))
+  //tree__getCheckPointDataResponse *chkptDataResponse = new tree__getCheckPointDataResponse();
+  rgt__getCheckPointDataResponse chkptDataResponse;
+  //if (soap_call_tree__getCheckPointData(&soap, checkPointGSH, "", chkptDataResponse))
+  if (soap_call_rgt__getCheckPointData(&soap, checkPointGSH, "", &chkptDataResponse))
     soap_print_fault(&soap, stderr);
   else{
-    result = chkptDataResponse->_getCheckPointDataReturn;
+    //result = chkptDataResponse->_getCheckPointDataReturn;
+    result = chkptDataResponse._getCheckPointDataReturn;
   }
 
   return result;
