@@ -78,7 +78,13 @@ my $sgs_GSH = $node->item(0)->getFirstChild->getNodeValue;
 #---------------------------------------------------------------------
 # Supply input file & max. run time
 
-if( open(GSH_FILE, $input_file) ){
+# Allow 5 more minutes than specified, just to be on the safe side.
+$run_time += 5;
+
+# Only actually supply the contents of the input file if a checkpoint
+# tree is being used (to avoid problems with large input decks when
+# they aren't actually required)
+if( (index($chkGSH, "http") > -1) && open(GSH_FILE, $input_file) ){
 
   $content = "";
   while ($line_text = <GSH_FILE>) {
@@ -86,30 +92,27 @@ if( open(GSH_FILE, $input_file) ){
   }
   close(GSH_FILE);
 
-  $target = $sgs_GSH;
-  $uri = "SGS";
-  $func = "setServiceData";
   # Protect input-file content by putting it in a CDATA section - we 
   # don't want parser to attempt to parse it 
   # Configure the SGS with the max. run-time of the job (is used to 
-  # control life-time of the service). Allow 5 more
-  # minutes than specified, just to be on the safe side.
-  $run_time += 5;
+  # control life-time of the service).
   $content = "<ogsi:setByServiceDataNames><SGS:Input_file><![CDATA[" . $content .
              "]]></SGS:Input_file><SGS:Max_run_time>" . $run_time . "</SGS:Max_run_time></ogsi:setByServiceDataNames>";
-
-  #$content = "<ogsi:setByServiceDataNames><SGS:Input_file><![CDATA[" . $content .
-  #    "]]></SGS:Input_file></ogsi:setByServiceDataNames>";
-
-  $result =  SOAP::Lite
-                   -> uri($uri)              #set the namespace
-                   -> proxy("$target")       #location of service
-                   -> $func($content)
-                   -> result;
-
-  #print "setServiceData returned: $result\n";
+}
+else{
+  # Configure the SGS with the max. run-time of the job (is used to 
+  # control life-time of the service). 
+  $content = "<ogsi:setByServiceDataNames><SGS:Input_file><SGS:Max_run_time>" . 
+             $run_time . "</SGS:Max_run_time></ogsi:setByServiceDataNames>";
 }
 
+$result =  SOAP::Lite
+                 -> uri("SGS")              #set the namespace
+                 -> proxy("$sgs_GSH")       #location of service
+                 -> setServiceData($content)
+                 -> result;
+
+#print "setServiceData returned: $result\n";
 #---------------------------------------------------------------------
 
 print "$sgs_GSH\n";
