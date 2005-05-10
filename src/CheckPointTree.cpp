@@ -42,15 +42,14 @@
  */
 
 #include "CheckPointTree.h"
-
-#include "CheckPointTree.h"
 #include "CheckPointTreeItem.h"
-#include "soapRealityGridTree.nsmap"
+//#include "soapRealityGridTree.nsmap"
+//#include "soapRealityGrid.nsmap"
+#include "soapH.h"
 #include "qdom.h"
 
 using namespace std;
 
-//CheckPointTree::CheckPointTree(QListView *_parent) : rootAddress("http://vermont.mvc.mcc.ac.uk:50000/Session/RealityGridTree/factory"){
 CheckPointTree::CheckPointTree(QListView *_parent, const QString &_address){
   rootAddress = _address;
   parent = _parent;
@@ -74,74 +73,18 @@ QStringList CheckPointTree::getActiveTrees(){
   struct soap soap;
   soap_init(&soap);
 
-  fact__getActiveTreesResponse *out = new fact__getActiveTreesResponse();
+  //fact__getActiveTreesResponse *out = new fact__getActiveTreesResponse();
+  rgtf__getActiveTreesResponse out;
 
-  if (soap_call_fact__getActiveTrees ( &soap, rootAddress, "", out ))
+  //  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", out ))
+  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", &out ))
     soap_print_fault(&soap, stderr);
 
-//  cout << out->_getActiveTreesReturn << endl;
-/*
-  // At the moment the data returned from Mark McKeown's web service isn't
-  // a valid XML document, since it doesn't have an single enclosing tag.
-  // To get round this for now, pre and append temporay tags to the string.
-  QString xmlResultDoc = QString("<foo>")+out->_getActiveTreesReturn+"</foo>";
-  // There's another instance of it being not well formed - the <Checkpoint_node_data>
-  // tag is never closed.... it should be before the next </ogsi:content>
-
   QStringList activeTrees;
+  //  parse(out->_getActiveTreesReturn);
+  parse(out._getActiveTreesReturn);
 
-  QDomDocument doc("ActiveTrees");
-  doc.setContent(xmlResultDoc);
-
-  QDomElement docElem = doc.documentElement();
-
-  QDomNode n = docElem.firstChild();
-
-  // Go through and grab all the active trees
-
-  while( !n.isNull() ) {
-    QDomElement e = n.toElement(); // try to convert the node to an element.
-
-    if( !e.isNull() && e.tagName() == "ogsi:entry") {
-
-      QDomNode nn = e.firstChild();
-
-      if (!nn.isNull()){
-        QDomElement ee = nn.nextSibling().toElement();
-
-        if (!ee.isNull() && ee.tagName() == "ogsi:memberServiceLocator") {
-
-          nn = ee.firstChild();
-
-          if (!nn.isNull()){
-            ee = nn.toElement();
-
-            if (!ee.isNull() && ee.tagName() == "ogsi:locator"){
-
-              nn = ee.firstChild();
-
-              if (!nn.isNull()){
-                ee = nn.toElement();
-
-                if (!ee.isNull() && ee.tagName() == "ogsi:handle"){
-                  //cout << ee.text() << endl;
-                  activeTrees += ee.text();
-                }
-              }
-
-            }
-          }
-
-        }
-
-      }
-    }
-    n = n.nextSibling();
-  }
-*/
-  QStringList activeTrees;
-  parse(out->_getActiveTreesReturn);
-
+  soap_end(&soap);
   return activeTrees;
 }
 
@@ -150,13 +93,16 @@ void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t)
   struct soap soap;
   soap_init(&soap);
 
-  tree__getChildNodesResponse *out = new tree__getChildNodesResponse();
-  if (soap_call_tree__getChildNodes(&soap, handle, "", out))
+  //rgtf__getChildNodesResponse *out = new rgtf__getChildNodesResponse();
+  rgt__getChildNodesResponse out;
+  //if (soap_call_rgtf__getChildNodes(&soap, handle, "", out))
+  if (soap_call_rgt__getChildNodes(&soap, handle, "", &out))
     soap_print_fault(&soap, stderr);
 
   // and then parse for children and data nodes, fill in list view as appropriate.....
 
-  parse(QString(out->_getChildNodesReturn), t);
+  //parse(QString(out->_getChildNodesReturn), t);
+  parse(QString(out._getChildNodesReturn), t);
 
   parent->triggerUpdate();
   
@@ -167,14 +113,19 @@ void CheckPointTree::getNodeData(const QString &handle, CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
 
-  tree__getCheckPointDataResponse *out = new tree__getCheckPointDataResponse();
-  if (soap_call_tree__getCheckPointData(&soap, handle, "", out))
+  //tree__getCheckPointDataResponse *out = new tree__getCheckPointDataResponse();
+  rgt__getCheckPointDataResponse out;
+  //if (soap_call_tree__getCheckPointData(&soap, handle, "", out))
+  if (soap_call_rgt__getCheckPointData(&soap, handle, "", &out))
     soap_print_fault(&soap, stderr);
 
-  cout << handle << endl;
-  cout << "************CHKPNTDATA***********" << endl << out->_getCheckPointDataReturn << endl << "******************************" << endl;
+  //cout << handle << endl;
+  //cout << "************CHKPNTDATA***********" << endl << 
+  //out->_getCheckPointDataReturn << endl << 
+  //  "******************************" << endl;
 
-  parse(QString(out->_getCheckPointDataReturn), t);
+  //parse(QString(out->_getCheckPointDataReturn), t);
+  parse(QString(out._getCheckPointDataReturn), t);
 }
 
 
