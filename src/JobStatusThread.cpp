@@ -66,6 +66,12 @@ JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow,
   // in a queue for hours on end.
   lifespan = 15000000;
 
+  soap_init2(&mSoap, SOAP_IO_KEEPALIVE, SOAP_IO_KEEPALIVE);
+}
+
+JobStatusThread::~JobStatusThread()
+{
+  soap_end(&mSoap);
 }
 
 void JobStatusThread::run(){
@@ -76,40 +82,21 @@ void JobStatusThread::run(){
 }
 
 void JobStatusThread::getJobStatus(){
-  /// Unfortunately this needs to be done by calling a script, rather than using gsoap directly from c++
-  ///
-  /// The reason for this is that the reg_steer_lib uses gsoap from c++, as does the library for the
-  /// checkpoint tree discovery. The issue is that we then have multiply defined functions and the linker
-  /// bails. There are three possible solutions:
-  ///  * combine the reg_steer_lib with the checkpoint tree discovery lib
-  ///      no good, since this would interfere with the encapsulation of both libs
-  ///  * use c++ namespaces for the checkpoint tree lib
-  ///      potentially the best way forward - but a bit of a botch also
-  ///  * just wrap around a script
-  ///      quickest way to progress - hence chosen - the deadline is fast approaching.
 
-  /// It's better that we run this process in stackspace rather than heapspace
-  /// That way QT doesn't have to worry about garbage collecting it
-  QProcess jobStatusProcess(QString("./jobStatus.pl"));
-  jobStatusProcess.setWorkingDirectory(mScriptsDir);
-  jobStatusProcess.addArgument(mNameSpace);
-  jobStatusProcess.addArgument(mGSH);
-
-  jobStatusProcess.start();
-
-  // We're in a thread - so no big worries about sitting waiting for
-  // this process to finish
-  while (jobStatusProcess.isRunning()){
-    usleep(50000);
+  struct sgs__findServiceDataResponse out;
+  QString arg("<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>");
+  if(soap_call_sgs__findServiceData(&mSoap, mGSH.latin1(), "", 
+				    (xsd__string)(arg.latin1()),
+				    &out)){
+    soap_print_fault(&mSoap, stderr);
+    done = true;
+    return;
   }
-
-  // Get the output, and simply grep for the desired results
-  QString results = jobStatusProcess.readStdout();
+  QString results(out._findServiceDataReturn);
 
   // Generate an event to send to the status bar (have to do it this way
   // because the gui thread must be the one to do the update)
   QCustomEvent *aUpdateEvent = new QCustomEvent(QEvent::User+1);
-  //QCustomEvent aUpdateEvent(QEvent::User+1);
 
   // need to think about having a timeout function
   if (results.find("NOT_STARTED")>=0){

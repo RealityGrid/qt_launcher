@@ -43,6 +43,7 @@
 #include "qthread.h"
 #include "qapplication.h"
 #include "StatusMessageData.h"
+#include "soapH.h"
 
 /** @file JobStatusThread.h
     @brief Class for monitoring inital status of job.
@@ -52,7 +53,8 @@ class JobStatusThread: public QThread {
   public:
     JobStatusThread(QApplication *aApp, QObject *aMainWindow,
                     const QString &aGSH, const QString &scriptsDir);
-    
+    ~JobStatusThread();
+
   protected:
     /** Starts the thread */
     virtual void run();
@@ -71,7 +73,8 @@ class JobStatusThread: public QThread {
     bool done;
     long age;
     long lifespan;
-    
+    struct soap mSoap;
+
     void getJobStatus();
 
   public slots:
