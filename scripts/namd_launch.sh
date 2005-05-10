@@ -73,6 +73,14 @@ VEL_FILE=`awk '/^velocities/ {print $2}' $SIM_INFILE`
 FEP_FILE=`awk '/^fepFile/ {print $2}' $SIM_INFILE`
 TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
+echo "TMP_PATH = $TMP_PATH"
+echo "COORD_FILE = $COORD_FILE"
+echo "STRUCT_FILE = $STRUCT_FILE"
+echo "PARAM_FILE = $PARAM_FILE"
+echo "VECT_FILE = $VECT_FILE"
+echo "VEL_FILE = $VEL_FILE"
+echo "FEP_FILE = $FEP_FILE"
+
 # Fourthly: Export these variables for use in child scripts
 
 REG_TMP_FILE=$REG_SCRATCH_DIRECTORY/reg_sim_remote.$$
@@ -95,16 +103,19 @@ esac
 
 # Ascertain whether we have a valid grid-proxy 
 
-case $ReG_LAUNCH in
-    globus|cog)
-    $GLOBUS_BIN_PATH/grid-proxy-info -exists
-     if [ $? -ne "0" ]
-     then
-       echo "No grid proxy, please invoke grid-proxy-init"
-       exit
-     fi
-    ;;
-esac
+if [ $SIM_HOSTNAME != "localhost" ]
+then
+  case $ReG_LAUNCH in
+      globus|cog)
+      $GLOBUS_BIN_PATH/grid-proxy-info -exists
+       if [ $? -ne "0" ]
+       then
+         echo "No grid proxy, please invoke grid-proxy-init"
+         exit
+       fi
+      ;;
+  esac
+fi
 
 # Setup the script for running the namd wrapper
 
@@ -226,11 +237,17 @@ case $SIM_HOSTNAME in
 		   then
 		   echo "Copying various input files to target machine"
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${COORD_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${COORD_FILE}.$$
+		   echo "Done ${TMP_PATH}${COORD_FILE}"
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${STRUCT_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${STRUCT_FILE}.$$
+		   echo "Done ${TMP_PATH}${STRUCT_FILE}"
  		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${PARAM_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${PARAM_FILE}.$$
+		   echo "Done ${TMP_PATH}${PARAM_FILE}"
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VECT_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${VECT_FILE}.$$
+		   echo "Done ${TMP_PATH}${VECT_FILE}"
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${VEL_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${VEL_FILE}.$$
+		   echo "Done ${TMP_PATH}${VEL_FILE}"
 		   $GLOBUS_BIN_PATH/globus-url-copy file:///${TMP_PATH}${FEP_FILE} gsiftp://$GRIDFTP_HOSTNAME/\~/RealityGrid/scratch/${FEP_FILE}.$$
+		   echo "Done ${TMP_PATH}${FEP_FILE}"
 	       fi
 	       ;;
           esac
