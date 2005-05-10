@@ -702,6 +702,7 @@ void RegLauncher::commonLaunchCode(){
         
     else{
       consoleOutSlot("Sorry! - couldn't start a factory");
+      consoleOutSlot("makeSGSFactory returned: "+posFactory);
       return;
     }     
   }
