@@ -243,7 +243,7 @@ QString Gridifier::makeSGSFactory(const QString &container,
 				  const QString &topLevelRegistry,
 				  const QString &className){
   QString result;
-  
+
   QProcess *makeSGSFactoryProcess = new QProcess(QString("./make_" + className + "_factory.pl"));
   makeSGSFactoryProcess->setWorkingDirectory(mScriptsDir);
   makeSGSFactoryProcess->addArgument(container);
