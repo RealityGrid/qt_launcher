@@ -723,9 +723,12 @@ void RegLauncher::commonLaunchCode(){
 
     // Create an SGS GSH, and create a checkpoint tree if necessary
     if (config.newTree) {
+      consoleOutSlot(QString("Making new checkpoint tree with tag "+
+			     config.treeTag));
       sgs = gridifier.makeSimSGS(factory, config);
     }
     else{
+      consoleOutSlot(QString("NOT making new checkpoint tree"));
       config.treeTag = "";
       sgs = gridifier.makeSimSGS(factory, config);
     }
