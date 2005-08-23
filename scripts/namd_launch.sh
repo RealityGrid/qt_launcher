@@ -65,12 +65,12 @@ export REG_STEER_HOME
 # and also get the path to the namd input file so that we can reconstruct
 # the full paths to each of the necessary files.
 
-COORD_FILE=`awk '/^coordinates/ {print $2}' $SIM_INFILE`
-STRUCT_FILE=`awk '/^structure/ {print $2}' $SIM_INFILE`
-PARAM_FILE=`awk '/^parameters/ {print $2}' $SIM_INFILE`
-VECT_FILE=`awk '/^extendedSystem/ {print $2}' $SIM_INFILE`
-VEL_FILE=`awk '/^velocities/ {print $2}' $SIM_INFILE`
-FEP_FILE=`awk '/^fepFile/ {print $2}' $SIM_INFILE`
+COORD_FILE=`awk '/^ *coordinates/ {print $2}' $SIM_INFILE`
+STRUCT_FILE=`awk '/^ *structure/ {print $2}' $SIM_INFILE`
+PARAM_FILE=`awk '/^ *parameters/ {print $2}' $SIM_INFILE`
+VECT_FILE=`awk '/^ *extendedSystem/ {print $2}' $SIM_INFILE`
+VEL_FILE=`awk '/^ *velocities/ {print $2}' $SIM_INFILE`
+FEP_FILE=`awk '/^ *fepFile/ {print $2}' $SIM_INFILE`
 TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
 echo "TMP_PATH = $TMP_PATH"
