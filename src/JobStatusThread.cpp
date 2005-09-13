@@ -40,6 +40,10 @@
 #include "JobStatusThread.h"
 #include "qprocess.h"
 #include <iostream>
+#include <ReG_Steer_Steerside.h>
+#include "ReG_Steer_Common.h"
+#include "ReG_Steer_XML.h"
+#include <ReG_Steer_Steerside_WSRF.h>
 
 /** @file JobStatusThread.cpp
     @brief Implementation of class for monitoring inital status of job.
@@ -83,6 +87,7 @@ void JobStatusThread::run(){
 
 void JobStatusThread::getJobStatus(){
 
+#if REG_OGSI
   struct sgs__findServiceDataResponse out;
   QString arg("<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>");
   if(soap_call_sgs__findServiceData(&mSoap, mGSH.latin1(), "", 
@@ -93,6 +98,15 @@ void JobStatusThread::getJobStatus(){
     return;
   }
   QString results(out._findServiceDataReturn);
+#else
+  char *rpOut;
+  char *rpName = "applicationStatus";
+  Get_resource_property (&mSoap,
+			 mGSH.latin1(),
+			 rpName,
+			 &rpOut);
+  QString results(rpOut);
+#endif // REG_OGSI
 
   // Generate an event to send to the status bar (have to do it this way
   // because the gui thread must be the one to do the update)
@@ -102,11 +116,13 @@ void JobStatusThread::getJobStatus(){
   if (results.find("NOT_STARTED")>=0){
     StatusMessageData *aData = new StatusMessageData("Job is Queued", 0);
     aUpdateEvent->setData(aData);
+    cout << "posting not yet started notification" << endl;
     mApp->postEvent(mMainWin, aUpdateEvent);
     
   } else if (results.find("RUNNING")>=0){
-    StatusMessageData *aData = new StatusMessageData("Job is Running", 2500);
+    StatusMessageData *aData = new StatusMessageData("Job is Running", 5000);
     aUpdateEvent->setData(aData);
+    cout << "posting RUNNING notification" << endl;
     mApp->postEvent(mMainWin, aUpdateEvent);
     done = true;
     
@@ -116,7 +132,7 @@ void JobStatusThread::getJobStatus(){
     mApp->postEvent(mMainWin, aUpdateEvent);
     
   } else if (results.find("STOPPED")>=0){
-    StatusMessageData *aData = new StatusMessageData("Job has Stopped", 2000);
+    StatusMessageData *aData = new StatusMessageData("Job has Stopped", 5000);
     aUpdateEvent->setData(aData);
     mApp->postEvent(mMainWin, aUpdateEvent);
     done = true;
