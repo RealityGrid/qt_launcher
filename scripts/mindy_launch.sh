@@ -287,7 +287,7 @@ case $SIM_HOSTNAME in
 	  fi
 	  if [ ! -z $HYBRID_FILE ]
 	      then
-	      cp -f ${TMP_PATH}$x{HYBRID_FILE} $HOME/RealityGrid/scratch/${HYBRID_FILE}.$$
+	      cp -f ${TMP_PATH}${HYBRID_FILE} $HOME/RealityGrid/scratch/${HYBRID_FILE}.$$
 	  fi
           ;;
       *)
