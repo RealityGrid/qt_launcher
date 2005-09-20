@@ -119,6 +119,8 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     // populate the gsh tag list view - spawn a process
     // to do this, read the results in from a slot here
     // when we're ready.
+    cout << "Calling getSGSies with registry: " << 
+      mConfig->topLevelRegistryGSH << endl;
     mGridifier.getSGSies(mConfig->topLevelRegistryGSH, gshTagTable);
 
     // Test to see if we're doing a migration
