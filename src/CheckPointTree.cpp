@@ -92,10 +92,8 @@ QStringList CheckPointTree::getActiveTrees(){
 void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
-
-  //rgtf__getChildNodesResponse *out = new rgtf__getChildNodesResponse();
   rgt__getChildNodesResponse out;
-  //if (soap_call_rgtf__getChildNodes(&soap, handle, "", out))
+
   if (soap_call_rgt__getChildNodes(&soap, handle, "", &out))
     soap_print_fault(&soap, stderr);
 
