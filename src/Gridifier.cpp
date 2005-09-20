@@ -39,7 +39,9 @@
 
 /** @file Gridifier.cpp
     @brief Implementation of wrappers for calling OGSA and remote-launching
-    scripts. */
+    scripts. 
+    @author Mark Riding
+    @author Andrew Porter */
 
 #include "Gridifier.h"
 #include "Utility.h"
@@ -51,6 +53,15 @@
 #include "qapplication.h"
 #include "qfile.h"
 #include "qmessagebox.h"
+
+#include <ReG_Steer_Steerside.h>
+#include "ReG_Steer_Common.h"
+#include <ReG_Steer_Browser.h>
+#include <ReG_Steer_Utils.h>
+#include "ReG_Steer_XML.h"
+#include "ReG_Steer_Utils_WSRF.h"
+#include "ReG_Steer_Steerside_WSRF.h"
+#include "soapH.h"
 
 using namespace std;
 
@@ -145,8 +156,13 @@ QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QStrin
 }
 
 
-void Gridifier::getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable){
-  QStringList result;
+void Gridifier::getSGSies(const QString &topLevelRegistry, 
+			  QTable *aGSHTagTable){
+
+  QStringList            result;
+  int                    numEntries;
+  struct registry_entry *entries;
+  int           i;
 
   mGSHTagTable = aGSHTagTable;
   if (mGSHTagTable == NULL)
@@ -158,53 +174,47 @@ void Gridifier::getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable)
   mGSHTagTable->insertRows(0, 1);
   mGSHTagTable->setText(0, 0, "Searching for Running Jobs");
 
-  getSGSiesProcess = new QProcess(QString("./get_sgsies.pl"));
-  getSGSiesProcess->setWorkingDirectory(mScriptsDir);
-  getSGSiesProcess->addArgument(topLevelRegistry);
-  if(!getSGSiesProcess->start()){
-    cout << "getSGSies: ERROR - proces failed to launch"<< endl;
+  if(Get_registry_entries(topLevelRegistry.latin1(), 
+			  &numEntries,  
+			  &entries) != REG_SUCCESS){
+    cout << "Get_registry_entries failed" << endl;
+    return;
   }
 
-  connect(getSGSiesProcess, SIGNAL(processExited()), this, 
-    SLOT(getSGSiesProcessEnded()));
-
-  return;
-}
-
-void Gridifier::getSGSiesProcessEnded(){
-  QStringList result;
+  if(numEntries == 0)return;
 
   // check we've got a reference to the gshTagTable
   if (mGSHTagTable == NULL){
-    cout << "getSGSiesProcessEnded: NULL reference to gshTagTable!" << endl;
+    cout << "getSGSies: NULL reference to gshTagTable!" << endl;
     return;
   }
 
   // clear out the table
-  for (int i=mGSHTagTable->numRows(); i>0; i--){
+  for (i=mGSHTagTable->numRows(); i>0; i--){
     mGSHTagTable->removeRow(0);
   }
 
-  QString processOutput = getSGSiesProcess->readStdout();
-
-  // the output will be in sgs gsh & tag pairs
-  // delimit on these and put them in the qstringlist
-  result = QStringList::split("\n", processOutput);
-
-  for (unsigned int i=0; i<result.count(); i++){
-    int firstSpace = result[i].find(" ");
-    QString tSGS = result[i].left(firstSpace);
-    QString tag = result[i].right(result[i].length() - firstSpace);
-    if (tSGS.startsWith("http://")){
+  for (i=0; i<numEntries; i++){
+    if( strstr(entries[i].gsh, "http://") ){
       mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, tSGS);
-      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, tag);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, 
+			    QString(entries[i].gsh));
+      QString tag(entries[i].user);
+      tag += QString(" ") + QString(entries[i].application) +
+	QString(" ") + QString(entries[i].job_description) +
+	QString(" ") + QString(entries[i].start_date_time);
+      mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, 
+			    tag);
     }
   }
+
+  free(entries);
+  entries = NULL;
 
   return;
 }
 
+//---------------------------------------------------------------
 void Gridifier::getCoupledParamDefs(const QString &gsh, 
 				    QString *aList){
   QStringList result;
@@ -239,12 +249,15 @@ void Gridifier::getCoupledParamDefs(const QString &gsh,
   *mFileListPtr = processOutput;
 }
 
+//---------------------------------------------------------------
 QString Gridifier::makeSGSFactory(const QString &container, 
 				  const QString &topLevelRegistry,
 				  const QString &className){
   QString result;
 
-  QProcess *makeSGSFactoryProcess = new QProcess(QString("./make_" + className + "_factory.pl"));
+  QProcess *makeSGSFactoryProcess = new QProcess(QString("./make_" + 
+							 className + 
+							 "_factory.pl"));
   makeSGSFactoryProcess->setWorkingDirectory(mScriptsDir);
   makeSGSFactoryProcess->addArgument(container);
   makeSGSFactoryProcess->addArgument(topLevelRegistry);
@@ -266,12 +279,15 @@ QString Gridifier::makeSGSFactory(const QString &container,
   return result;
 }
 
-/* Create an SGS to associate with a simulation
+//---------------------------------------------------------------
+/* Create an SGS or SWS to associate with a simulation
  */
-QString Gridifier::makeSimSGS(const QString &factory,
-                              const LauncherConfig &config){
+QString Gridifier::makeSteeringService(const QString &factory,
+				       const LauncherConfig &config){
   QString result;
-  
+
+#if REG_OGSI
+
   QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
   makeSimSGSProcess->setWorkingDirectory(mScriptsDir);
   makeSimSGSProcess->addArgument(factory);
@@ -296,13 +312,109 @@ QString Gridifier::makeSimSGS(const QString &factory,
   // Do some error checking here - or in the calling class?
   result = QString(makeSimSGSProcess->readStdout()).stripWhiteSpace();
 
+#else // !REG_OGSI
+
+  // Create a new checkpoint tree if requested
+  char *chkTree;
+  if(config.treeTag.length()){
+    chkTree = Create_checkpoint_tree(config.checkPointTreeFactoryGSH.ascii(), 
+				     config.treeTag.ascii());
+    if(!chkTree){
+      QMessageBox::critical( NULL, "Checkpoint tree error",
+                             "Failed to create new checkpoint tree.\n\n",
+                             QMessageBox::Ok, 0, 0 );
+      return result;
+    }
+  }
+  else{
+    chkTree = (char *)(config.currentCheckpointGSH.ascii());
+  }
+
+  char *EPR = Create_steering_service(config.mTimeToRun, 
+				      factory.ascii(), 
+				      config.topLevelRegistryGSH.ascii(),
+				      config.mJobData->mPersonLaunching.ascii(), 
+				      config.mJobData->mOrganisation.ascii(), 
+				      config.mJobData->mSoftwareDescription.ascii(),
+				      config.mJobData->mPurposeOfJob.ascii(), 
+				      config.mInputFileName.ascii(),
+				      chkTree);
+
+  if(EPR){
+    printf("Address of SWS = %s\n", EPR);
+  }
+  else{
+    printf("FAILED to create SWS :-(\n");
+  }
+  result = QString(EPR);
+
+#endif // REG_OGSI
+
   return result;
 }
 
+//---------------------------------------------------------------
+/* Create a child MetaSGS or SWS to associate with a simulation
+ */
+QString Gridifier::makeSteeringService(const QString &factory,
+				       const LauncherConfig &config,
+				       const QString &parentEPR){
+  struct soap mySoap;
+  struct sws__AddChildRequest request;
+  struct sws__AddChildResponse response;
+  struct wsrp__SetResourcePropertiesResponse setRPresponse;
+  char   tmpBuf1[256];
+  char   tmpBuf2[256];
+  QString callBuf;
+  QString result;
+  QString epr = this->makeSteeringService(factory, config);
+
+  if(epr.isEmpty()) return epr;
+
+  // Tell the child service about its parent
+  callBuf = "<parentEPR>" + parentEPR + "</parentEPR>";
+  soap_init(&mySoap);
+
+  cout << "makeSteeringService: Calling SetResourceProperties with >>" <<
+    callBuf << "<<" << endl;
+
+  if(soap_call_wsrp__SetResourceProperties(&mySoap, epr, "", 
+					   (char*)callBuf.ascii(),
+					   &setRPresponse) != SOAP_OK){
+    cout << "makeSteeringService: SetResourceProperties failed:" << endl;
+    soap_print_fault(&mySoap, stderr);
+    soap_end(&mySoap);
+    soap_done(&mySoap);
+    return result;
+  }
+
+  // Now tell the parent about this child
+  snprintf(tmpBuf1, 256, "%s", epr.ascii());
+  snprintf(tmpBuf2, 256, "%s", 
+	   config.mJobData->mSoftwareDescription.ascii());
+  request.__epr = tmpBuf1;
+  request.__name = tmpBuf2;
+
+  if( soap_call_sws__AddChild(&mySoap, parentEPR, "", 
+			      request, &response) != SOAP_OK ){
+    cout << "makeSteeringService: AddChild failed:" << endl;
+    soap_print_fault(&mySoap, stderr);
+  }
+  else {
+    result = epr;
+  }
+
+  soap_end(&mySoap);
+  soap_done(&mySoap);
+  return result;
+}
+
+//---------------------------------------------------------------
 QString Gridifier::makeVizSGS(const QString &factory,
                               const LauncherConfig &config){
   QString result;
 
+#if REG_OGSI
   QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
   makeVizSGSProcess->setWorkingDirectory(mScriptsDir);
   makeVizSGSProcess->addArgument(factory);
@@ -318,6 +430,133 @@ QString Gridifier::makeVizSGS(const QString &factory,
   }
 
   result = QString(makeVizSGSProcess->readStdout()).stripWhiteSpace();
+
+#else // !REG_OGSI
+
+  char                                       purpose[1024];
+  char                                       iodef_label[256];
+  char                                      *ioTypes;
+  struct soap                                mySoap;
+  char                                      *EPR;
+  struct wsrp__SetResourcePropertiesResponse response;
+  struct msg_struct                         *msg;
+  xmlDocPtr                                  doc;
+  xmlNsPtr                                   ns;
+  xmlNodePtr                                 cur;
+  struct io_struct                          *ioPtr;
+  int                                        i, count;
+
+  /* Obtain the IOTypes from the data source */
+  soap_init(&mySoap);
+  if( Get_resource_property (&mySoap,
+			     config.simulationGSH.ascii(),
+			     "ioTypeDefinitions",
+			     &ioTypes) != REG_SUCCESS ){
+
+    cout << "Call to get ioTypeDefinitions ResourceProperty on "<< 
+      config.simulationGSH << " failed" << endl;
+    return result;
+  }
+  cout << "Got ioTypeDefinitions >>" << ioTypes << "<<" << endl;
+
+  if( !(doc = xmlParseMemory(ioTypes, strlen(ioTypes))) ||
+      !(cur = xmlDocGetRootElement(doc)) ){
+    fprintf(stderr, "Hit error parsing buffer\n");
+    xmlFreeDoc(doc);
+    xmlCleanupParser();
+    return result;
+  }
+
+  ns = xmlSearchNsByHref(doc, cur,
+            (const xmlChar *) "http://www.realitygrid.org/xml/steering");
+
+  if ( xmlStrcmp(cur->name, (const xmlChar *) "ioTypeDefinitions") ){
+    cout << "ioTypeDefinitions not the root element" << endl;
+    return result;
+  }
+  /* Step down to ReG_steer_message and then to IOType_defs */
+  cur = cur->xmlChildrenNode->xmlChildrenNode;
+
+  msg = New_msg_struct();
+  msg->io_def = New_io_def_struct();
+  parseIOTypeDef(doc, ns, cur, msg->io_def);
+  Print_msg(msg);
+
+  if(!(ioPtr = msg->io_def->first_io) ){
+    fprintf(stderr, "Got no IOType definitions from data source\n");
+    return result;
+  }
+  i = 0;
+  printf("Available IOTypes:\n");
+  while(ioPtr){
+    if( !xmlStrcmp(ioPtr->direction, (const xmlChar *)"OUT") ){
+      printf("  %d: %s\n", i++, (char *)ioPtr->label);
+    }
+    ioPtr = ioPtr->next;
+  }
+  count = i-1;
+  /*
+  printf("Enter IOType to use as data source (0-%d): ", count);
+  while(1){
+    if(scanf("%d", &i) == 1)break;
+  }
+  printf("\n");
+  */
+  // ARPDBG - temporary hardwire to select first output IOType
+  i = 0;
+
+  count = 0; ioPtr = msg->io_def->first_io;
+  while(ioPtr){
+    if( !xmlStrcmp(ioPtr->direction, (const xmlChar *)"OUT") ){
+      if(count == i){
+	strncpy(iodef_label, (char *)(ioPtr->label), 256);
+	break;
+      }
+      count++;
+    }
+    ioPtr = ioPtr->next;
+  }
+
+  Delete_msg_struct(&msg);
+
+  // Now create SWS for the vis
+  if( !(EPR = Create_steering_service(config.mTimeToRun, 
+				      factory.ascii(),
+				      config.topLevelRegistryGSH.ascii(),
+				      config.mJobData->mPersonLaunching.ascii(), 
+				      config.mJobData->mOrganisation.ascii(), 
+				      config.mJobData->mSoftwareDescription.ascii(),
+				      config.mJobData->mPurposeOfJob.ascii(),
+				      config.mInputFileName.ascii(), 
+				      config.currentCheckpointGSH.ascii())) ){
+    cout << "FAILED to create SWS for " << 
+      config.mJobData->mSoftwareDescription << " :-(" << endl;
+    soap_end(&mySoap);
+    soap_done(&mySoap);
+    return result;
+  }
+
+  /* Finally, set it up with information on the data source*/
+
+  snprintf(purpose, 1024, "<dataSource><sourceEPR>%s</sourceEPR>"
+	   "<sourceLabel>%s</sourceLabel></dataSource>",
+	   config.simulationGSH.ascii(), iodef_label);
+
+  printf("Calling SetResourceProperties with >>%s<<\n",
+	 purpose);
+  if(soap_call_wsrp__SetResourceProperties(&mySoap, EPR, 
+					   "", purpose, &response) != SOAP_OK){
+    cout << "SetResourceProperties failed:" << endl;
+    soap_print_fault(&mySoap, stderr);
+    soap_end(&mySoap);
+    soap_done(&mySoap);
+    return result;
+  }
+  result = QString(EPR);
+
+  soap_end(&mySoap);
+  soap_done(&mySoap);
+#endif
 
   return result;
 }

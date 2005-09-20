@@ -64,7 +64,11 @@ public:
   QString makeSGSFactory(const QString &container, 
 			 const QString &topLevelRegistry,
 			 const QString &className);
-  QString makeSimSGS(const QString &factory, const LauncherConfig &config);
+  QString makeSteeringService(const QString &factory, 
+			      const LauncherConfig &config);
+  QString makeSteeringService(const QString &factory, 
+			      const LauncherConfig &config,
+			      const QString &parentEPR);
   QString makeVizSGS(const QString &factory, const LauncherConfig &config);
   QString makeMetaSGS(const QString &factory,
 		      const LauncherConfig &config,
@@ -73,12 +77,17 @@ public:
   void getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable);
   void getCoupledParamDefs(const QString &gsh, 
 			   QString *aList);
-
-  void makeReGScriptConfig(const QString &filename, const LauncherConfig &config);
-  void launchSimScript(const QString &scriptConfigFileName, const LauncherConfig &config);
-  void launchVizScript(const QString &scriptConfigFileName, const LauncherConfig &config);
+  /** Make the configuration script that is sent to the remote host
+      in order to set-up env before job launch */
+  void makeReGScriptConfig(const QString &filename, 
+			   const LauncherConfig &config);
+  void launchSimScript(const QString &scriptConfigFileName, 
+		       const LauncherConfig &config);
+  void launchVizScript(const QString &scriptConfigFileName, 
+		       const LauncherConfig &config);
+  /** Launch a vizualization job on the Argonne cluster */
   void launchArgonneViz(const LauncherConfig &config);
-  /** Prototype */
+  /** Prototype function for using a web service to submit jobs */
   void webServiceJobSubmit(const QString &scriptConfigFileName);
 
   void copyCheckPointFiles(const QString &host);
@@ -112,8 +121,6 @@ private:
   QString      *mFileListPtr;
 
 public slots:
-  void getSGSiesProcessEnded();
-//  void getParamDefsProcessEnded();
   void gsiFtpStdoutSlot();
   void gsiFtpStderrSlot();
   
