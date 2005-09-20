@@ -250,6 +250,7 @@ void RegLauncher::migrateSimSlot()
   
 }
 
+//----------------------------------------------------------------------
 /// Consider sticking this method in a separate soap class
 QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
 {
@@ -258,19 +259,17 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   struct soap soap;
   soap_init(&soap);
   
-  //tree__getInputFileResponse *inputFileResponse = new tree__getInputFileResponse();
   rgt__getInputFileResponse inputFileResponse;
-  //if (soap_call_tree__getInputFile(&soap, checkPointGSH, "", inputFileResponse))
   if (soap_call_rgt__getInputFile(&soap, checkPointGSH, "", &inputFileResponse))
     soap_print_fault(&soap, stderr);
   else{
-    //result = inputFileResponse->_getInputFileReturn;
     result = inputFileResponse._getInputFileReturn;
   }
 
   return result;
 }
 
+//-------------------------------------------------------------------------
 /// Consider sticking this method in a separate soap class
 QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 {
@@ -279,10 +278,9 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
   struct soap soap;
   soap_init(&soap);
 
-  //tree__getCheckPointDataResponse *chkptDataResponse = new tree__getCheckPointDataResponse();
   rgt__getCheckPointDataResponse chkptDataResponse;
-  //if (soap_call_tree__getCheckPointData(&soap, checkPointGSH, "", chkptDataResponse))
-  if (soap_call_rgt__getCheckPointData(&soap, checkPointGSH, "", &chkptDataResponse))
+  if (soap_call_rgt__getCheckPointData(&soap, checkPointGSH, "", 
+				       &chkptDataResponse))
     soap_print_fault(&soap, stderr);
   else{
     //result = chkptDataResponse->_getCheckPointDataReturn;
@@ -293,7 +291,7 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 }
 
 
-
+//---------------------------------------------------------------------
 void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
                                          QString &chkUIDString)
 {
@@ -312,7 +310,9 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
   if (find__init_cond__ >= 0){
     int nextLine = inputFileText.find("\n",find__init_cond__);
     if (nextLine > find__init_cond__){
-      inputFileText = inputFileText.left(find__init_cond__) +"init_cond = 7\n"+ inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(find__init_cond__) +
+	"init_cond = 7\n"+ inputFileText.right(inputFileText.length() 
+					       - nextLine - 1);
     }
   }
 
@@ -320,11 +320,14 @@ void RegLauncher::patchLb3dInputFileText(QString &inputFileText,
   if (find__restore_string__ >= 0){
     int nextLine = inputFileText.find("\n", find__restore_string__);
     if (nextLine > find__restore_string__){
-      inputFileText = inputFileText.left(find__restore_string__) +"restore_string = '"+chkUIDString+"'\n"+ inputFileText.right(inputFileText.length() - nextLine - 1);
+      inputFileText = inputFileText.left(find__restore_string__) +
+	"restore_string = '"+chkUIDString+"'\n"+ 
+	inputFileText.right(inputFileText.length() - nextLine - 1);
     }
   }
 }
 
+//-----------------------------------------------------------------
 /** Method to patch NAMD input file such that it is suitable for
     performing a restart from the specified checkpoint
  */
@@ -541,6 +544,7 @@ void RegLauncher::patchNamdInputFileText(QString &inputFileText,
   cerr << "Modified input file is now: >>" << inputFileText << "<<" << endl;
 }
 
+//------------------------------------------------------------------------
 /** Slot launches a simulation or visualization component.
  *  User goes through a wizard, filling in data - after
  *  successful completion, launch the actual job.
@@ -683,6 +687,7 @@ void RegLauncher::launchSimSlot()
   }
 }
 
+//--------------------------------------------------------------------
 void RegLauncher::commonLaunchCode(){
 
   QString sgs;
@@ -693,6 +698,7 @@ void RegLauncher::commonLaunchCode(){
 
   consoleOutSlot("Starting a component...");
 
+#if REG_OGSI
   // First find a factory, and if we don't have one - make one
   QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
 					      config.selectedContainer,
@@ -700,13 +706,15 @@ void RegLauncher::commonLaunchCode(){
 
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory("http://"+
+						  config.selectedContainer+":"+
+						  QString::number(config.containerPortNum)+"/", 
 						  config.topLevelRegistryGSH,
 						  QString("sgs"));
       
-    if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
+    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
+			      QString::number(config.containerPortNum)+"/"))
       factory = posFactory;
-        
     else{
       consoleOutSlot("Sorry! - couldn't start a factory");
       consoleOutSlot("makeSGSFactory returned: "+posFactory);
@@ -715,6 +723,11 @@ void RegLauncher::commonLaunchCode(){
   }
 
   consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
+#else
+  QString factory = "http://"+config.selectedContainer+":"+
+    QString::number(config.containerPortNum)+"/";
+  cout << "Using container: "<< factory << endl;
+#endif //REG_OGSI
 
   // Now determine whether we need to configure the SGS with data source(s)
   if (config.mAppToLaunch->mNumInputs == 0){
@@ -725,17 +738,18 @@ void RegLauncher::commonLaunchCode(){
     if (config.newTree) {
       consoleOutSlot(QString("Making new checkpoint tree with tag "+
 			     config.treeTag));
-      sgs = gridifier.makeSimSGS(factory, config);
+      sgs = gridifier.makeSteeringService(factory, config);
     }
     else{
       consoleOutSlot(QString("NOT making new checkpoint tree"));
       config.treeTag = "";
-      sgs = gridifier.makeSimSGS(factory, config);
+      sgs = gridifier.makeSteeringService(factory, config);
     }
       
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){
-      consoleOutSlot("Failed to create a simulation SGS - is the factory valid?");
+      consoleOutSlot("Failed to create a steering service - is "
+		     "the factory valid?");
       return;
     }
       
@@ -759,21 +773,23 @@ void RegLauncher::commonLaunchCode(){
     //return;//ARPDBG
     
     // Now launch the job
-
-    gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
+    gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", 
+				  config);
 
     // Check to see if we're starting from a checkpoint or not..
     if (restartingFromCheckpoint){
       // and copy the checkpoint files too - this could take a looong time
       // then start the job
-      consoleOutSlot("About to copy checkpoint files to target machine. This may take some time....");
+      consoleOutSlot("About to copy checkpoint files to target machine. "
+		     "This may take some time....");
 
       ProgressBarThread *test = new ProgressBarThread();
       test->start();
       gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf",
                                 config);
       test->kill();
-      consoleOutSlot("Done with copying checkpoint files. Job should be queued.");
+      consoleOutSlot("Done with copying checkpoint files. Job "
+		     "should be queued.");
     }
     else {
       gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
@@ -783,14 +799,9 @@ void RegLauncher::commonLaunchCode(){
                                                             config.simulationGSH,
 							    config.mScriptsDirectory);
     aJobStatusThread->start();
-
   }
   else{
     // We need to set-up data sources
-
-    // Remember to fill in the config.simulationGSH during the wizard stage - or we'll have problems!
-    // for the time being though - if we make sure we create a simulation before creating a visualization
-    // then we'll be ok for testing purposes
     sgs = gridifier.makeVizSGS(factory, config);
 
     // Check that the sgs was created properly, if not die
@@ -824,25 +835,31 @@ void RegLauncher::commonLaunchCode(){
   }
 }
 
+//--------------------------------------------------------------------
 /** Launch a two-component coupled model */
 void RegLauncher::coupledModelLaunchCode(){
 
   QString parentMetaSGS_GSH, firstChildMetaSGS_GSH, secondChildMetaSGS_GSH;
+  QString parentSWS_EPR, firstChildSWS_EPR, secondChildSWS_EPR;
   LauncherConfig tmpConfig;
 
   consoleOutSlot("Starting two components...");
 
+#if REG_OGSI
   // First find a factory, and if we don't have one - make one
   QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
 					      config.selectedContainer,
 					      QString("msgs"));
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/", 
-						  config.topLevelRegistryGSH,
-						  QString("msgs"));
+    QString posFactory = gridifier.makeSGSFactory("http://"+
+                                 config.selectedContainer+":"+
+                                 QString::number(config.containerPortNum)+"/", 
+			         config.topLevelRegistryGSH,
+			         QString("msgs"));
       
-    if (posFactory.startsWith("http://"+config.selectedContainer+":"+QString::number(config.containerPortNum)+"/"))
+    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
+			      QString::number(config.containerPortNum)+"/"))
       factory = posFactory;
         
     else{
@@ -857,22 +874,34 @@ void RegLauncher::coupledModelLaunchCode(){
 					      QString("msgs"));
   if (factory2.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+config2.selectedContainer+":"+QString::number(config2.containerPortNum)+"/", 
-						  config2.topLevelRegistryGSH,
-						  QString("msgs"));
+    QString posFactory = gridifier.makeSGSFactory("http://"+
+						config2.selectedContainer+":"+
+						QString::number(config2.containerPortNum)+"/", 
+						config2.topLevelRegistryGSH,
+						QString("msgs"));
       
-    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+QString::number(config2.containerPortNum)+"/"))
+    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+
+			      QString::number(config2.containerPortNum)+"/"))
       factory2 = posFactory;
-        
     else{
       consoleOutSlot("Sorry! - couldn't start a factory");
       return;
     }     
   }
 
-  consoleOutSlot(QString("MetaSGS Factories are "+factory+"\n and "+factory2).stripWhiteSpace());
+  consoleOutSlot(QString("MetaSGS Factories are "+factory+"\n and "+
+			 factory2).stripWhiteSpace());
+#else // !REG_OGSI
+  QString factory = "http://"+config.selectedContainer+":"+
+    QString::number(config.containerPortNum)+"/";
+  cout << "Using container 1: "<< factory << endl;
+  QString factory2 = "http://"+config2.selectedContainer+":"+
+    QString::number(config.containerPortNum)+"/";
+  cout << "Using container 2: "<< factory << endl;
+#endif // REG_OGSI
 
-  // Now create the parent MetaSGS
+
+  // Now create the parent SWS
 
   ComponentLauncher *componentLauncher = new ComponentLauncher();
   componentLauncher->toggleCollectJobMetaDataOnly(true);
@@ -880,47 +909,100 @@ void RegLauncher::coupledModelLaunchCode(){
   tmpConfig.migration = false;
   tmpConfig.restart = false;
   tmpConfig.newTree = false;
+  tmpConfig.topLevelRegistryGSH = config.topLevelRegistryGSH;
   componentLauncher->setConfig(&tmpConfig);
   componentLauncher->showPage(componentLauncher->page(7));
   componentLauncher->exec();
 
   tmpConfig.treeTag = "";
-  tmpConfig.topLevelRegistryGSH = config.topLevelRegistryGSH;
   tmpConfig.currentCheckpointGSH = config.currentCheckpointGSH;
   tmpConfig.mInputFileName = "";
   tmpConfig.mTimeToRun = config.mTimeToRun;
 
+#if REG_OGSI
   parentMetaSGS_GSH = gridifier.makeMetaSGS(factory, tmpConfig, "");
-      
   // Check that the sgs was created properly, if not die
-  if (parentMetaSGS_GSH.length()==0 || !parentMetaSGS_GSH.startsWith("http://")){
-    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory+") valid?");
+  if (parentMetaSGS_GSH.length()==0 || 
+      !parentMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
+		   factory+") valid?");
     return;
   }
+#else
+  parentSWS_EPR = gridifier.makeSteeringService(factory, tmpConfig);
+  // Check that the sws was created properly, if not die
+  if (parentSWS_EPR.length()==0 || 
+      !parentSWS_EPR.startsWith("http://")){
+    consoleOutSlot("Failed to create parent SWS - is the factory ("+
+		   factory+") valid?");
+    return;
+  }
+  else{
+    consoleOutSlot("Parent SWS EPR = "+parentSWS_EPR);
+  }
+#endif // REG_OGSI
 
   // Create the first child
+#if REG_OGSI
   firstChildMetaSGS_GSH = gridifier.makeMetaSGS(factory, config, 
 						parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
-  if (firstChildMetaSGS_GSH.length()==0 || !firstChildMetaSGS_GSH.startsWith("http://")){
-    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory+") valid?");
+  if (firstChildMetaSGS_GSH.length()==0 || 
+      !firstChildMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
+		   factory+") valid?");
     return;
   }
   // Copy the value to the config
   config.simulationGSH = firstChildMetaSGS_GSH;
-  consoleOutSlot(QString("1st MetaSGS is "+config.simulationGSH).stripWhiteSpace());
+  consoleOutSlot(QString("1st MetaSGS is "+
+			 config.simulationGSH).stripWhiteSpace());
+#else
+  firstChildSWS_EPR = gridifier.makeSteeringService(factory, config,
+						    parentSWS_EPR);
+  // Check that the sws was created properly, if not die
+  if (firstChildSWS_EPR.length()==0 || 
+      !firstChildSWS_EPR.startsWith("http://")){
+    consoleOutSlot("Failed to create first child SWS - is the factory ("+
+		   factory+") valid?");
+    return;
+  }
+  // Copy the value to the config
+  config.simulationGSH = firstChildSWS_EPR;
+  consoleOutSlot(QString("1st child SWS is "+
+			 config.simulationGSH).stripWhiteSpace());
+#endif // REG_OGSI
 
   // Create the second child
+#if REG_OGSI
   secondChildMetaSGS_GSH = gridifier.makeMetaSGS(factory2, config2, 
 						 parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
-  if (secondChildMetaSGS_GSH.length()==0 || !secondChildMetaSGS_GSH.startsWith("http://")){
-    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+factory2+") valid?");
+  if (secondChildMetaSGS_GSH.length()==0 || 
+      !secondChildMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create 2nd child MetaSGS - is the factory ("+
+		   factory2+") valid?");
     return;
   }
   // Copy the value to the config
   config2.simulationGSH = secondChildMetaSGS_GSH;
-  consoleOutSlot(QString("2nd MetaSGS is "+config2.simulationGSH).stripWhiteSpace());
+  consoleOutSlot(QString("2nd MetaSGS is "+
+			 config2.simulationGSH).stripWhiteSpace());
+#else
+  secondChildSWS_EPR = gridifier.makeSteeringService(factory2, config2, 
+						     parentSWS_EPR);
+  // Check that the sws was created properly, if not die
+  if (secondChildSWS_EPR.length()==0 || 
+      !secondChildSWS_EPR.startsWith("http://")){
+    consoleOutSlot("Failed to create second child SWS - is the factory ("+
+		   factory2+") valid?");
+    return;
+  }
+  // Copy the value to the config
+  config2.simulationGSH = secondChildSWS_EPR;
+  consoleOutSlot(QString("2nd child SWS is "+
+			 config2.simulationGSH).stripWhiteSpace());
+#endif // REG_OGSI
 
   // Now launch the jobs themselves
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
@@ -928,9 +1010,16 @@ void RegLauncher::coupledModelLaunchCode(){
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config2);
   gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config2);
 
+#if REG_OGSI
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
 							  parentMetaSGS_GSH,
 							  config.mScriptsDirectory);
+#else
+  JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
+							  parentSWS_EPR,
+							  config.mScriptsDirectory);
+#endif //REG_OGSI
+
   aJobStatusThread->start();
 }
 
