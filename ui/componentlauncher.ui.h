@@ -196,16 +196,6 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
         Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
         sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
       }
-      /*
-      if(!mConfig->restart && !mConfig->migration){
-        Application *chosenApp = &(mConfig->applicationList[componentComboBox->currentItem()]);
-        sgsSoftwarePackageLineEdit->setText(chosenApp->mAppName);
-      }
-      else{
-        // If we're restarting then the application to launch is already set
-        sgsSoftwarePackageLineEdit->setText(mConfig->mAppToLaunch->mAppName);
-      }
-      */
     }
     else if(string == title(page(4))){
     
