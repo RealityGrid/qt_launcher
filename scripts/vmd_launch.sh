@@ -54,6 +54,7 @@ else
 CHECKPOINT_GSH=""
 fi
 echo "Checkpoint GSH = $CHECKPOINT_GSH"
+echo "Sim hostname = $SIM_HOSTNAME"
 
 # Thirdly: Setup REG_STEER_HOME for library location
 
@@ -94,7 +95,7 @@ case $ReG_LAUNCH in
     ;;
 esac
 
-if [ $SIM_HOSTNAME != "localhost" ]
+if [ $SIM_HOSTNAME -ne "localhost" ]
 then
    xhost + $SIM_HOSTNAME
 else
