@@ -392,8 +392,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
   snprintf(tmpBuf1, 256, "%s", epr.ascii());
   snprintf(tmpBuf2, 256, "%s", 
 	   config.mJobData->mSoftwareDescription.ascii());
-  request.__epr = tmpBuf1;
-  request.__name = tmpBuf2;
+  request.epr = tmpBuf1;
+  request.name = tmpBuf2;
 
   if( soap_call_sws__AddChild(&mySoap, parentEPR, "", 
 			      request, &response) != SOAP_OK ){
@@ -478,6 +478,7 @@ QString Gridifier::makeVizSGS(const QString &factory,
   cur = cur->xmlChildrenNode->xmlChildrenNode;
 
   msg = New_msg_struct();
+  msg->msg_type = IO_DEFS;
   msg->io_def = New_io_def_struct();
   parseIOTypeDef(doc, ns, cur, msg->io_def);
   Print_msg(msg);
