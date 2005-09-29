@@ -910,6 +910,7 @@ void RegLauncher::coupledModelLaunchCode(){
   tmpConfig.restart = false;
   tmpConfig.newTree = false;
   tmpConfig.topLevelRegistryGSH = config.topLevelRegistryGSH;
+  //config.mJobData->mSoftwareDescription.ascii(),
   componentLauncher->setConfig(&tmpConfig);
   componentLauncher->showPage(componentLauncher->page(7));
   componentLauncher->exec();
@@ -1009,6 +1010,14 @@ void RegLauncher::coupledModelLaunchCode(){
   gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config2);
   gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config2);
+
+  // Fix so that launcher correctly points steerer at parent rather than
+  // a child if the user presses the 'steer' button
+#if REG_OGSI
+  config.simulationGSH = parentMetaSGS_GSH;
+#else
+  config.simulationGSH = parentSWS_EPR;
+#endif
 
 #if REG_OGSI
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
