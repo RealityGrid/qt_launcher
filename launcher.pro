@@ -3,7 +3,7 @@ LANGUAGE	= C++
 
 CONFIG	+= qt warn_on release thread opengl x11
 
-LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer -lReG_Steer_Utils
+LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer_Utils -lReG_Steer 
 
 INCLUDEPATH	+= include /usr/include/libxml2 ${REG_STEER_HOME}/include
 
