@@ -689,8 +689,8 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
 /** Method calls <app_name>_launch.sh script to
  *  actually launch the job on the target machine
  */
-void Gridifier::launchSimScript(const QString &scriptConfigFileName,
-                                const LauncherConfig &config){
+int Gridifier::launchSimScript(const QString &scriptConfigFileName,
+			       const LauncherConfig &config){
 
   // Construct name of script from name of application
   QProcess *launchSimScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
@@ -707,27 +707,29 @@ void Gridifier::launchSimScript(const QString &scriptConfigFileName,
     usleep(10000);
     mApplication->processEvents();
   }
-
-// Debugging going on here
-/*QFile logFile(config.mScratchDirectory+"/log");
-if ( logFile.open(IO_WriteOnly) ){
-  QTextStream stream(&logFile);
-  stream << launchSimScriptProcess->arguments().join(" ") << endl;
-  stream << QString(launchSimScriptProcess->readStdout()) << endl;
-  stream << endl << QString(launchSimScriptProcess->readStderr()) << endl;
-  logFile.close();
-}*/
   
-  cout << "Stdout:" << endl << launchSimScriptProcess->readStdout() << endl;
-  if (launchSimScriptProcess->canReadLineStderr())
-    cout << "Stderr:" << endl << launchSimScriptProcess->readStderr() << endl;
+  if (launchSimScriptProcess->canReadLineStdout()){
+    QString out(launchSimScriptProcess->readStdout());
+    cout << "Stdout:" << endl << out << endl;
+    if(out.contains("ERROR")){
+      return REG_FAILURE;
+    }
+  }
+  if (launchSimScriptProcess->canReadLineStderr()){
+    QString out(launchSimScriptProcess->readStderr());
+    cout << "Stderr:" << endl << out << endl;
+    if(out.contains("ERROR")){
+      return REG_FAILURE;
+    }
+  }
+  return REG_SUCCESS;
 }
 
-/** Method calls Robin's ReG-L2-Viz-QTL script to
- *  actually launch the job on the target machine
+/** Method calls appropriate xxx_launch.sh script to
+ *  actually launch the visualization job on the target machine
  */
-void Gridifier::launchVizScript(const QString &scriptConfigFileName,
-                                const LauncherConfig &config){
+int Gridifier::launchVizScript(const QString &scriptConfigFileName,
+			       const LauncherConfig &config){
                                 
   // Construct name of script from name of application
   QProcess *launchVizScriptProcess = new QProcess(QString("./"+config.mAppToLaunch->mAppName+"_launch.sh"));
@@ -743,9 +745,21 @@ void Gridifier::launchVizScript(const QString &scriptConfigFileName,
   }
 
 
-  cout << "Stdout:" << endl << launchVizScriptProcess->readStdout() << endl;
-  if (launchVizScriptProcess->canReadLineStderr())
-    cout << "Stderr:" << endl << launchVizScriptProcess->readStderr() << endl;
+  if (launchVizScriptProcess->canReadLineStdout()){
+    QString out(launchVizScriptProcess->readStdout());
+    cout << "Stdout:" << endl << out << endl;
+    if(out.contains("ERROR")){
+      return REG_FAILURE;
+    }
+  }
+  if (launchVizScriptProcess->canReadLineStderr()){
+    QString out(launchVizScriptProcess->readStderr());
+    cout << "Stderr:" << endl << out << endl;
+    if(out.contains("ERROR")){
+      return REG_FAILURE;
+    }
+  }
+  return REG_SUCCESS;
 }
 
 
@@ -909,7 +923,31 @@ void Gridifier::setServiceData(const QString &nameSpace,
     mApplication->processEvents();
   }
 
-  cout << "Stdout:" << endl << setServiceDataProcess->readStdout() << endl;
-  if (setServiceDataProcess->canReadLineStderr())
+  if(setServiceDataProcess->canReadLineStdout()){
+    cout << "Stdout:" << endl << setServiceDataProcess->readStdout() << endl;
+  }
+  if (setServiceDataProcess->canReadLineStderr()){
     cout << "Stderr:" << endl << setServiceDataProcess->readStderr() << endl;
+  }
 }
+
+/** Cleans up when launch fails
+ */
+void Gridifier::cleanUp(LauncherConfig *config){
+#if !REG_OGSI
+  if(!(config->simulationGSH.isEmpty())){
+    Destroy_steering_service((char *)(config->simulationGSH.ascii())); // ReG lib
+  }
+  if(!(config->visualizationGSH.isEmpty())){
+    Destroy_steering_service((char *)(config->visualizationGSH.ascii())); // ReG lib
+  }
+#endif
+} 
+
+void Gridifier::cleanUp(QString address){
+#if !REG_OGSI
+  if(!(address.isEmpty())){
+    Destroy_steering_service((char *)(address.ascii())); // ReG lib
+  }
+#endif
+} 

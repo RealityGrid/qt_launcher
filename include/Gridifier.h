@@ -58,33 +58,55 @@ public:
   Gridifier();
   ~Gridifier();
 
+  /** Cleans up when launch fails */
+  void cleanUp(LauncherConfig *config);
+  /** Overloaded version that just takes address of service to Destroy */
+  void Gridifier::cleanUp(QString address);
+  /** Get list of available SGS factories */
   QString getSGSFactories(const QString &topLevelRegistry, 
 			  const QString &desiredContainer,
 			  const QString &className);
+  /** Create an SGS factory in the specified container */
   QString makeSGSFactory(const QString &container, 
 			 const QString &topLevelRegistry,
 			 const QString &className);
+  /** Create a SWS using the specified factory */
   QString makeSteeringService(const QString &factory, 
 			      const LauncherConfig &config);
+  /** Overloaded version for coupled models - create SWS and set up
+      as child of specified parent service */
   QString makeSteeringService(const QString &factory, 
 			      const LauncherConfig &config,
 			      const QString &parentEPR);
+  /** Creates an SGS for a visualization job using specified factory */
   QString makeVizSGS(const QString &factory, const LauncherConfig &config);
+  /** OBSOLETE - creates a MetaSGS for use in a coupled model */
   QString makeMetaSGS(const QString &factory,
 		      const LauncherConfig &config,
 		      const QString &parentGSH);
+  /** Instruct the specified simulation to take a checkpoint and then stop */
   QString checkPointAndStop(const QString &sgsGSH);
+  /** Query the specified registry for details of available SGSs.  Details
+      are then inserted in the GSHTagTable */
   void getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable);
+  /** Query the specified (parent) service for details of its parameters
+      so that 'global' parameters can be constructed for the coupled model */
   void getCoupledParamDefs(const QString &gsh, 
 			   QString *aList);
   /** Make the configuration script that is sent to the remote host
       in order to set-up env before job launch */
   void makeReGScriptConfig(const QString &filename, 
 			   const LauncherConfig &config);
-  void launchSimScript(const QString &scriptConfigFileName, 
-		       const LauncherConfig &config);
-  void launchVizScript(const QString &scriptConfigFileName, 
-		       const LauncherConfig &config);
+  /** Run the appropriate <app-name>_launch.sh script to copy
+      input files to remote machine and start job.
+      @returns REG_SUCCESS if all OK, REG_FAILURE otherwise */
+  int launchSimScript(const QString &scriptConfigFileName, 
+		      const LauncherConfig &config);
+  /** Run the appropriate <app-name>_launch.sh script to copy
+      input files to remote machine and start vis. job.
+      @returns REG_SUCCESS if all OK, REG_FAILURE otherwise */
+  int launchVizScript(const QString &scriptConfigFileName, 
+		      const LauncherConfig &config);
   /** Launch a vizualization job on the Argonne cluster */
   void launchArgonneViz(const LauncherConfig &config);
   /** Prototype function for using a web service to submit jobs */

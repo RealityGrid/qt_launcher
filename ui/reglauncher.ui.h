@@ -785,14 +785,23 @@ void RegLauncher::commonLaunchCode(){
 
       ProgressBarThread *test = new ProgressBarThread();
       test->start();
-      gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf",
-                                config);
+      if(gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf",
+				   config) != REG_SUCCESS){
+	consoleOutSlot("Error with starting job - see stdout/err for details");
+	gridifier.cleanUp(&config);
+	return;
+      }
       test->kill();
       consoleOutSlot("Done with copying checkpoint files. Job "
 		     "should be queued.");
     }
     else {
-      gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
+      if(gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", 
+				   config) != REG_SUCCESS){
+	consoleOutSlot("Error with starting job - see stdout/err for details");
+	gridifier.cleanUp(&config);
+	return;
+      }
     }
     
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
@@ -816,7 +825,8 @@ void RegLauncher::commonLaunchCode(){
     // Copy the value to the config
     config.visualizationGSH = sgs;
 
-    consoleOutSlot(QString("Viz SGS is "+config.visualizationGSH).stripWhiteSpace());
+    consoleOutSlot(QString("Viz SGS is "+
+			   config.visualizationGSH).stripWhiteSpace());
 
     // At this point we want to specialise for the Argonne Cluster.
     // Check to see where we are rendering and act accordingly
@@ -824,8 +834,14 @@ void RegLauncher::commonLaunchCode(){
       gridifier.launchArgonneViz(config);
     }
     else {
-      gridifier.makeReGScriptConfig(config.mScratchDirectory+"/viz.conf", config);
-      gridifier.launchVizScript(config.mScratchDirectory+"/viz.conf", config);
+      gridifier.makeReGScriptConfig(config.mScratchDirectory+"/viz.conf", 
+				    config);
+      if(gridifier.launchVizScript(config.mScratchDirectory+"/viz.conf", 
+				   config) != REG_SUCCESS){
+	consoleOutSlot("Error with starting job - see stdout/err for details");
+	gridifier.cleanUp(&config);
+	return;
+      }
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
@@ -910,7 +926,6 @@ void RegLauncher::coupledModelLaunchCode(){
   tmpConfig.restart = false;
   tmpConfig.newTree = false;
   tmpConfig.topLevelRegistryGSH = config.topLevelRegistryGSH;
-  //config.mJobData->mSoftwareDescription.ascii(),
   componentLauncher->setConfig(&tmpConfig);
   componentLauncher->showPage(componentLauncher->page(7));
   componentLauncher->exec();
@@ -952,6 +967,7 @@ void RegLauncher::coupledModelLaunchCode(){
       !firstChildMetaSGS_GSH.startsWith("http://")){
     consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
 		   factory+") valid?");
+    gridifier.cleanUp(parentMetaSGS_GSH);
     return;
   }
   // Copy the value to the config
@@ -966,6 +982,7 @@ void RegLauncher::coupledModelLaunchCode(){
       !firstChildSWS_EPR.startsWith("http://")){
     consoleOutSlot("Failed to create first child SWS - is the factory ("+
 		   factory+") valid?");
+    gridifier.cleanUp(parentSWS_EPR);
     return;
   }
   // Copy the value to the config
@@ -983,6 +1000,8 @@ void RegLauncher::coupledModelLaunchCode(){
       !secondChildMetaSGS_GSH.startsWith("http://")){
     consoleOutSlot("Failed to create 2nd child MetaSGS - is the factory ("+
 		   factory2+") valid?");
+    gridifier.cleanUp(&config);
+    gridifier.cleanUp(parentMetaSGS_GSH);
     return;
   }
   // Copy the value to the config
@@ -997,6 +1016,8 @@ void RegLauncher::coupledModelLaunchCode(){
       !secondChildSWS_EPR.startsWith("http://")){
     consoleOutSlot("Failed to create second child SWS - is the factory ("+
 		   factory2+") valid?");
+    gridifier.cleanUp(&config);
+    gridifier.cleanUp(parentSWS_EPR);
     return;
   }
   // Copy the value to the config
@@ -1007,9 +1028,31 @@ void RegLauncher::coupledModelLaunchCode(){
 
   // Now launch the jobs themselves
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
-  gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config);
+  if(gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", 
+			       config) != REG_SUCCESS){
+    gridifier.cleanUp(&config);
+    gridifier.cleanUp(&config2);
+#if REG_OGSI
+    gridifier.cleanUp(parentMetaSGS_GSH);
+#else
+    gridifier.cleanUp(parentSWS_EPR);
+#endif
+    consoleOutSlot("Failed to launch first component - cancelling");
+  }
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config2);
-  gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", config2);
+  if(gridifier.launchSimScript(config.mScratchDirectory+"/sim.conf", 
+			       config2) != REG_SUCCESS){
+    gridifier.cleanUp(&config);
+    gridifier.cleanUp(&config2);
+#if REG_OGSI
+    gridifier.cleanUp(parentMetaSGS_GSH);
+#else
+    gridifier.cleanUp(parentSWS_EPR);
+#endif
+    // ARPDBG - somehow need to withdraw the first component that is 
+    // now running on its target machine...
+    consoleOutSlot("Failed to launch second component - cancelling");
+  }
 
   // Fix so that launcher correctly points steerer at parent rather than
   // a child if the user presses the 'steer' button
