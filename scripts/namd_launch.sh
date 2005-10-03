@@ -110,7 +110,7 @@ then
       $GLOBUS_BIN_PATH/grid-proxy-info -exists
        if [ $? -ne "0" ]
        then
-         echo "No grid proxy, please invoke grid-proxy-init"
+         echo "ERROR: No grid proxy, please invoke grid-proxy-init"
          exit
        fi
       ;;
@@ -256,7 +256,8 @@ esac
 
 if [ $? -gt "0" ]
 then
-  echo "Error with transferring input file"
+  echo "ERROR with transferring input file"
+  exit
 fi
 
 echo "Starting simulation..."

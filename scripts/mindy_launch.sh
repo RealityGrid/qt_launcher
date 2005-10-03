@@ -362,7 +362,8 @@ esac
 
 if [ $? -gt "0" ]
 then
-  echo "Error with transferring input file"
+  echo "ERROR with transferring input file"
+  exit
 fi
 
 echo "Starting simulation..."
