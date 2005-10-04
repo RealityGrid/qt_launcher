@@ -10,6 +10,16 @@
 /** @file GlobalParamConstructionForm.ui.h
     @brief Dialog for constructing global params for coupled models */
 
+#include <stdio.h>
+#include <stdlib.h>
+#include "ReG_Steer_types.h"
+#include "ReG_Steer_Browser.h"
+#include "ReG_Steer_Utils.h"
+#include "ReG_Steer_Common.h"
+#include "ReG_Steer_XML.h"
+#include "ReG_Steer_Steerside_WSRF.h"
+#include "soapH.h"
+
 void GlobalParamConstructionForm::init()
 {
   mConfig = NULL;
@@ -109,7 +119,8 @@ void GlobalParamConstructionForm::createGlobal_clicked()
 
 
 void GlobalParamConstructionForm::paramListTable_clicked( int lRow, int lCol, 
-							  int lButton, const QPoint &aPt )
+							  int lButton, 
+							  const QPoint &aPt )
 {
 }
 
@@ -131,6 +142,7 @@ void GlobalParamConstructionForm::setConfig( LauncherConfig *aConfig )
   mConfig = aConfig;
 }
 
+//----------------------------------------------------------------------
 
 void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
 {
@@ -153,17 +165,10 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
     return;
   }
 
-  // Get param defs from service...
-  // ...the output will be a space-delimited list of filenames
-  if(!mParentGSH.isEmpty()){
-    mGridifier->setScriptsDirectory(mConfig->mScriptsDirectory);
-    mGridifier->getCoupledParamDefs(mParentGSH, &configFileList);
-  }
-  else{
+  if(mParentGSH.isEmpty()){
     cout << "Have no GSH for parent service" << endl;
     return;
   }
-  result = QStringList::split(" ", configFileList);
 
   // clear out the table
   for (i=(paramListTable->numRows()-1); i>-1; i--){
@@ -172,6 +177,15 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
   for (i=(paramListTable->numCols()-1); i>-1; i--){
     paramListTable->removeColumn(i);
   }
+
+#if REG_OGSI
+
+  // Get param defs from service...
+  // ...the output will be a space-delimited list of filenames
+  mGridifier->setScriptsDirectory(mConfig->mScriptsDirectory);
+  mGridifier->getCoupledParamDefs(mParentGSH, &configFileList);
+
+  result = QStringList::split(" ", configFileList);
 
   int count = 0;
   // Count how many valid file names we have (& thus how
@@ -250,6 +264,213 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
     file.close();
     ++count;
   }
+
+#else // !REG_OGSI
+
+  char                *paramDefs;
+  char                *pchar;
+  char                *pend;
+  char                *childrenTxt;
+  char                *appName;
+  struct soap          mySoap;
+  struct msg_struct   *msg;
+  struct param_struct *param_ptr;
+  const int            MAX_CHILDREN = 10;
+  char                 childEPR[MAX_CHILDREN][256];
+  char                 paramSet[MAX_CHILDREN][256];
+  const int            MAX_PARAMS = 30;
+  struct param_struct *childParams[MAX_CHILDREN][MAX_PARAMS];
+  char                 nameTxt[128];
+  char                 couplingConfig[1024*1024];
+  int                  count;
+  int                  childParamCount[MAX_CHILDREN];
+  int                  j, numInSet;
+  struct wsrp__SetResourcePropertiesResponse response;
+  QStringList          paramLabelList;
+
+  soap_init(&mySoap);
+
+  if( Get_resource_property (&mySoap,
+                             mParentGSH,
+                             "paramDefinitions",
+                             &paramDefs) != REG_SUCCESS ){
+
+    cout << "Call to get paramDefinitions ResourceProperty on "<< 
+      mParentGSH <<" failed" << endl;
+    return;
+  }
+
+  printf("Parameter definitions:\n%s\n", paramDefs);
+
+  if( !(pchar = strstr(paramDefs, "<sws:paramDefinitions")) ){
+    cout << "Got no paramDefinitions from " << 
+	 mParentGSH << " (is job running?)" << endl;
+    return;
+  }
+
+  if( !(pchar = strstr(paramDefs, "<ReG_steer_message")) ){
+    cout << "paramDefinitions does not contain '<ReG_steer_message' :-(" << endl;
+    return;
+  }
+  pend = strstr(pchar, "</sws:paramDefinitions>");
+  *pend = '\0'; /* Terminate string early so parser doesn't see the 
+		   paramDefinitions closing tag */
+
+  msg = New_msg_struct();
+  Parse_xml_buf(pchar, strlen(pchar), msg, NULL);
+  *pend = '<'; /* Remove early terminating character in case it hinders
+		  clean-up */
+  Print_msg(msg);
+  if(msg->msg_type != PARAM_DEFS){
+    printf("Error, result of parsing paramDefinitions is NOT a "
+	   "PARAM_DEFS message\n");
+    return;
+  }
+  if( !(msg->status) || !(msg->status->first_param)){
+    cout << "Error, message has no param elements" << endl;
+    return;
+  }
+
+  /* Now get details of the parent's children */
+  if( Get_resource_property (&mySoap,
+                             mParentGSH,
+                             "childService",
+                             &childrenTxt) != REG_SUCCESS ){
+
+    cout << "Call to get childService ResourceProperty on " << 
+      mParentGSH << " failed" << endl;
+    return;
+  }
+  printf("Children:\n%s\n", childrenTxt);
+
+  if( !(pchar = strstr(childrenTxt, "<sws:childService")) ){
+
+    cout << "No children found :-(" << endl;
+    return;
+  }
+
+  count = 0;
+  while(pchar && (count < MAX_CHILDREN)){
+    pchar = strchr(pchar, '>');
+    pchar++;
+    pend = strchr(pchar, '<');
+    strncpy(childEPR[count], pchar, (pend-pchar));
+    childEPR[count][(pend-pchar)] = '\0';
+    count++;
+    pchar = strstr(pend, "<sws:childService");
+  }
+
+  // Insert the required number of columns in the table
+  paramListTable->insertColumns(0, count);
+  // Make a hidden row to hold GSHs
+  paramListTable->insertRows(0,1);
+  paramListTable->hideRow(0);
+
+  /* Loop over children */
+  for(i=0; i<count; i++){
+    printf("Child %d EPR = %s\n", i, childEPR[i]);
+
+    if( Get_resource_property (&mySoap,
+			       childEPR[i],
+			       "applicationName",
+			       &appName) != REG_SUCCESS ){
+
+      printf("Call to get applicationName ResourceProperty on "
+	     "child %s failed\n", childEPR[i]);
+      return;
+    }
+    if( !(pchar = strstr(appName, "<sws:applicationName")) ){
+
+      printf("applicationName RP does not contain "
+	     "'<sws:applicationName'\n");
+      return;
+    }
+    pchar = strchr(pchar, '>');
+    pchar++;
+    pend = strchr(pchar, '<');
+    *pend = '\0';
+    printf("       name = >>%s<<\n", pchar);
+    sprintf(nameTxt, "%s/", pchar);
+    *pend = '<';
+
+    // Set the column header to be the name of the application
+    paramListTable->horizontalHeader()->setLabel(i, QString(pchar) );
+
+    param_ptr = msg->status->first_param;
+    childParamCount[i] = 0;
+    while(param_ptr){
+
+      /* We don't want internal parameters */
+      if(!xmlStrcmp(param_ptr->is_internal, (const xmlChar *)"TRUE")){
+	param_ptr = param_ptr->next;
+	continue;
+      }
+
+      /* Nor do we want monitored parameters */
+      if(!xmlStrcmp(param_ptr->steerable, (const xmlChar *)"0")){
+	param_ptr = param_ptr->next;
+	continue;
+      }
+
+      /* Check to see whether this parameter is from the current
+	 child - if it is then it will have the application name and
+         a forward slash prepended to its label */
+      if(strstr((char *)(param_ptr->label), nameTxt) ==
+	 (char *)(param_ptr->label) ){
+
+	childParams[i][childParamCount[i]] = param_ptr;
+	childParamCount[i]++;
+
+	fprintf(stderr, "Param no. %d:\n", childParamCount[i]);
+	if(param_ptr->handle) fprintf(stderr, "   Handle = %s\n", 
+				  (char *)(param_ptr->handle));
+	if(param_ptr->label){
+	  fprintf(stderr, "   Label  = %s\n", 
+		  (char *)(param_ptr->label));
+
+	  // Remove the application name prepended to the label
+	  QString label = QString((char *)(param_ptr->label));
+	  int index = label.find('/');
+	  paramLabelList.append(label.mid(index+1, label.length()));
+	}
+	if(param_ptr->value)      fprintf(stderr, "   Value  = %s\n", 
+					(char *)(param_ptr->value));
+	if(param_ptr->steerable)  fprintf(stderr, "   Steerable = %s\n", 
+					(char *)(param_ptr->steerable));
+	if(param_ptr->type)       fprintf(stderr, "   Type   = %s\n", 
+					(char *)(param_ptr->type));
+	if(param_ptr->is_internal)fprintf(stderr, "   Internal = %s\n", 
+					(char *)(param_ptr->is_internal));
+      }
+      param_ptr = param_ptr->next;
+    }
+
+    // Insert more rows in the table if required
+    if( childParamCount[i] > ((int)(paramListTable->numRows())-1)){
+      paramListTable->insertRows(paramListTable->numRows(),
+		       	 (childParamCount[i] + 1 - paramListTable->numRows()));
+    }
+
+    j = 0;
+    for (it = paramLabelList.begin(); it != paramLabelList.end(); ++it){
+      // Insert the label into the table - '+1' allows for initial
+      // (hidden) row holding the GSH
+      paramListTable->setText(j+1, i, *it);
+      j++;
+    }
+    paramLabelList.clear();
+
+    // Adjust the column width BEFORE putting the (hidden) gsh string
+    // into the top row of this column
+    paramListTable->adjustColumn(i);
+    paramListTable->setText(0, i, QString(childEPR[i]));
+  }
+
+  Delete_msg_struct(&msg);
+  soap_end(&mySoap);
+  soap_done(&mySoap);
+
+#endif // REG_OGSI
 }
 
 
