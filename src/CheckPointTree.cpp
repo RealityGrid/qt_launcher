@@ -73,15 +73,12 @@ QStringList CheckPointTree::getActiveTrees(){
   struct soap soap;
   soap_init(&soap);
 
-  //fact__getActiveTreesResponse *out = new fact__getActiveTreesResponse();
   rgtf__getActiveTreesResponse out;
 
-  //  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", out ))
-  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", &out ))
+  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", NULL, &out ))
     soap_print_fault(&soap, stderr);
 
   QStringList activeTrees;
-  //  parse(out->_getActiveTreesReturn);
   parse(out._getActiveTreesReturn);
 
   soap_end(&soap);
@@ -94,12 +91,11 @@ void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t)
   soap_init(&soap);
   rgt__getChildNodesResponse out;
 
-  if (soap_call_rgt__getChildNodes(&soap, handle, "", &out))
+  if (soap_call_rgt__getChildNodes(&soap, handle, "", NULL, &out))
     soap_print_fault(&soap, stderr);
 
   // and then parse for children and data nodes, fill in list view as appropriate.....
 
-  //parse(QString(out->_getChildNodesReturn), t);
   parse(QString(out._getChildNodesReturn), t);
 
   parent->triggerUpdate();
@@ -111,18 +107,10 @@ void CheckPointTree::getNodeData(const QString &handle, CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
 
-  //tree__getCheckPointDataResponse *out = new tree__getCheckPointDataResponse();
   rgt__getCheckPointDataResponse out;
-  //if (soap_call_tree__getCheckPointData(&soap, handle, "", out))
-  if (soap_call_rgt__getCheckPointData(&soap, handle, "", &out))
+  if (soap_call_rgt__getCheckPointData(&soap, handle, "", NULL, &out))
     soap_print_fault(&soap, stderr);
 
-  //cout << handle << endl;
-  //cout << "************CHKPNTDATA***********" << endl << 
-  //out->_getCheckPointDataReturn << endl << 
-  //  "******************************" << endl;
-
-  //parse(QString(out->_getCheckPointDataReturn), t);
   parse(QString(out._getCheckPointDataReturn), t);
 }
 

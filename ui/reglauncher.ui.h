@@ -260,12 +260,15 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   soap_init(&soap);
   
   rgt__getInputFileResponse inputFileResponse;
-  if (soap_call_rgt__getInputFile(&soap, checkPointGSH, "", &inputFileResponse))
+  if (soap_call_rgt__getInputFile(&soap, checkPointGSH, "", NULL,
+				  &inputFileResponse))
     soap_print_fault(&soap, stderr);
   else{
     result = inputFileResponse._getInputFileReturn;
   }
 
+  // ARPDBG - should call soap_end here but will that trash the
+  // contents of result??
   return result;
 }
 
@@ -280,13 +283,14 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 
   rgt__getCheckPointDataResponse chkptDataResponse;
   if (soap_call_rgt__getCheckPointData(&soap, checkPointGSH, "", 
-				       &chkptDataResponse))
+				       NULL, &chkptDataResponse))
     soap_print_fault(&soap, stderr);
   else{
-    //result = chkptDataResponse->_getCheckPointDataReturn;
     result = chkptDataResponse._getCheckPointDataReturn;
   }
 
+  // ARPDBG - should call soap_end here but will that trash the
+  // contents of result??
   return result;
 }
 
