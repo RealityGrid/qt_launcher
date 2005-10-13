@@ -43,6 +43,7 @@
     @author Mark Riding
     @author Andrew Porter */
 
+#define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "Gridifier.h"
 #include "Utility.h"
 #include <iostream>
@@ -55,10 +56,8 @@
 #include "qmessagebox.h"
 
 #include <ReG_Steer_Steerside.h>
-#include "ReG_Steer_Common.h"
 #include <ReG_Steer_Browser.h>
 #include <ReG_Steer_Utils.h>
-#include "ReG_Steer_XML.h"
 #include "ReG_Steer_Utils_WSRF.h"
 #include "ReG_Steer_Steerside_WSRF.h"
 #include "soapH.h"
@@ -224,6 +223,7 @@ void Gridifier::getCoupledParamDefs(const QString &gsh,
     return;
 
   cout << "ARPDBG: getCoupledParamDefs, gsh = " << gsh << endl;
+
   getParamDefsProcess = new QProcess(QString("./get_component_param_defs.pl"));
   getParamDefsProcess->setWorkingDirectory(mScriptsDir);
   getParamDefsProcess->addArgument(gsh);

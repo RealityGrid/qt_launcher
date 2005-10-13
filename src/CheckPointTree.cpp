@@ -40,11 +40,9 @@
 /** @file CheckPointTree.cpp
     @brief Implements methods for handling the CheckPointTree
  */
-
+#define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "CheckPointTree.h"
 #include "CheckPointTreeItem.h"
-//#include "soapRealityGridTree.nsmap"
-//#include "soapRealityGrid.nsmap"
 #include "soapH.h"
 #include "qdom.h"
 

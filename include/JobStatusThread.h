@@ -43,6 +43,7 @@
 #include "qthread.h"
 #include "qapplication.h"
 #include "StatusMessageData.h"
+#define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "soapH.h"
 
 /** @file JobStatusThread.h
