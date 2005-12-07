@@ -98,6 +98,11 @@ esac
 if [ $SIM_HOSTNAME -ne "localhost" ]
 then
    xhost + $SIM_HOSTNAME
+else
+   if [ $DISPLAY = ":0" ]
+   then
+       CLIENT_DISPLAY=":0"
+   fi
 fi
 
 # Setup the script for running the lbe3d wrapper
