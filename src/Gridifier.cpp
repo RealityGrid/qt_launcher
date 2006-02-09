@@ -382,14 +382,16 @@ QString Gridifier::makeSteeringService(const QString &factory,
 				      config.mPrivateKeyCertFile.ascii(),
 				      config.mCACertsPath.ascii());
 
+  result = QString(EPR);
   if(EPR){
     printf("Address of SWS = %s\n", EPR);
   }
   else{
     printf("FAILED to create SWS :-(\n");
+    return result;
   }
-  result = QString(EPR);
 
+  // Now register the SWS - ARPDBG
 #endif // ndef REG_WSRF
 
   return result;
