@@ -156,13 +156,22 @@ fi
 if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
 then
 
-  echo "/usr/psc/bin/far get RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
-  echo "/usr/psc/bin/far get RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
+# The 'far' command doesn't work from a batch script submitted by globus so
+# use tcscp which is one of the things it wraps...
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
+  echo "/usr/psc/bin/tcscp golem:RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${COORD_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${STRUCT_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${PARAM_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${VECT_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${VEL_FILE}.$$ ." >> $REG_TMP_FILE
+#  echo "/usr/psc/bin/far get RealityGrid/scratch/${FEP_FILE}.$$ ." >> $REG_TMP_FILE
 
 else
 

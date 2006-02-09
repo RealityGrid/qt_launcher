@@ -50,6 +50,13 @@
 
 #include "LauncherConfig.h"
 
+/// This class contains methods that either wrap perl scripts or make
+/// calls using gSoap to interact with the OGSA framework and for
+/// remote job launching.  Perl scripts are used for the (older) OGSI
+/// stuff whilst gSoap bindings are used for interacting with the newer 
+/// WSRF framework.
+/// @author Mark Riding
+/// @author Andrew Porter
 class Gridifier: public QObject{
 
 Q_OBJECT
@@ -60,8 +67,9 @@ public:
 
   /** Cleans up when launch fails */
   void cleanUp(LauncherConfig *config);
-  /** Overloaded version that just takes address of service to Destroy */
-  void Gridifier::cleanUp(QString address);
+  /** Overloaded version that takes object describing service to Destroy 
+      @param service Pointer to description of service to destroy */
+  void Gridifier::cleanUp(SteeringService *service);
   /** Get list of available SGS factories */
   QString getSGSFactories(const QString &topLevelRegistry, 
 			  const QString &desiredContainer,

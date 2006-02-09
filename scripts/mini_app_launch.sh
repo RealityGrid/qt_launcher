@@ -127,8 +127,13 @@ echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
 echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "echo \"Starting mini_app job...\"" >> $REG_TMP_FILE
-echo "\$HOME/RealityGrid/bin/mini_app" >> $REG_TMP_FILE
-
+# Set up AGW gateway (for network access to job) if machine is lemieux
+if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+then
+    echo "/usr/local/packages/qsockets/agwrun.sh \$HOME/RealityGrid/bin/mini_app" >> $REG_TMP_FILE
+else
+    echo "\$HOME/RealityGrid/bin/mini_app" >> $REG_TMP_FILE
+fi
 echo "Starting simulation..."
 
 ./reg_globusrun 

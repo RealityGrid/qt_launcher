@@ -58,7 +58,8 @@ my $content = "MetaSGSfactory";
 my $ans =  SOAP::Lite
     -> uri("factory") #set the namespace
     -> proxy("$sgs_factory_GSH")  #location of service
-    -> $func($factory_registry_GSH, $content)
+    -> $func(SOAP::Data->value("$factory_registry_GSH")->type('string'), 
+	     SOAP::Data->value("$content")->type('string'))
     -> result;
 
 #print "Locator for ServiceGroupEntry = $ans\n";
@@ -112,7 +113,7 @@ sub query_registry
     $list = SOAP::Lite
 	-> uri("ServiceGroupRegistration")
 	-> proxy("$gsh")
-	-> $func("$arg")
+	-> $func(SOAP::Data->value("$arg")->type('string'))
 	-> result;
 
     #print "\nGot entries from Registry: >>$list<<\n\n";

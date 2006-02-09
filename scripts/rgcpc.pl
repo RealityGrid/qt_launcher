@@ -386,7 +386,7 @@ if ( ($GSH_FLAG  eq "TRUE") &&  ($FORCE eq "FALSE") )
  $ans =  SOAP::Lite
            -> uri("RealityGridTree")                #set the namespace
            -> proxy($GSH)                           #location of service
-           -> setCheckPointData($CPmetadata);       #function + args to invoke
+           -> setCheckPointData(SOAP::Data->value("$CPmetadata")->type('string'));
  
  if ( $ans->fault)
  {

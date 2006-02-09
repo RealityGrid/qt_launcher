@@ -63,7 +63,7 @@ while($done != 1){
 $ans=  SOAP::Lite
        -> uri('SGS')
        -> proxy("$sgs_GSH")
-       -> findServiceData("<ogsi:queryByServiceDataNames names=\"SGS:ChkType_defs\"/>")
+       -> findServiceData(SOAP::Data->value("<ogsi:queryByServiceDataNames names=\"SGS:ChkType_defs\"/>")->type('string'))
        -> result;
 
 #print "findServiceData returned: $ans\n";
@@ -107,7 +107,7 @@ my $ctrlMessage = "<ReG_steer_message xmlns:xsi=\"http://www.w3.org/2001/XMLSche
 $ans=  SOAP::Lite
     -> uri('SGS')
     -> proxy("$sgs_GSH")
-    -> PutControl("$ctrlMessage")
+    -> PutControl(SOAP::Data->value("$ctrlMessage")->type('string'))
     -> result;
 
 #    print "Control set: \n$ans\n";
@@ -154,7 +154,7 @@ if($done != 1){
 $ans=  SOAP::Lite
        -> uri('SGS')
        -> proxy("$sgs_GSH")
-       -> findServiceData("<ogsi:queryByServiceDataNames names=\"SGS:Chkpoint_GSH\"/>")
+       -> findServiceData(SOAP::Data->value("<ogsi:queryByServiceDataNames names=\"SGS:Chkpoint_GSH\"/>")->type('string'))
        -> result;
 
 # print "findServiceData returned: $ans\n";

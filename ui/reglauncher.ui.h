@@ -44,13 +44,13 @@ CheckPointTree     *cpt = NULL;
 CheckPointTreeItem *rightMouseCheckPointTreeItem = NULL;
 int checkPointTreeListViewPreviousSelection = -1;
 
-/** Reads the launcher configuration file "default.conf"
+/** Reads the launcher configuration file "launcher.conf"
   * and tweaks the way the checkpoint tree is displayed
   */
 void RegLauncher::init(){
   QString homeDir = QString(getenv("HOME"));
-  config.readConfig(homeDir + "/.reg_launcher/default.conf");
-  config2.readConfig(homeDir + "/.reg_launcher/default.conf");
+  config.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
+  config2.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
   checkPointTreeListView->setRootIsDecorated(true);
 
   QDir lDir(config.mScriptsDirectory);
@@ -83,6 +83,10 @@ void RegLauncher::init(){
   }
 
   gridifier.setScriptsDirectory(config.mScriptsDirectory);
+
+  // Read in security configuration
+  config.readSecurityConfig(homeDir + "/RealityGrid/etc/launcher.conf");
+  config2.readSecurityConfig(homeDir + "/RealityGrid/etc/launcher.conf");
 }
 
 /** Store a pointer to the object representing the type of application
@@ -702,7 +706,7 @@ void RegLauncher::commonLaunchCode(){
 
   consoleOutSlot("Starting a component...");
 
-#if REG_OGSI
+#ifndef REG_WSRF
   // First find a factory, and if we don't have one - make one
   QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
 					      config.selectedContainer,
@@ -731,7 +735,7 @@ void RegLauncher::commonLaunchCode(){
   QString factory = "http://"+config.selectedContainer+":"+
     QString::number(config.containerPortNum)+"/";
   cout << "Using container: "<< factory << endl;
-#endif //REG_OGSI
+#endif // ndef REG_WSRF
 
   // Now determine whether we need to configure the SGS with data source(s)
   if (config.mAppToLaunch->mNumInputs == 0){
@@ -758,9 +762,10 @@ void RegLauncher::commonLaunchCode(){
     }
       
     // Copy the value to the config
-    config.simulationGSH = sgs;
+    config.simulationGSH.mEPR = sgs;
 
-    consoleOutSlot(QString("SGS is "+config.simulationGSH).stripWhiteSpace());
+    consoleOutSlot(QString("SGS is "+
+			   config.simulationGSH.mEPR).stripWhiteSpace());
 
     // Create xml job description and save to file
     //QFile jobFile(config.mScratchDirectory + "/job.xml");
@@ -809,14 +814,16 @@ void RegLauncher::commonLaunchCode(){
     }
     
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.simulationGSH,
+                                                            config.simulationGSH.mEPR,
+							    config.simulationGSH.mUsername,
+							    config.simulationGSH.mPassword,
 							    config.mScriptsDirectory);
     aJobStatusThread->start();
   }
   else{
     // We need to set-up data sources
     sgs = gridifier.makeVizSGS(factory, config);
-
+    cout << "Common launch code, sgs = >>" << sgs << "<<" << endl;
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http://")){
       consoleOutSlot("Failed to create a visualization SGS - is the "
@@ -827,10 +834,10 @@ void RegLauncher::commonLaunchCode(){
     }
 
     // Copy the value to the config
-    config.visualizationGSH = sgs;
+    config.visualizationGSH.mEPR = sgs;
 
     consoleOutSlot(QString("Viz SGS is "+
-			   config.visualizationGSH).stripWhiteSpace());
+			   config.visualizationGSH.mEPR).stripWhiteSpace());
 
     // At this point we want to specialise for the Argonne Cluster.
     // Check to see where we are rendering and act accordingly
@@ -849,7 +856,9 @@ void RegLauncher::commonLaunchCode(){
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.visualizationGSH,
+                                                            config.visualizationGSH.mEPR,
+							    config.visualizationGSH.mUsername,
+							    config.visualizationGSH.mPassword,
 							    config.mScriptsDirectory);
     aJobStatusThread->start();
   }
@@ -865,7 +874,7 @@ void RegLauncher::coupledModelLaunchCode(){
 
   consoleOutSlot("Starting two components...");
 
-#if REG_OGSI
+#ifndef REG_WSRF
   // First find a factory, and if we don't have one - make one
   QString factory = gridifier.getSGSFactories(config.topLevelRegistryGSH, 
 					      config.selectedContainer,
@@ -911,14 +920,14 @@ void RegLauncher::coupledModelLaunchCode(){
 
   consoleOutSlot(QString("MetaSGS Factories are "+factory+"\n and "+
 			 factory2).stripWhiteSpace());
-#else // !REG_OGSI
+#else // REG_WSRF defined...
   QString factory = "http://"+config.selectedContainer+":"+
     QString::number(config.containerPortNum)+"/";
   cout << "Using container 1: "<< factory << endl;
   QString factory2 = "http://"+config2.selectedContainer+":"+
     QString::number(config.containerPortNum)+"/";
   cout << "Using container 2: "<< factory << endl;
-#endif // REG_OGSI
+#endif // ndef REG_WSRF
 
 
   // Now create the parent SWS
@@ -939,16 +948,7 @@ void RegLauncher::coupledModelLaunchCode(){
   tmpConfig.mInputFileName = "";
   tmpConfig.mTimeToRun = config.mTimeToRun;
 
-#if REG_OGSI
-  parentMetaSGS_GSH = gridifier.makeMetaSGS(factory, tmpConfig, "");
-  // Check that the sgs was created properly, if not die
-  if (parentMetaSGS_GSH.length()==0 || 
-      !parentMetaSGS_GSH.startsWith("http://")){
-    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
-		   factory+") valid?");
-    return;
-  }
-#else
+#ifdef REG_WSRF
   parentSWS_EPR = gridifier.makeSteeringService(factory, tmpConfig);
   // Check that the sws was created properly, if not die
   if (parentSWS_EPR.length()==0 || 
@@ -960,10 +960,19 @@ void RegLauncher::coupledModelLaunchCode(){
   else{
     consoleOutSlot("Parent SWS EPR = "+parentSWS_EPR);
   }
-#endif // REG_OGSI
+#else
+  parentMetaSGS_GSH = gridifier.makeMetaSGS(factory, tmpConfig, "");
+  // Check that the sgs was created properly, if not die
+  if (parentMetaSGS_GSH.length()==0 || 
+      !parentMetaSGS_GSH.startsWith("http://")){
+    consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
+		   factory+") valid?");
+    return;
+  }
+#endif // def REG_WSRF
 
   // Create the first child
-#if REG_OGSI
+#ifndef REG_WSRF
   firstChildMetaSGS_GSH = gridifier.makeMetaSGS(factory, config, 
 						parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
@@ -971,13 +980,15 @@ void RegLauncher::coupledModelLaunchCode(){
       !firstChildMetaSGS_GSH.startsWith("http://")){
     consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
 		   factory+") valid?");
-    gridifier.cleanUp(parentMetaSGS_GSH);
+    gridifier.cleanUp(&SteeringService(parentMetaSGS_GSH,
+				      "",
+				      ""));
     return;
   }
   // Copy the value to the config
-  config.simulationGSH = firstChildMetaSGS_GSH;
+  config.simulationGSH.mEPR = firstChildMetaSGS_GSH;
   consoleOutSlot(QString("1st MetaSGS is "+
-			 config.simulationGSH).stripWhiteSpace());
+			 config.simulationGSH.mEPR).stripWhiteSpace());
 #else
   firstChildSWS_EPR = gridifier.makeSteeringService(factory, config,
 						    parentSWS_EPR);
@@ -986,17 +997,18 @@ void RegLauncher::coupledModelLaunchCode(){
       !firstChildSWS_EPR.startsWith("http://")){
     consoleOutSlot("Failed to create first child SWS - is the factory ("+
 		   factory+") valid?");
-    gridifier.cleanUp(parentSWS_EPR);
+    gridifier.cleanUp(&SteeringService(parentSWS_EPR,
+				      "", ""));
     return;
   }
   // Copy the value to the config
-  config.simulationGSH = firstChildSWS_EPR;
+  config.simulationGSH.mEPR = firstChildSWS_EPR;
   consoleOutSlot(QString("1st child SWS is "+
-			 config.simulationGSH).stripWhiteSpace());
-#endif // REG_OGSI
+			 config.simulationGSH.mEPR).stripWhiteSpace());
+#endif // ndef REG_WSRF
 
   // Create the second child
-#if REG_OGSI
+#ifndef REG_WSRF
   secondChildMetaSGS_GSH = gridifier.makeMetaSGS(factory2, config2, 
 						 parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
@@ -1005,13 +1017,14 @@ void RegLauncher::coupledModelLaunchCode(){
     consoleOutSlot("Failed to create 2nd child MetaSGS - is the factory ("+
 		   factory2+") valid?");
     gridifier.cleanUp(&config);
-    gridifier.cleanUp(parentMetaSGS_GSH);
+    gridifier.cleanUp(&SteeringService(parentMetaSGS_GSH,
+				      "",""));
     return;
   }
   // Copy the value to the config
-  config2.simulationGSH = secondChildMetaSGS_GSH;
+  config2.simulationGSH.mEPR = secondChildMetaSGS_GSH;
   consoleOutSlot(QString("2nd MetaSGS is "+
-			 config2.simulationGSH).stripWhiteSpace());
+			 config2.simulationGSH.mEPR).stripWhiteSpace());
 #else
   secondChildSWS_EPR = gridifier.makeSteeringService(factory2, config2, 
 						     parentSWS_EPR);
@@ -1021,14 +1034,15 @@ void RegLauncher::coupledModelLaunchCode(){
     consoleOutSlot("Failed to create second child SWS - is the factory ("+
 		   factory2+") valid?");
     gridifier.cleanUp(&config);
-    gridifier.cleanUp(parentSWS_EPR);
+    gridifier.cleanUp(&SteeringService(parentSWS_EPR,
+				      "", ""));
     return;
   }
   // Copy the value to the config
-  config2.simulationGSH = secondChildSWS_EPR;
+  config2.simulationGSH.mEPR = secondChildSWS_EPR;
   consoleOutSlot(QString("2nd child SWS is "+
-			 config2.simulationGSH).stripWhiteSpace());
-#endif // REG_OGSI
+			 config2.simulationGSH.mEPR).stripWhiteSpace());
+#endif // ndef REG_WSRF
 
   // Now launch the jobs themselves
   gridifier.makeReGScriptConfig(config.mScratchDirectory+"/sim.conf", config);
@@ -1036,10 +1050,12 @@ void RegLauncher::coupledModelLaunchCode(){
 			       config) != REG_SUCCESS){
     gridifier.cleanUp(&config);
     gridifier.cleanUp(&config2);
-#if REG_OGSI
-    gridifier.cleanUp(parentMetaSGS_GSH);
+#ifdef REG_WSRF
+    gridifier.cleanUp(&SteeringService(parentSWS_EPR,
+				      "",""));
 #else
-    gridifier.cleanUp(parentSWS_EPR);
+    gridifier.cleanUp(&SteeringService(parentMetaSGS_GSH,
+				      "", ""));
 #endif
     consoleOutSlot("Failed to launch first component - cancelling");
   }
@@ -1048,10 +1064,12 @@ void RegLauncher::coupledModelLaunchCode(){
 			       config2) != REG_SUCCESS){
     gridifier.cleanUp(&config);
     gridifier.cleanUp(&config2);
-#if REG_OGSI
-    gridifier.cleanUp(parentMetaSGS_GSH);
+#ifdef REG_WSRF
+    gridifier.cleanUp(&SteeringService(parentSWS_EPR,
+				      "", ""));
 #else
-    gridifier.cleanUp(parentSWS_EPR);
+    gridifier.cleanUp(&SteeringService(parentMetaSGS_GSH,
+				      "", ""));
 #endif
     // ARPDBG - somehow need to withdraw the first component that is 
     // now running on its target machine...
@@ -1060,21 +1078,23 @@ void RegLauncher::coupledModelLaunchCode(){
 
   // Fix so that launcher correctly points steerer at parent rather than
   // a child if the user presses the 'steer' button
-#if REG_OGSI
-  config.simulationGSH = parentMetaSGS_GSH;
+#ifdef REG_WSRF
+  config.simulationGSH.mEPR = parentSWS_EPR;
 #else
-  config.simulationGSH = parentSWS_EPR;
+  config.simulationGSH.mEPR = parentMetaSGS_GSH;
 #endif
 
-#if REG_OGSI
+#ifdef REG_WSRF
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-							  parentMetaSGS_GSH,
+							  parentSWS_EPR,
+							  "", "",
 							  config.mScriptsDirectory);
 #else
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-							  parentSWS_EPR,
+							  parentMetaSGS_GSH,
+							  "","",
 							  config.mScriptsDirectory);
-#endif //REG_OGSI
+#endif // defined REG_WSRF
 
   aJobStatusThread->start();
 }
@@ -1114,8 +1134,8 @@ void RegLauncher::steerSlot()
 
   // create an instance of the RealityGrid QT Steerer for the current GSH
   steerer = new QProcess(config.mSteererBinaryLocation);
-  if (config.simulationGSH.length() != 0){    
-    steerer->addArgument(config.simulationGSH);
+  if (config.simulationGSH.mEPR.length() != 0){    
+    steerer->addArgument(config.simulationGSH.mEPR);
     steerer->setCommunication(QProcess::Stdout|QProcess::Stderr|QProcess::DupStderr);
 
     steerer->start();

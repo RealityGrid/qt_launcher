@@ -101,6 +101,7 @@ fi
 # Setup the script for running the lbe3d wrapper
 
 echo "#!/bin/sh" > $REG_TMP_FILE
+echo "set -x" >> $REG_TMP_FILE
 echo ". \$HOME/RealityGrid/etc/reg-user-env.sh" >>$REG_TMP_FILE
 echo "REG_WORKING_DIR=\$HOME/RealityGrid/scratch" >> $REG_TMP_FILE
 echo "export REG_WORKING_DIR" >> $REG_TMP_FILE
@@ -115,12 +116,21 @@ echo "then" >> $REG_TMP_FILE
 echo "  mkdir \$REG_WORKING_DIR" >> $REG_TMP_FILE
 echo "fi" >> $REG_TMP_FILE
 echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
-echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> $REG_TMP_FILE
-echo "then" >> $REG_TMP_FILE
-echo "  echo \"Input file not found - exiting\"" >> $REG_TMP_FILE
-echo "  exit" >> $REG_TMP_FILE
-echo "fi" >> $REG_TMP_FILE
-echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+
+# On lemieux, the compute node can't even see the disk to which gridftp
+# writes the files...
+if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+then
+
+  echo "/usr/psc/bin/far get RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+else
+  echo "if [ ! -e \$HOME/RealityGrid/scratch/.reg.input-file.$$ ]" >> $REG_TMP_FILE
+  echo "then" >> $REG_TMP_FILE
+  echo "  echo \"Input file not found - exiting\"" >> $REG_TMP_FILE
+  echo "  exit" >> $REG_TMP_FILE
+  echo "fi" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+fi
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
 echo "UC_PROCESSORS=$SIM_PROCESSORS" >> $REG_TMP_FILE
 echo "export UC_PROCESSORS" >> $REG_TMP_FILE

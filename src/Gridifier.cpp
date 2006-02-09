@@ -286,7 +286,7 @@ QString Gridifier::makeSteeringService(const QString &factory,
 				       const LauncherConfig &config){
   QString result;
 
-#if REG_OGSI
+#ifndef REG_WSRF
 
   QProcess *makeSimSGSProcess = new QProcess(QString("./make_sgs.pl"));
   makeSimSGSProcess->setWorkingDirectory(mScriptsDir);
@@ -312,10 +312,25 @@ QString Gridifier::makeSteeringService(const QString &factory,
   // Do some error checking here - or in the calling class?
   result = QString(makeSimSGSProcess->readStdout()).stripWhiteSpace();
 
-#else // !REG_OGSI
+#else // REG_WSRF is defined
+
+  struct job_details job;
+  char              *chkTree;
+
+  // Initialize job_details struct
+  snprintf(job.userName, REG_MAX_STRING_LENGTH,
+	   config.mJobData->mPersonLaunching.ascii());
+  snprintf(job.group, REG_MAX_STRING_LENGTH, "RSS");
+  snprintf(job.software, REG_MAX_STRING_LENGTH, 
+	   config.mJobData->mSoftwareDescription.ascii());
+  snprintf(job.purpose, REG_MAX_STRING_LENGTH,
+	   config.mJobData->mPurposeOfJob.ascii());
+  snprintf(job.inputFilename, REG_MAX_STRING_LENGTH,
+	   config.mInputFileName.ascii());
+  job.lifetimeMinutes = config.mTimeToRun;
+  job.passphrase[0] = '\0';
 
   // Create a new checkpoint tree if requested
-  char *chkTree;
   if(config.treeTag.length()){
     chkTree = Create_checkpoint_tree(config.checkPointTreeFactoryGSH.ascii(), 
 				     config.treeTag.ascii());
@@ -329,16 +344,14 @@ QString Gridifier::makeSteeringService(const QString &factory,
   else{
     chkTree = (char *)(config.currentCheckpointGSH.ascii());
   }
+  snprintf(job.checkpointAddress, REG_MAX_STRING_LENGTH, chkTree);
 
-  char *EPR = Create_steering_service(config.mTimeToRun, 
+  char *EPR = Create_steering_service(&job,
 				      factory.ascii(), 
 				      config.topLevelRegistryGSH.ascii(),
-				      config.mJobData->mPersonLaunching.ascii(), 
-				      config.mJobData->mOrganisation.ascii(), 
-				      config.mJobData->mSoftwareDescription.ascii(),
-				      config.mJobData->mPurposeOfJob.ascii(), 
-				      config.mInputFileName.ascii(),
-				      chkTree);
+				      config.mKeyPassphrase.ascii(), 
+				      config.mPrivateKeyCertFile.ascii(),
+				      config.mCACertsPath.ascii());
 
   if(EPR){
     printf("Address of SWS = %s\n", EPR);
@@ -348,7 +361,7 @@ QString Gridifier::makeSteeringService(const QString &factory,
   }
   result = QString(EPR);
 
-#endif // REG_OGSI
+#endif // ndef REG_WSRF
 
   return result;
 }
@@ -414,13 +427,13 @@ QString Gridifier::makeVizSGS(const QString &factory,
                               const LauncherConfig &config){
   QString result;
 
-#if REG_OGSI
+#ifndef REG_WSRF
   QProcess *makeVizSGSProcess = new QProcess(QString("./make_vis_sgs.pl"));
   makeVizSGSProcess->setWorkingDirectory(mScriptsDir);
   makeVizSGSProcess->addArgument(factory);
   makeVizSGSProcess->addArgument(config.mJobData->toXML(QString("SGS")));
   makeVizSGSProcess->addArgument(config.topLevelRegistryGSH);
-  makeVizSGSProcess->addArgument(config.simulationGSH);
+  makeVizSGSProcess->addArgument(config.simulationGSH.mEPR);
   makeVizSGSProcess->addArgument(QString::number(config.mTimeToRun));
   makeVizSGSProcess->start();
 
@@ -429,9 +442,23 @@ QString Gridifier::makeVizSGS(const QString &factory,
     mApplication->processEvents();
   }
 
+  if(makeVizSGSProcess->canReadLineStdout()){
+    result = QString(makeVizSGSProcess->readStdout());
+    cout << "stdout: " << result << endl;
+  }
+  else{
+    cout << "Full line of stdout unavailable" << endl;
+  }
+  if(makeVizSGSProcess->canReadLineStderr()){
+    cout << "stderr: " << QString(makeVizSGSProcess->readStderr()) << endl;
+  }
+  else{
+    cout << "Full line of stderr unavailable" << endl;
+  }
+
   result = QString(makeVizSGSProcess->readStdout()).stripWhiteSpace();
 
-#else // !REG_OGSI
+#else // REG_WSRF is defined
 
   char                                       purpose[1024];
   char                                       iodef_label[256];
@@ -445,16 +472,19 @@ QString Gridifier::makeVizSGS(const QString &factory,
   xmlNodePtr                                 cur;
   struct io_struct                          *ioPtr;
   int                                        i, count;
+  struct job_details                         job;
 
   /* Obtain the IOTypes from the data source */
   soap_init(&mySoap);
   if( Get_resource_property (&mySoap,
-			     config.simulationGSH.ascii(),
+			     config.simulationGSH.mEPR.ascii(),
+			     config.simulationGSH.mUsername.ascii(),
+			     config.simulationGSH.mPassword.ascii(),
 			     "ioTypeDefinitions",
 			     &ioTypes) != REG_SUCCESS ){
 
     cout << "Call to get ioTypeDefinitions ResourceProperty on "<< 
-      config.simulationGSH << " failed" << endl;
+      config.simulationGSH.mEPR << " failed" << endl;
     return result;
   }
   cout << "Got ioTypeDefinitions >>" << ioTypes << "<<" << endl;
@@ -520,16 +550,29 @@ QString Gridifier::makeVizSGS(const QString &factory,
 
   Delete_msg_struct(&msg);
 
+  // Initialize job_details struct
+  snprintf(job.userName, REG_MAX_STRING_LENGTH,
+	   config.mJobData->mPersonLaunching.ascii());
+  snprintf(job.group, REG_MAX_STRING_LENGTH, "RSS");
+  snprintf(job.software, REG_MAX_STRING_LENGTH, 
+	   config.mJobData->mSoftwareDescription.ascii());
+  snprintf(job.purpose, REG_MAX_STRING_LENGTH,
+	   config.mJobData->mPurposeOfJob.ascii());
+  snprintf(job.inputFilename, REG_MAX_STRING_LENGTH,
+	   config.mInputFileName.ascii());
+  job.lifetimeMinutes = config.mTimeToRun;
+  snprintf(job.passphrase, REG_MAX_STRING_LENGTH, 
+	   config.simulationGSH.mPassword.ascii());
+  snprintf(job.checkpointAddress, REG_MAX_STRING_LENGTH, 
+	   config.currentCheckpointGSH.ascii());
+
   // Now create SWS for the vis
-  if( !(EPR = Create_steering_service(config.mTimeToRun, 
+  if( !(EPR = Create_steering_service(&job,
 				      factory.ascii(),
 				      config.topLevelRegistryGSH.ascii(),
-				      config.mJobData->mPersonLaunching.ascii(), 
-				      config.mJobData->mOrganisation.ascii(), 
-				      config.mJobData->mSoftwareDescription.ascii(),
-				      config.mJobData->mPurposeOfJob.ascii(),
-				      config.mInputFileName.ascii(), 
-				      config.currentCheckpointGSH.ascii())) ){
+                                      config.mKeyPassphrase.ascii(),
+				      config.mPrivateKeyCertFile.ascii(),
+				      config.mCACertsPath.ascii()) ) ){
     cout << "FAILED to create SWS for " << 
       config.mJobData->mSoftwareDescription << " :-(" << endl;
     soap_end(&mySoap);
@@ -541,7 +584,19 @@ QString Gridifier::makeVizSGS(const QString &factory,
 
   snprintf(purpose, 1024, "<dataSource><sourceEPR>%s</sourceEPR>"
 	   "<sourceLabel>%s</sourceLabel></dataSource>",
-	   config.simulationGSH.ascii(), iodef_label);
+	   config.simulationGSH.mEPR.ascii(), iodef_label);
+
+  if( Create_WSSE_header(&mySoap,
+			 config.simulationGSH.mUsername.ascii(),
+			 config.simulationGSH.mPassword.ascii()) !=
+      REG_SUCCESS){
+    cout << "Failed to create WSSE header for call to SetResourceProperties" 
+	 << endl;
+    //ARPDBG - need to destroy SWS here
+    soap_end(&mySoap);
+    soap_done(&mySoap);
+    return result;
+  }
 
   printf("Calling SetResourceProperties with >>%s<<\n",
 	 purpose);
@@ -557,7 +612,7 @@ QString Gridifier::makeVizSGS(const QString &factory,
 
   soap_end(&mySoap);
   soap_done(&mySoap);
-#endif
+#endif // ndef REG_WSRF
 
   return result;
 }
@@ -659,10 +714,10 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
   fileText += "VIZ_PROCESSORS="+QString::number(config.mNumberProcessors)+"\n";
   
   if(config.mAppToLaunch->mNumInputs > 0){
-    fileText += "REG_SGS_ADDRESS="+config.visualizationGSH+"\n";
+    fileText += "REG_SGS_ADDRESS="+config.visualizationGSH.mEPR+"\n";
   }
   else{
-    fileText += "REG_SGS_ADDRESS="+config.simulationGSH+"\n";
+    fileText += "REG_SGS_ADDRESS="+config.simulationGSH.mEPR+"\n";
   }
  
   fileText += "export HOST_JOB_MGR CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_TYPE VIZ_PROCESSORS SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
@@ -769,7 +824,7 @@ int Gridifier::launchVizScript(const QString &scriptConfigFileName,
 void Gridifier::launchArgonneViz(const LauncherConfig &config){
   QProcess *launchArgonneVizProcess = new QProcess(QString("./argonneVis.sh"));
   launchArgonneVizProcess->setWorkingDirectory(mScriptsDir);
-  launchArgonneVizProcess->addArgument(config.visualizationGSH);
+  launchArgonneVizProcess->addArgument(config.visualizationGSH.mEPR);
   launchArgonneVizProcess->addArgument(QString::number(config.mTimeToRun));
   launchArgonneVizProcess->addArgument(config.multicastAddress);
 
@@ -934,20 +989,26 @@ void Gridifier::setServiceData(const QString &nameSpace,
 /** Cleans up when launch fails
  */
 void Gridifier::cleanUp(LauncherConfig *config){
-#if !REG_OGSI
-  if(!(config->simulationGSH.isEmpty())){
-    Destroy_steering_service((char *)(config->simulationGSH.ascii())); // ReG lib
+#ifdef REG_WSRF
+  if(!(config->simulationGSH.mEPR.isEmpty())){
+    Destroy_steering_service((char*)config->simulationGSH.mEPR.ascii(),
+			     (char*)config->simulationGSH.mUsername.ascii(),
+			     (char*)config->simulationGSH.mPassword.ascii()); // ReG lib
   }
-  if(!(config->visualizationGSH.isEmpty())){
-    Destroy_steering_service((char *)(config->visualizationGSH.ascii())); // ReG lib
+  if(!(config->visualizationGSH.mEPR.isEmpty())){
+    Destroy_steering_service((char*)config->visualizationGSH.mEPR.ascii(),
+			     (char*)config->visualizationGSH.mUsername.ascii(),
+			     (char*)config->visualizationGSH.mPassword.ascii()); // ReG lib
   }
 #endif
 } 
 
-void Gridifier::cleanUp(QString address){
-#if !REG_OGSI
-  if(!(address.isEmpty())){
-    Destroy_steering_service((char *)(address.ascii())); // ReG lib
+void Gridifier::cleanUp(SteeringService *service){
+#ifdef REG_WSRF
+  if(service && !(service->mEPR.isEmpty())){
+    Destroy_steering_service((char*)service->mEPR.ascii(),
+			     (char*)service->mUsername.ascii(),
+			     (char*)service->mPassword.ascii()); // ReG lib
   }
 #endif
 } 

@@ -52,8 +52,10 @@
 #include "qstringlist.h"
 #include "qvaluelist.h"
 #include "jobmetadata.h"
+#include "qdom.h"
 
 #include <iostream>
+
 using namespace std;
 
 /** @file LauncherConfig.h
@@ -69,6 +71,8 @@ using namespace std;
 // when I get a moment!                   //
 // ************************************** //
 
+/** Holds information on a Container which we
+    can use to host SGS/SWSs */
 class Container {
   public:
     QString mContainer;
@@ -82,6 +86,8 @@ class Container {
     ~Container(){}
 };
 
+/** Holds information on an application which
+    we can launch */
 class Application {
 
   public:
@@ -103,6 +109,8 @@ class Application {
     ~Application(){}
 };
 
+/** Holds information on a machine on which
+    we can launch jobs */
 class Machine {
 
   public:
@@ -118,11 +126,31 @@ class Machine {
       mJobManager = aJobManager;
       mOS = aOS;
       mQueue = aQ;
-      //cout << "Machine: name=" << aName << " jobmgr=" << aJobManager << " os="<< aOS << " queue="<< aQ << endl;
     }
     ~Machine(){}
 };
 
+/** Holds information of a single steering service (either SGS 
+    or SWS) */
+class SteeringService {
+  public:
+    /// The address of this steering service 
+    QString mEPR;
+    /// The username used to access this steering service (WSRF only)
+    QString mUsername;
+    /// The password used to access this steering service (WSRF only)
+    QString mPassword;
+
+    SteeringService(){};
+    SteeringService(const QString aEPR,
+		    const QString aUsername,
+		    const QString aPassword){
+    };
+    ~SteeringService(){};
+};
+
+/** Holds information on the configuration of the launcher - both that
+    read from file and that set by the user through the GUI */
 class LauncherConfig {
   public:
 
@@ -134,21 +162,26 @@ class LauncherConfig {
   QString checkPointTreeFactoryGSH;
   /** Grid Service Handle of the registry for factories */
   QString registryOfFactoriesGSH;
+  /** Grid Service Handle of the SGS Factory */
   QString SGSFactoryGSH;
-  QString SGSGSH;
-
+  /** The last SGS created */
+  SteeringService SGSGSH;
   /** Holds the GSH of the currently selected checkpoint */
   QString currentCheckpointGSH;
-  /** Holds the GSH of the most recently launched component that is not a 
+  /** The most recently launched component that is not a 
       visualization */
-  QString simulationGSH;
-  /** Holds the GSH of the most recently launched vis. component */
-  QString visualizationGSH;
-    
+  SteeringService simulationGSH;
+  /** The most recently launched vis. component */
+  SteeringService visualizationGSH;
+  /** Whether or not we're using vizServer */ 
   bool     vizServer;
+  /// Whether or not visualization will be multicast
   bool     multicast;
+  /// Address for visualization to multicast to
   QString  multicastAddress;
+  /// Whether this is a job migration
   bool     migration;
+  /// Whether this is a job restart (from a checkpoint)
   bool     restart;
   bool     newTree;
   int      vizType;
@@ -158,16 +191,23 @@ class LauncherConfig {
   int      mNumberProcessors;
   int      mNumberPipes;
   int      mTimeToRun;
-    
+  /** Pointer to object containing metadata for job being launched */
   JobMetaData *mJobData;
-
+  /** List of available containers as read from the launcher.config file */
   QValueList<Container>   containerList;
+  /** Which container we're going to use in the current launch */
   QString                 selectedContainer;
+  /** The port that the selected container is listening on */
   int                     containerPortNum;
+  /** Where globus lives on this machine */
   QString                 globusLocation;
+  /** List of applications that we can launch */
   QValueList<Application> applicationList;
+  /** List of machines on which we can launch applications */
   QValueList<Machine>     machineList;
+  /** List of visualization machines */
   QValueList<Machine>     vizMachineList;
+  /** Pointer to application that has been chosen for this launch */
   Application            *mAppToLaunch;
 
   /** Whether we are launching a coupled model or not */
@@ -183,6 +223,12 @@ class LauncherConfig {
   QString mConfigFileContent;
   /** Location of the steering client binary */
   QString mSteererBinaryLocation;
+  /** Path of directory holding the CA certificates */
+  QString mCACertsPath;
+  /** Location of the PEM file holding user's private key and certificate */
+  QString mPrivateKeyCertFile;
+  /** The passphrase for the user's private key */
+  QString mKeyPassphrase;
 
   // Methods
 
@@ -191,8 +237,20 @@ class LauncherConfig {
   ~LauncherConfig();
 
   void writeConfig(QString file);
+  /** Reads specified configuration file and stores values */
   void readConfig(QString file);
+  /** Use Qt XML support to generate XML document describing the
+      job to be launched.*/
   QString toXML();
+  /** Method loads a configuration xml file, and parses it to
+   *  determine the stored security configuration values. */
+  void readSecurityConfig(QString fileName);
+  /** Helper method for parsing XML
+      @param elem QDomElement from which to get attribute
+      @param name The name of the attribute to get
+      @return value of the specified attribute */
+  QString getElementAttrValue(QDomElement elem, 
+			      QString     name);
 
  protected:
   /** Create a new default.conf if it is missing

@@ -31,8 +31,8 @@ void RunningJobsDialog::setConfig(LauncherConfig *aConfig )
   mGridifier.setScriptsDirectory(mConfig->mScriptsDirectory);
 
   // populate the viz's simulation gsh entry box with a good default
-  if(mConfig->simulationGSH){
-    runningGSHLineEdit->setText(mConfig->simulationGSH);
+  if(mConfig->simulationGSH.mEPR){
+    runningGSHLineEdit->setText(mConfig->simulationGSH.mEPR);
     if (mResultString != NULL){
       *mResultString = runningGSHLineEdit->text();
     }

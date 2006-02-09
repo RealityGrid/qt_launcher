@@ -42,6 +42,7 @@ echo "Remote machine is: $SIM_HOSTNAME"
 REG_RSL_FILE=$REG_SCRATCH_DIRECTORY/sim_stage.$$.rsl
 export REG_RSL_FILE
 
+RSL="&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))"
 
 # If target machine is the local client then just execute the launching script
 # created in the xxx_launch.sh script that called this one
@@ -51,19 +52,20 @@ case $SIM_HOSTNAME in
 	$REG_TMP_FILE &> ${HOME}/${SIM_STD_ERR_FILE} &
 	exit
           ;;
-#       lemieux.psc.edu)
-#        # Specify our dedicated queue if launching on lemieux
-#        echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=\"/usr/users/7/aporter/RealityGrid/out$$\")(stderr=\"/usr/users/7/aporter/RealityGrid/err$$\")(count=$SIM_PROCESSORS)(queue=\"escience\")" > $REG_RSL_FILE
-#          ;;
        *)
+        # If Lemieux, then have to specify that we want one AGW server
+        # to handle internet connections for us
+        if [ "$SIM_HOSTNAME" == "lemieux.psc.edu" ]
+	then
+          RSL=$RSL"(agw_count=1)"
+        fi
+
         if [ "$HOST_QUEUE" != "none" ]
         then
           # Use named queue
-          echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(queue=\"$HOST_QUEUE\")(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))" > $REG_RSL_FILE
-        else
-          # Use default queue
-          echo "&(executable=\$(GLOBUSRUN_GASS_URL)/$REG_TMP_FILE)(jobtype=single)(maxWallTime=$TIME_TO_RUN)(stdout=$SIM_STD_OUT_FILE)(stderr=$SIM_STD_ERR_FILE)(count=$SIM_PROCESSORS)(environment=(NGSMODULES pbs:pgi:gm:mpich-gm))" > $REG_RSL_FILE
+	  RSL=$RSL"(queue=\"$HOST_QUEUE\")"
         fi
+        echo $RSL > $REG_RSL_FILE
           ;;
 esac
 
@@ -78,7 +80,9 @@ esac
 case $ReG_LAUNCH in
     globus)
      echo "Using vanilla globus"
-     $GLOBUS_LOCATION/bin/globusrun -b -s -r ${HOST_JOB_MGR} -f $REG_RSL_FILE
+     JOB_ID=`$GLOBUS_LOCATION/bin/globusrun -b -s -r ${HOST_JOB_MGR} -f $REG_RSL_FILE`
+     echo "Job id is "$JOB_ID
+     echo $JOB_ID >> reg_job_list.txt
     ;;
     cog)
      echo "Using COG globus"

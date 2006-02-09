@@ -111,7 +111,7 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     }
     
     // populate the viz's simulation gsh entry box with a good default
-    simulationGSHLineEdit->setText(mConfig->simulationGSH);
+    simulationGSHLineEdit->setText(mConfig->simulationGSH.mEPR);
 
     // Tell the Gridifier object where the scripts live    
     mGridifier.setScriptsDirectory(mConfig->mScriptsDirectory);
@@ -295,7 +295,7 @@ void ComponentLauncher::accept(){
       else{
         // otherwise replace the config value with what the user wants
         // be aware that this should really need to happen
-        mConfig->simulationGSH = simulationGSHLineEdit->text();
+        mConfig->simulationGSH.mEPR = simulationGSHLineEdit->text();
       }
     }
   }

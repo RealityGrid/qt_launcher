@@ -45,12 +45,12 @@
 
 /* MORE IMPORTANTLY - I'll convert all this to QT xml support later.... */
 
+#include <qdom.h>
 #include "LauncherConfig.h"
 #include "textviewdialog.h"
 #include <iostream>
 #include "libxml/parser.h"
 #include "qmdcodec.h"
-#include <qdom.h>
 #include <qfile.h>
 #include <qdir.h>
 #include <qmessagebox.h>
@@ -243,7 +243,7 @@ void LauncherConfig::readConfig(QString file){
         // SGS
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"SGS"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
-          SGSGSH = QString((const char*)key);
+          SGSGSH.mEPR = QString((const char*)key);
 	  xmlFree(key);
         }
 
@@ -447,7 +447,7 @@ void LauncherConfig::writeConfig(QString file){
   xmlNewProp(SGSFactory, (const xmlChar*)"value", (const xmlChar*)SGSFactoryGSH.latin1());
     
   SGS = xmlNewTextChild(SGSs, NULL, (const xmlChar*)"SGS", NULL);
-  xmlNewProp(SGS, (const xmlChar*)"value", (const xmlChar*)SGSGSH.latin1());
+  xmlNewProp(SGS, (const xmlChar*)"value", (const xmlChar*)SGSGSH.mEPR.ascii());
 
 // Don't bother with component info for now - ARPDBG
 //  if (simComponentType == lb3d){
@@ -513,10 +513,7 @@ void LauncherConfig::writeConfig(QString file){
   xmlSaveFile(file.latin1(), doc);
 }
 
-/**
- * Use Qt XML support to generate XML document describing the
- * job to be launched.
- */
+//----------------------------------------------------------------------
 QString LauncherConfig::toXML(){
 
   QDomDocument *doc = new QDomDocument();
@@ -592,12 +589,14 @@ QString LauncherConfig::toXML(){
   QString outputFile("ReGJob.");
   QDomText tSGS;
   if(mAppToLaunch->mNumInputs == 0){
-    tSGS = doc->createTextNode(simulationGSH);
-    outputFile.append(simulationGSH.right(simulationGSH.length() - simulationGSH.findRev('/') - 1));
+    tSGS = doc->createTextNode(simulationGSH.mEPR);
+    outputFile.append(simulationGSH.mEPR.right(simulationGSH.mEPR.length() - 
+					       simulationGSH.mEPR.findRev('/') - 1));
   }
   else{
-    tSGS = doc->createTextNode(visualizationGSH);
-    outputFile.append(visualizationGSH.right(visualizationGSH.length() - visualizationGSH.findRev('/') - 1));
+    tSGS = doc->createTextNode(visualizationGSH.mEPR);
+    outputFile.append(visualizationGSH.mEPR.right(visualizationGSH.mEPR.length() - 
+						  visualizationGSH.mEPR.findRev('/') - 1));
   }
 
   // Name of file to write job stdout to
@@ -620,6 +619,7 @@ QString LauncherConfig::toXML(){
   return doc->toString();
 }
 
+//---------------------------------------------------------------------------
 bool LauncherConfig::createNewConfigFile(){
 
   QString homePath = QDir::homeDirPath();
@@ -666,3 +666,53 @@ bool LauncherConfig::createNewConfigFile(){
   return true;
 }
 
+//---------------------------------------------------------------------------
+void LauncherConfig::readSecurityConfig(QString fileName){
+
+  QDomDocument doc( "steererSecurityConfigDocument" );
+  QFile        configFile(fileName);
+
+  // Parse file
+  if ( !configFile.open( IO_ReadOnly ) ){
+    cout << "Input file " << configFile.name() << " does not exist :-(" <<endl;
+    return;
+  }
+  if ( !doc.setContent( &configFile ) ) {
+    configFile.close();
+    return;
+  }
+  configFile.close();
+
+  // Root element
+  QDomElement docElem = doc.documentElement();
+  if(docElem.tagName().contains("Security_config")){
+
+    mCACertsPath = getElementAttrValue(docElem, "caCertsPath");
+    cout << "Path to dir holding CA certs. is " << mCACertsPath << endl;
+
+    mPrivateKeyCertFile = getElementAttrValue(docElem, "privateKeyCertFile");
+    cout << "Path to file holding user's key and cert. is " <<
+      mPrivateKeyCertFile << endl;
+  }
+  else{
+    cout << "Failed to find Security section in config. file" << endl;
+  }
+}
+
+//----------------------------------------------------------------------
+QString LauncherConfig::getElementAttrValue(QDomElement elem, QString name)
+{
+  QDomNode     tmpNode;
+  QDomNodeList nodeList = elem.elementsByTagName(name);
+
+  if(nodeList.count() != 1){
+    cout << "Failed to find " << name << " in config. file" << endl;
+  }
+  else{
+    tmpNode = nodeList.item(0).attributes().namedItem("value");
+    if(!tmpNode.isNull()){
+      return tmpNode.nodeValue();
+    }
+  }
+  return "";
+}

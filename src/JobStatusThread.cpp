@@ -52,12 +52,15 @@
 using namespace std;
 
 JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
-				 const QString &aGSH, const QString &scriptsDir)
+				 const QString &aGSH, const QString &aUsername,
+				 const QString &aPasswd, const QString &scriptsDir)
 : done(false)
 {
   mMainWin = aMainWindow;
   mGSH = aGSH;
   mApp = aApp;
+  mPassword = aPasswd;
+  mUsername = aUsername;
   mScriptsDir = scriptsDir;
   
   int index = mGSH.find("/service", 0, true);
@@ -87,7 +90,7 @@ void JobStatusThread::run(){
 
 void JobStatusThread::getJobStatus(){
 
-#if REG_OGSI
+#ifndef REG_WSRF
   struct sgs__findServiceDataResponse out;
   QString arg("<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>");
   if(soap_call_sgs__findServiceData(&mSoap, mGSH.latin1(), "", 
@@ -103,10 +106,12 @@ void JobStatusThread::getJobStatus(){
   char *rpName = "applicationStatus";
   Get_resource_property (&mSoap,
 			 mGSH.latin1(),
+			 mUsername.ascii(),
+			 mPassword.ascii(),
 			 rpName,
 			 &rpOut);
   QString results(rpOut);
-#endif // REG_OGSI
+#endif // ndef REG_WSRF
 
   // Generate an event to send to the status bar (have to do it this way
   // because the gui thread must be the one to do the update)

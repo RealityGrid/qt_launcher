@@ -22,7 +22,7 @@ my $parser = new XML::DOM::Parser;
 my $param_xml = SOAP::Lite
                        -> uri("MetaSGS")       #set the namespace
                        -> proxy("$parentGSH")  #location of service
-                       -> findServiceData($content)
+                       -> findServiceData(SOAP::Data->value("$content")->type('string'))
                        -> result;
 if (!$param_xml){
     print "ERROR: Got no parameter definitions from parent\n";
@@ -36,7 +36,7 @@ $content = "<ogsi:queryByServiceDataNames names=\"MSGS:Children\"/>";
 my $ans =  SOAP::Lite
     -> uri("MetaSGS")       #set the namespace
     -> proxy("$parentGSH")  #location of service
-    -> findServiceData($content)
+    -> findServiceData(SOAP::Data->value("$content")->type('string'))
     -> result;
 
 my $doc = $parser->parse($ans);
@@ -65,8 +65,8 @@ foreach my $node (@nodes){
     my $name =  SOAP::Lite
 	-> uri("MetaSGS")      #set the namespace
 	-> proxy("$childGSH")  #location of service
-	-> findServiceData("<ogsi:queryByServiceDataNames ".
-			   "names=\"SGS:Application_name\"/>")
+	-> findServiceData(SOAP::Data->value("<ogsi:queryByServiceDataNames ".
+			   "names=\"SGS:Application_name\"/>")->type('string'))
 	-> result;
 
     if(index($name,"<sd:serviceDataValues></sd:serviceDataValues>") > -1){

@@ -52,8 +52,16 @@
 
 class JobStatusThread: public QThread {
   public:
+    /** Constructor method
+        @param aApp Ptr to main QApplication object
+        @param aMainWindow Ptr to launcher's main window
+        @param aGSH Address of service to poll
+        @param aUsername Username to use when accessing service
+        @param aPasswd   Password to use when accessing service
+        @param scriptsDir Location of the scripts directory */
     JobStatusThread(QApplication *aApp, QObject *aMainWindow,
-                    const QString &aGSH, const QString &scriptsDir);
+                    const QString &aGSH, const QString &aUsername,
+		    const QString &aPasswd, const QString &scriptsDir);
     ~JobStatusThread();
 
   protected:
@@ -71,9 +79,15 @@ class JobStatusThread: public QThread {
     QString       mScriptsDir;
     /** Namespace (SGS or MetaSGS) of service to talk to */
     QString       mNameSpace;
+    /** Password used to access secured SWS (i.e. WSRF only) */
+    QString mPassword;
+    /** Username used to access secured SWS (i.e. WSRF only) */
+    QString mUsername;
+    /** Used to signal when thread should exit */
     bool done;
-    long age;
+    /** Lifespan of thread in microseconds - NOT currently used */
     long lifespan;
+    /** Common soap struct for calls to service via gSoap */
     struct soap mSoap;
 
     void getJobStatus();

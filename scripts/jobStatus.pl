@@ -21,7 +21,7 @@ my $arg  = "<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>";
 my $job_status = SOAP::Lite
                -> uri("$namespace")
                -> proxy("$app_SGS_GSH")
-               -> findServiceData("$arg")
+               -> findServiceData(SOAP::Data->value("$arg")->type('string'))
                -> result;
 
 print "findServiceData returned: >>$job_status<<\n";

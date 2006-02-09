@@ -178,7 +178,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
     paramListTable->removeColumn(i);
   }
 
-#if REG_OGSI
+#ifndef REG_WSRF
 
   // Get param defs from service...
   // ...the output will be a space-delimited list of filenames
@@ -265,7 +265,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
     ++count;
   }
 
-#else // !REG_OGSI
+#else // def REG_WSRF
 
   char                *paramDefs;
   char                *pchar;
@@ -292,6 +292,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
 
   if( Get_resource_property (&mySoap,
                              mParentGSH,
+			     "", "", // ARPDBG - passwd ??
                              "paramDefinitions",
                              &paramDefs) != REG_SUCCESS ){
 
@@ -334,6 +335,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
   /* Now get details of the parent's children */
   if( Get_resource_property (&mySoap,
                              mParentGSH,
+			     "","", // ARPDBG passwd??
                              "childService",
                              &childrenTxt) != REG_SUCCESS ){
 
@@ -372,6 +374,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
 
     if( Get_resource_property (&mySoap,
 			       childEPR[i],
+			       "", "", // ARPDBG - passwd??
 			       "applicationName",
 			       &appName) != REG_SUCCESS ){
 
@@ -470,7 +473,7 @@ void GlobalParamConstructionForm::setParentGSH( const QString &aGSH )
   soap_end(&mySoap);
   soap_done(&mySoap);
 
-#endif // REG_OGSI
+#endif // ndef REG_WSRF
 }
 
 

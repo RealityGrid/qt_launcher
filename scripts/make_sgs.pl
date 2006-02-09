@@ -35,7 +35,10 @@ if(length($chkGSH) < 5){
 	$result = SOAP::Lite
 	    -> uri($uri)              #set the namespace
 	    -> proxy("$target")       #location of service
-	    -> createNewTree($timeToLive, "", "", $tree_meta_data)
+	    -> createNewTree(SOAP::Data->value("$timeToLive")->type('string'), 
+			     SOAP::Data->value("")->type('string'), 
+			     SOAP::Data->value("")->type('string'), 
+			     SOAP::Data->value("$tree_meta_data")->type('string'))
 	    -> result;
 
 	# Strip locator and handle tags from response to leave GSH
@@ -66,7 +69,10 @@ $timeToLive = "<ogsi:terminationTime after=\"".$timeStr."\"/>";
 $result =  SOAP::Lite
                  -> uri($uri)              #set the namespace
                  -> proxy("$target")       #location of service
-                 -> $func($timeToLive, $registry_GSH, $content, $chkGSH)
+                 -> $func(SOAP::Data->value("$timeToLive")->type('string'), 
+			  SOAP::Data->value("$registry_GSH")->type('string'), 
+			  SOAP::Data->value("$content")->type('string'), 
+			  SOAP::Data->value("$chkGSH")->type('string'))
                  -> result;
 
 # Use DOM to parse the XML fragment 
@@ -109,7 +115,7 @@ else{
 $result =  SOAP::Lite
                  -> uri("SGS")              #set the namespace
                  -> proxy("$sgs_GSH")       #location of service
-                 -> setServiceData($content)
+                 -> setServiceData(SOAP::Data->value("$content")->type('string'))
                  -> result;
 
 #print "setServiceData returned: $result\n";

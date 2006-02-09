@@ -107,7 +107,7 @@ sub query_registry
     $list = SOAP::Lite
 	-> uri("ServiceGroupRegistration")
 	-> proxy("$gsh")
-	-> $func("$arg")
+	-> $func(SOAP::Data->value("$arg")->type('string'))
 	-> result;
 
     #print "\nGot entries from Registry: >>$list<<\n\n";

@@ -39,7 +39,9 @@ $timeToLive = "<ogsi:terminationTime after=\"".$timeStr."\"/>";
 $result =  SOAP::Lite
                  -> uri($uri)              #set the namespace
                  -> proxy("$target")       #location of service
-                 -> $func($timeToLive, $registry_GSH, $content)
+                 -> $func(SOAP::Data->value("$timeToLive")->type('string'), 
+			  SOAP::Data->value("$registry_GSH")->type('string'), 
+			  SOAP::Data->value("$content")->type('string'))
                  -> result;
 
 # Use DOM to parse the XML fragment 
@@ -57,11 +59,29 @@ my @fields = split(/\/service/, $source_GSH);
 my @bits =split(/\//, $fields[0]);
 my $namespace = pop @bits;
 
-my $iotypes = SOAP::Lite
+#print "uri = $namespace\n";
+#print "proxy = $source_GSH\n";
+#print "arg = $arg\n";
+
+my $fsd_ans = SOAP::Lite
               -> uri("$namespace")
               -> proxy("$source_GSH")
-              -> findServiceData("$arg")
-              -> result;
+              -> findServiceData(SOAP::Data->value("$arg")->type('string'));
+
+if(!$fsd_ans){
+    print "findServiceData failed to return anything:\n";
+    print "      uri = $namespace\n";
+    print "    proxy = $source_GSH\n";
+    print "      arg = $arg\n";
+    exit;
+}
+if($fsd_ans->fault){
+    print "Call to findServiceData failed:\n";
+    print join ',', $fsd_ans->faultcode, $fsd_ans->faultstring,
+                    $fsd_ans->faultdetail;
+    exit;
+}
+my $iotypes = $fsd_ans->result;
 
 #print "findServiceData returned: >>$iotypes<<\n";
 
@@ -127,7 +147,7 @@ $arg = "<ogsi:setByServiceDataNames>".$dataSources.
 my $ans = SOAP::Lite
           -> uri("SGS")
           -> proxy("$sgs_GSH")
-          -> setServiceData("$arg")
+          -> setServiceData(SOAP::Data->value("$arg")->type('string'))
           -> result;
 
 #print "setServiceData for Data_source_list returned: >>$ans<<\n";
@@ -151,7 +171,7 @@ $arg = "<ogsi:setByServiceDataNames>".$dataSources.
 my $ans = SOAP::Lite
           -> uri("$namespace")
           -> proxy("$source_GSH")
-          -> $func("$arg")
+          -> $func(SOAP::Data->value("$arg")->type('string'))
           -> result;
 
 #--------------------------------------------------
