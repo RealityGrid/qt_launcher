@@ -54,6 +54,7 @@
 #include "qapplication.h"
 #include "qfile.h"
 #include "qmessagebox.h"
+#include "qinputdialog.h"
 
 #include <ReG_Steer_Steerside.h>
 #include <ReG_Steer_Browser.h>
@@ -155,13 +156,13 @@ QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QStrin
 }
 
 
-void Gridifier::getSGSies(const QString &topLevelRegistry, 
+void Gridifier::getSGSies(LauncherConfig *aConfig, 
 			  QTable *aGSHTagTable){
 
   QStringList            result;
   int                    numEntries;
   struct registry_entry *entries;
-  int           i;
+  int                    i;
 
   mGSHTagTable = aGSHTagTable;
   if (mGSHTagTable == NULL)
@@ -173,13 +174,39 @@ void Gridifier::getSGSies(const QString &topLevelRegistry,
   mGSHTagTable->insertRows(0, 1);
   mGSHTagTable->setText(0, 0, "Searching for Running Jobs");
 
-  if(Get_registry_entries(topLevelRegistry.latin1(), 
+  // Get the passphrase for the user's key if registry is using
+  // SSL
+  if( aConfig->topLevelRegistryGSH.startsWith("https") &&
+      aConfig->mKeyPassphrase.isEmpty() ){
+    bool ok;
+
+    aConfig->mKeyPassphrase = QInputDialog::getText("RealityGrid Launcher", 
+						    "Enter passphrase for X.509 key:", 
+						    QLineEdit::Password,
+						    QString::null, &ok, NULL );
+    if ( !ok ) return; // Cancel if user didn't press OK
+  }
+
+#ifdef REG_WSRF
+  if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
+				 aConfig->mKeyPassphrase.ascii(),
+				 aConfig->mPrivateKeyCertFile.ascii(),
+				 aConfig->mCACertsPath.ascii(),
+				 &numEntries,  
+				 &entries) != REG_SUCCESS){
+    cout << "Get_registry_entries failed" << endl;
+    return;
+  }
+#else
+  if(Get_registry_entries(aConfig->topLevelRegistry.latin1(), 
 			  &numEntries,  
 			  &entries) != REG_SUCCESS){
     cout << "Get_registry_entries failed" << endl;
     return;
   }
+#endif
 
+  cout << "ARPDBG, got "<< numEntries << " entries from registry" << endl;
   if(numEntries == 0)return;
 
   // check we've got a reference to the gshTagTable
@@ -194,7 +221,8 @@ void Gridifier::getSGSies(const QString &topLevelRegistry,
   }
 
   for (i=0; i<numEntries; i++){
-    if( strstr(entries[i].gsh, "http://") ){
+    if(!strcmp(entries[i].service_type, "SWS") ||
+       !strcmp(entries[i].service_type, "SGS")){
       mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, 
 			    QString(entries[i].gsh));

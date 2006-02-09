@@ -624,28 +624,28 @@ bool LauncherConfig::createNewConfigFile(){
 
   QString homePath = QDir::homeDirPath();
   cout << "Home directory = " << homePath << endl;
-  QDir testDir = QDir(homePath+"/.reg_launcher");
+  QDir testDir = QDir(homePath+"/RealityGrid/etc");
   if(!testDir.exists()){
-    if(!testDir.mkdir(homePath+"/.reg_launcher")){
+    if(!testDir.mkdir(homePath+"/RealityGrid/etc")){
       QMessageBox::critical( NULL, "Error with configuration file",
-			     "File ~/.reg_launcher/default.conf does not exist\n"
-			     "and I cannot create the ~/.reg_launcher directory.\n\n",
+			     "File ~/RealityGrid/etc/launcher.conf does not exist\n"
+			     "and I cannot create the ~/RealityGrid/etc directory.\n\n",
 			     QMessageBox::Ok, 0, 0 );
       return false;
     }
   }
 
-  QFile configFile(homePath+"/.reg_launcher/default.conf");
+  QFile configFile(homePath+"/RealityGrid/etc/launcher.conf");
   if(!configFile.open(IO_WriteOnly)){
       QMessageBox::critical( NULL, "Error with configuration file",
-			     "File ~/.reg_launcher/default.conf does not exist\n"
+			     "File ~/RealityGrid/etc/launcher.conf does not exist\n"
 			     "and I cannot create it.\n\n",
 			     QMessageBox::Ok, 0, 0 );
       return false;
   }
 
   QMessageBox::warning( NULL, "New configuration file",
-			"The configuration file ~/.reg_launcher/default.conf was missing\n"
+			"The configuration file ~/RealityGrid/etc/launcher.conf was missing\n"
 			"so I will create one for you but you'll need to edit it.\n\n",
 			QMessageBox::Ok, 0, 0 );
 
@@ -656,7 +656,7 @@ bool LauncherConfig::createNewConfigFile(){
   textViewDialog->exec();
   mConfigFileContent = textViewDialog->mTextEdit->text();
 
-  // Now write a 'default' default.conf using the text originally held in 
+  // Now write a 'default' launcher.conf using the text originally held in 
   // mConfigFileContent (obtained from include/ConfigFileContent.h) that the
   // user has just edited.
   QTextStream stream(&configFile);

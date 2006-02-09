@@ -121,7 +121,7 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     // when we're ready.
     cout << "Calling getSGSies with registry: " << 
       mConfig->topLevelRegistryGSH << endl;
-    mGridifier.getSGSies(mConfig->topLevelRegistryGSH, gshTagTable);
+    mGridifier.getSGSies(mConfig, gshTagTable);
 
     // Test to see if we're doing a migration
     // Things are a bit different if we're migrating

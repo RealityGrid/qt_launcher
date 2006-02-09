@@ -40,7 +40,7 @@ void RunningJobsDialog::setConfig(LauncherConfig *aConfig )
   // populate the gsh tag list view - spawn a process
   // to do this, read the results in from a slot here
   // when we're ready.
-  mGridifier.getSGSies(mConfig->topLevelRegistryGSH, runningGSHTagTable);
+  mGridifier.getSGSies(mConfig, runningGSHTagTable);
 }
 
 void RunningJobsDialog::runningGSHSelectedSlot( int row, int col, int button, 

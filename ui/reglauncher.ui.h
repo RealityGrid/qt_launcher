@@ -58,7 +58,7 @@ void RegLauncher::init(){
     QMessageBox::critical(this, "Configuration error",
 			  "Cannot read from the scripts directory\n("
 			  +config.mScriptsDirectory+")\n specified "
-			  "in ~/.reg_launcher/default.conf - launching will "
+			  "in ~/RealityGrid/etc/launcher.conf - launching will "
 			  "NOT work.",  QMessageBox::Ok, 0, 0);
   }
 
@@ -67,7 +67,7 @@ void RegLauncher::init(){
     QMessageBox::critical(this, "Configuration error",
 			  "Cannot read from the scratch directory\n("
 			  +config.mScratchDirectory+")\n specified "
-			  "in ~/.reg_launcher/default.conf - launching will "
+			  "in ~/RealityGrid/etc/launcher.conf - launching will "
 			  "NOT work.",  QMessageBox::Ok, 0, 0);
   }
 
@@ -76,7 +76,7 @@ void RegLauncher::init(){
     QMessageBox::warning( NULL, "Configuration error",
 			  "Steerer binary is not in the location \n("
 			  +config.mSteererBinaryLocation+")\n specified in "
-			  "~/.reg_launcher/default.conf.  Firing-up the\n"
+			  "~/RealityGrid/etc/launcher.conf.  Firing-up the\n"
 			  "steering client from within the Launcher will not "
 			  "be possible\n\n",
 			  QMessageBox::Ok, 0, 0 );
@@ -85,8 +85,8 @@ void RegLauncher::init(){
   gridifier.setScriptsDirectory(config.mScriptsDirectory);
 
   // Read in security configuration
-  config.readSecurityConfig(homeDir + "/RealityGrid/etc/launcher.conf");
-  config2.readSecurityConfig(homeDir + "/RealityGrid/etc/launcher.conf");
+  config.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
+  config2.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
 }
 
 /** Store a pointer to the object representing the type of application

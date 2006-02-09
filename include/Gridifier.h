@@ -95,8 +95,11 @@ public:
   /** Instruct the specified simulation to take a checkpoint and then stop */
   QString checkPointAndStop(const QString &sgsGSH);
   /** Query the specified registry for details of available SGSs.  Details
-      are then inserted in the GSHTagTable */
-  void getSGSies(const QString &topLevelRegistry, QTable *aGSHTagTable);
+      are then inserted in the GSHTagTable. 
+      @param aConfig Pointer to LauncherConfig object holding info on location of registry and certificates etc.
+      @param aGSHTagTable Pointer to table to update with results */
+  void getSGSies(LauncherConfig *aConfig, 
+		 QTable *aGSHTagTable);
   /** Query the specified (parent) service for details of its parameters
       so that 'global' parameters can be constructed for the coupled model */
   void getCoupledParamDefs(const QString &gsh, 
