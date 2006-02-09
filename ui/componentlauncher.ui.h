@@ -46,6 +46,8 @@ void ComponentLauncher::init(){
     mcastAddrLineEdit->setEnabled(false);
 
     mCollectMetaDataOnly = false;
+
+    passwdTextEdit->setEchoMode(QLineEdit::Password);
 }
 
 void ComponentLauncher::componentSelectedSlot()
@@ -105,9 +107,14 @@ void ComponentLauncher::setConfig(LauncherConfig *aConfig )
     mConfig = aConfig;
     
     // populate the containerListBox
-    int numContainers = mConfig->containerList.size();
+    //int numContainers = mConfig->containerList.size();
+    //for (int i=0; i<numContainers; i++){
+    //	    containerListBox->insertItem(mConfig->containerList[i].mContainer);
+    //}
+
+    int numContainers = mConfig->mContainerList.size();
     for (int i=0; i<numContainers; i++){
-	    containerListBox->insertItem(mConfig->containerList[i].mContainer);
+	    containerListBox->insertItem(mConfig->mContainerList[i]);
     }
     
     // populate the viz's simulation gsh entry box with a good default
@@ -179,8 +186,9 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
     // Automatically generate as much of the meta data for the job
     // as possible
     else if (string == title(page(7))){
-    	// Find out who we are - could query our certificate at this stage
-    	sgsUserNameLineEdit->setText(QString(getenv("USER")));
+
+      // Find out who we are - could query our certificate at this stage
+      sgsUserNameLineEdit->setText(QString(getenv("USER")));
 
       // Get the current date and time
       QDateTime dt = QDateTime::currentDateTime(Qt::UTC);
@@ -269,7 +277,7 @@ void ComponentLauncher::accept(){
     mConfig->mTimeToRun = runTimeLineEdit->text().toInt();
 
     // Container port number
-    mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
+    //mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
 
     if(mConfig->mAppToLaunch->mIsViz){
       // Number pipes
@@ -299,6 +307,9 @@ void ComponentLauncher::accept(){
       }
     }
   }
+
+  // Store the password to give this job
+  mConfig->mServicePassword = passwdTextEdit->text();
 
   // Store meta-data about this job
   mConfig->mJobData->mPersonLaunching = sgsUserNameLineEdit->text();
@@ -397,11 +408,11 @@ void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
  */
 void ComponentLauncher::containerListBoxSelectedSlot( QListBoxItem *selectedContainer )
 {
-    if (selectedContainer != NULL){
-	    int containerIndex = containerListBox->index(selectedContainer);
-	    int selectedPortNum = mConfig->containerList[containerIndex].mPort;
-	    containerPortNumLineEdit->setText(QString::number(selectedPortNum));
-    }
+  //    if (selectedContainer != NULL){
+  //	    int containerIndex = containerListBox->index(selectedContainer);
+  //	    int selectedPortNum = mConfig->containerList[containerIndex].mPort;
+  //	    containerPortNumLineEdit->setText(QString::number(selectedPortNum));
+  //    }
 }
 
 

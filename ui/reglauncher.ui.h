@@ -26,8 +26,6 @@
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
-// gSoap
-//#include "checkPointTreeH.h"
 #include "soapH.h"
 
 /** @file reglauncher.ui.h
@@ -51,6 +49,7 @@ void RegLauncher::init(){
   QString homeDir = QString(getenv("HOME"));
   config.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
   config2.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
+
   checkPointTreeListView->setRootIsDecorated(true);
 
   QDir lDir(config.mScriptsDirectory);
@@ -87,6 +86,8 @@ void RegLauncher::init(){
   // Read in security configuration
   config.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
   config2.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
+
+  gridifier.getContainerList(&config);
 }
 
 /** Store a pointer to the object representing the type of application
@@ -714,14 +715,16 @@ void RegLauncher::commonLaunchCode(){
 
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+
-						  config.selectedContainer+":"+
-						  QString::number(config.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory(//"http://"+
+						  config.selectedContainer,
+						  //+":"+
+						  //QString::number(config.containerPortNum)+"/", 
 						  config.topLevelRegistryGSH,
 						  QString("sgs"));
       
-    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
-			      QString::number(config.containerPortNum)+"/"))
+    //    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
+    //			      QString::number(config.containerPortNum)+"/"))
+    if (posFactory.startsWith(config.selectedContainer))
       factory = posFactory;
     else{
       consoleOutSlot("Sorry! - couldn't start a factory");
@@ -732,8 +735,7 @@ void RegLauncher::commonLaunchCode(){
 
   consoleOutSlot(QString("SGS Factory is "+factory).stripWhiteSpace());
 #else
-  QString factory = "http://"+config.selectedContainer+":"+
-    QString::number(config.containerPortNum)+"/";
+  QString factory = config.selectedContainer;
   cout << "Using container: "<< factory << endl;
 #endif // ndef REG_WSRF
 
@@ -743,7 +745,7 @@ void RegLauncher::commonLaunchCode(){
     // No data sources....
 
     // Create an SGS GSH, and create a checkpoint tree if necessary
-    if (config.newTree) {
+    if (config.newTree && !(config.treeTag.isEmpty()) ){
       consoleOutSlot(QString("Making new checkpoint tree with tag "+
 			     config.treeTag));
       sgs = gridifier.makeSteeringService(factory, config);
@@ -763,6 +765,8 @@ void RegLauncher::commonLaunchCode(){
       
     // Copy the value to the config
     config.simulationGSH.mEPR = sgs;
+    config.simulationGSH.mUsername = config.mJobData->mPersonLaunching;
+    config.simulationGSH.mPassword = config.mServicePassword;
 
     consoleOutSlot(QString("SGS is "+
 			   config.simulationGSH.mEPR).stripWhiteSpace());
@@ -881,14 +885,17 @@ void RegLauncher::coupledModelLaunchCode(){
 					      QString("msgs"));
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+
-                                 config.selectedContainer+":"+
-                                 QString::number(config.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory(//"http://"+
+						  config.selectedContainer,
+				 //+":"+
+                                 //QString::number(config.containerPortNum)+"/", 
 			         config.topLevelRegistryGSH,
 			         QString("msgs"));
       
-    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
-			      QString::number(config.containerPortNum)+"/"))
+    if (posFactory.startsWith(//"http://"+
+			      config.selectedContainer
+			      //+":"+QString::number(config.containerPortNum)+"/"
+			      ))
       factory = posFactory;
         
     else{
@@ -903,14 +910,16 @@ void RegLauncher::coupledModelLaunchCode(){
 					      QString("msgs"));
   if (factory2.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory("http://"+
-						config2.selectedContainer+":"+
-						QString::number(config2.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory(//"http://"+
+						config2.selectedContainer,
+						//+":"+
+						//QString::number(config2.containerPortNum)+"/", 
 						config2.topLevelRegistryGSH,
 						QString("msgs"));
       
-    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+
-			      QString::number(config2.containerPortNum)+"/"))
+    //    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+
+    //			      QString::number(config2.containerPortNum)+"/"))
+    if (posFactory.startsWith(config2.selectedContainer))
       factory2 = posFactory;
     else{
       consoleOutSlot("Sorry! - couldn't start a factory");
@@ -921,11 +930,9 @@ void RegLauncher::coupledModelLaunchCode(){
   consoleOutSlot(QString("MetaSGS Factories are "+factory+"\n and "+
 			 factory2).stripWhiteSpace());
 #else // REG_WSRF defined...
-  QString factory = "http://"+config.selectedContainer+":"+
-    QString::number(config.containerPortNum)+"/";
+  QString factory = config.selectedContainer;
   cout << "Using container 1: "<< factory << endl;
-  QString factory2 = "http://"+config2.selectedContainer+":"+
-    QString::number(config.containerPortNum)+"/";
+  QString factory2 = config2.selectedContainer;
   cout << "Using container 2: "<< factory << endl;
 #endif // ndef REG_WSRF
 

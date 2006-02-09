@@ -71,21 +71,6 @@ using namespace std;
 // when I get a moment!                   //
 // ************************************** //
 
-/** Holds information on a Container which we
-    can use to host SGS/SWSs */
-class Container {
-  public:
-    QString mContainer;
-    int mPort;
-
-    Container(){};
-    Container(const QString aContainer, const int aPort){
-      mContainer = aContainer;
-      mPort = aPort;
-    }
-    ~Container(){}
-};
-
 /** Holds information on an application which
     we can launch */
 class Application {
@@ -183,22 +168,28 @@ class LauncherConfig {
   bool     migration;
   /// Whether this is a job restart (from a checkpoint)
   bool     restart;
+  /// Whether or not to create a new checkpoint tree for this job
   bool     newTree;
+  /// What sort of job this Viz. is (only relevant to lb3d vtk app)
   int      vizType;
+  /// Name of the job's top-level input deck
   QString  mInputFileName;
+  /// Pointer to description of machine on which to launch
   Machine *mTargetMachine;
+  /// Meta-data for new checkpoint tree (if any)
   QString  treeTag;
+  /// No. of processes job will use
   int      mNumberProcessors;
+  /// No. of graphics pipes viz. job will use (NOT USED)
   int      mNumberPipes;
+  /// Max. wallclock time of job in minutes
   int      mTimeToRun;
-  /** Pointer to object containing metadata for job being launched */
+  /// Pointer to object containing metadata for job being launched
   JobMetaData *mJobData;
-  /** List of available containers as read from the launcher.config file */
-  QValueList<Container>   containerList;
-  /** Which container we're going to use in the current launch */
+  /// List of available containers as obtained from Containers registry
+  QStringList             mContainerList;
+  /// Full address of container we're going to use in the current launch
   QString                 selectedContainer;
-  /** The port that the selected container is listening on */
-  int                     containerPortNum;
   /** Where globus lives on this machine */
   QString                 globusLocation;
   /** List of applications that we can launch */
@@ -229,6 +220,8 @@ class LauncherConfig {
   QString mPrivateKeyCertFile;
   /** The passphrase for the user's private key */
   QString mKeyPassphrase;
+  /// The password to give the job we are in the process of launching
+  QString mServicePassword;
 
   // Methods
 

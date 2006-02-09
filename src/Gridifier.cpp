@@ -356,7 +356,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
   snprintf(job.inputFilename, REG_MAX_STRING_LENGTH,
 	   config.mInputFileName.ascii());
   job.lifetimeMinutes = config.mTimeToRun;
-  job.passphrase[0] = '\0';
+  snprintf(job.passphrase, REG_MAX_STRING_LENGTH,
+	   config.mServicePassword.ascii());
 
   // Create a new checkpoint tree if requested
   if(config.treeTag.length()){
@@ -1039,4 +1040,75 @@ void Gridifier::cleanUp(SteeringService *service){
 			     (char*)service->mPassword.ascii()); // ReG lib
   }
 #endif
+} 
+
+void Gridifier::getContainerList(LauncherConfig *aConfig){
+#ifdef REG_WSRF
+  bool                   ok;
+  int                    i;
+  int                    numEntries;
+  struct registry_entry *entries;
+
+  // Get the passphrase for the user's key if registry is using
+  // SSL
+  if( aConfig->topLevelRegistryGSH.startsWith("https") &&
+      aConfig->mKeyPassphrase.isEmpty() ){
+
+    aConfig->mKeyPassphrase = QInputDialog::getText("RealityGrid Launcher", 
+						    "Enter passphrase for X.509 key:", 
+						    QLineEdit::Password,
+						    QString::null, &ok, NULL );
+    if ( !ok ) return; // Cancel if user didn't press OK
+  }
+
+  if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
+				 aConfig->mKeyPassphrase.ascii(),
+				 aConfig->mPrivateKeyCertFile.ascii(),
+				 aConfig->mCACertsPath.ascii(),
+				 &numEntries,  
+				 &entries) != REG_SUCCESS){
+    cout << "Get_registry_entries_secure failed" << endl;
+    return;
+  }
+  if(numEntries == 0)return;
+
+  ok = false;
+  for(i=0; i<numEntries; i++){
+    if(!strcmp(entries[i].service_type, "ServiceGroup") &&
+       !strcmp(entries[i].job_description, "Container registry")){
+      ok = true;
+      break;
+    }
+  }
+  if(!ok){
+    cout << "ERROR, registry of containers not found" << endl;
+    return;
+  }
+  QString containerRegistryEPR = QString(entries[i].gsh);
+  free(entries);
+  entries = NULL;
+
+  if(Get_registry_entries_secure(containerRegistryEPR.ascii(), 
+				 aConfig->mKeyPassphrase.ascii(),
+				 aConfig->mPrivateKeyCertFile.ascii(),
+				 aConfig->mCACertsPath.ascii(),
+				 &numEntries,  
+				 &entries) != REG_SUCCESS){
+    cout << "Get_registry_entries_secure for containers failed" << endl;
+    return;
+  }
+  if(numEntries == 0){
+    cout << "No containers found in registry" << endl;
+    return;
+  }
+  aConfig->mContainerList.clear();
+  for(i=0; i<numEntries; i++){
+    if(!strcmp(entries[i].service_type, "Container")){
+      aConfig->mContainerList.append(QString(entries[i].gsh));
+      cout << "Container "<< i << ": " << aConfig->mContainerList.last() << endl;
+    }
+  }
+  free(entries);
+  entries = NULL;
+#endif // def REG_WSRF
 } 

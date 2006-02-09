@@ -1,4 +1,4 @@
-<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
 <class>ComponentLauncher</class>
 <widget class="QWizard">
     <property name="name">
@@ -759,34 +759,100 @@
             <property name="name">
                 <cstring>unnamed</cstring>
             </property>
-            <widget class="QLabel" row="4" column="0">
+            <widget class="QLayoutWidget" row="5" column="0">
                 <property name="name">
-                    <cstring>textLabel1_2_2_4</cstring>
+                    <cstring>layout13</cstring>
                 </property>
-                <property name="minimumSize">
-                    <size>
-                        <width>110</width>
-                        <height>0</height>
-                    </size>
-                </property>
-                <property name="text">
-                    <string>Task Description</string>
-                </property>
-            </widget>
-            <widget class="QTextEdit" row="4" column="1">
-                <property name="name">
-                    <cstring>tagTextEdit</cstring>
-                </property>
-            </widget>
-            <widget class="QLayoutWidget" row="3" column="0" rowspan="1" colspan="2">
-                <property name="name">
-                    <cstring>layout24</cstring>
-                </property>
-                <hbox>
+                <grid>
                     <property name="name">
                         <cstring>unnamed</cstring>
                     </property>
-                    <widget class="QLabel">
+                    <widget class="QLabel" row="0" column="0">
+                        <property name="name">
+                            <cstring>textLabel1_2_2_4</cstring>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>Task Description</string>
+                        </property>
+                    </widget>
+                    <widget class="QTextEdit" row="0" column="1">
+                        <property name="name">
+                            <cstring>tagTextEdit</cstring>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
+            <widget class="QLayoutWidget" row="0" column="0">
+                <property name="name">
+                    <cstring>layout12</cstring>
+                </property>
+                <grid>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLineEdit" row="0" column="1">
+                        <property name="name">
+                            <cstring>passwdTextEdit</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>7</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                    </widget>
+                    <widget class="QLabel" row="0" column="0">
+                        <property name="name">
+                            <cstring>textLabel1</cstring>
+                        </property>
+                        <property name="sizePolicy">
+                            <sizepolicy>
+                                <hsizetype>5</hsizetype>
+                                <vsizetype>0</vsizetype>
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>110</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>32767</width>
+                                <height>21</height>
+                            </size>
+                        </property>
+                        <property name="text">
+                            <string>Password</string>
+                        </property>
+                    </widget>
+                </grid>
+            </widget>
+            <widget class="QLayoutWidget" row="4" column="0">
+                <property name="name">
+                    <cstring>layout23</cstring>
+                </property>
+                <grid>
+                    <property name="name">
+                        <cstring>unnamed</cstring>
+                    </property>
+                    <widget class="QLineEdit" row="0" column="1">
+                        <property name="name">
+                            <cstring>sgsOrganisationLineEdit</cstring>
+                        </property>
+                    </widget>
+                    <widget class="QLabel" row="0" column="0">
                         <property name="name">
                             <cstring>textLabel1_2_2_3</cstring>
                         </property>
@@ -800,14 +866,9 @@
                             <string>Organisation</string>
                         </property>
                     </widget>
-                    <widget class="QLineEdit">
-                        <property name="name">
-                            <cstring>sgsOrganisationLineEdit</cstring>
-                        </property>
-                    </widget>
-                </hbox>
+                </grid>
             </widget>
-            <widget class="QLayoutWidget" row="2" column="0" rowspan="1" colspan="2">
+            <widget class="QLayoutWidget" row="3" column="0">
                 <property name="name">
                     <cstring>layout25</cstring>
                 </property>
@@ -836,7 +897,7 @@
                     </widget>
                 </hbox>
             </widget>
-            <widget class="QLayoutWidget" row="1" column="0" rowspan="1" colspan="2">
+            <widget class="QLayoutWidget" row="2" column="0">
                 <property name="name">
                     <cstring>layout26</cstring>
                 </property>
@@ -865,7 +926,7 @@
                     </widget>
                 </hbox>
             </widget>
-            <widget class="QLayoutWidget" row="0" column="0" rowspan="1" colspan="2">
+            <widget class="QLayoutWidget" row="1" column="0">
                 <property name="name">
                     <cstring>layout27</cstring>
                 </property>

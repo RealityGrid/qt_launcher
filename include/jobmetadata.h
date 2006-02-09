@@ -42,11 +42,12 @@
 
 #include "qstring.h"
 
-/**@file jobmetadata.h
+/**@file jobmetadata.h */
+
+/**
   *Holds the description of the job being launched
   *@author Mark Riding
   */
-
 class JobMetaData {
 public: 
 	JobMetaData();

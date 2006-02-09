@@ -256,13 +256,15 @@ void LauncherConfig::readConfig(QString file){
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"containers"))){
       containers = childOfRoot->xmlChildrenNode;
 
+      cout << "ARPDBG Containers from launcher.conf:" << endl;
       while (containers != NULL){
         
         if (!xmlStrcmp(containers->name, (const xmlChar*)"container")){
           xmlChar *containerName = xmlNodeListGetString(doc, containers->xmlChildrenNode, 1);
           xmlChar *port = xmlGetProp(containers, (const xmlChar*)"port");
-          Container tContainer((const char*)containerName, QString((const char*)port).toInt());
-          containerList += tContainer;
+	  mContainerList += "http://"+QString((char*)containerName)+":"+
+	    QString((char*)port) + "/";
+	  cout << "  ARPDBG Container: " << mContainerList.last() << endl;
           xmlFree(containerName);
           xmlFree(port);
         }
@@ -414,6 +416,7 @@ void LauncherConfig::readConfig(QString file){
 
 /** Method uses libxml2 to create an xml encoding of the current configuration
  *  and save the file to disk
+ *  NOT UP TO DATE AND NOT CURRENTLY USED
  */
 void LauncherConfig::writeConfig(QString file){
   xmlDocPtr doc;
@@ -485,10 +488,10 @@ void LauncherConfig::writeConfig(QString file){
 //  }
 
   containers = xmlNewTextChild(root, NULL, (const xmlChar*)"containers", NULL);
-  for ( QValueList<Container>::Iterator it = containerList.begin(); it != containerList.end(); ++it ) {
-      xmlNodePtr t = xmlNewTextChild(containers, NULL, (const xmlChar*)"container", (const xmlChar*)((*it).mContainer).latin1());
-      sprintf(buff, "%d", (*it).mPort);
-      xmlNewProp(t, (const xmlChar*)"port", (const xmlChar*)buff);
+  for ( QStringList::Iterator it = mContainerList.begin(); it != mContainerList.end(); ++it ) {
+      xmlNodePtr t = xmlNewTextChild(containers, NULL, (const xmlChar*)"container", (const xmlChar*)(*it).latin1());
+      //sprintf(buff, "%d", (*it).mPort);
+      //xmlNewProp(t, (const xmlChar*)"port", (const xmlChar*)buff);
   }
 
   machines = xmlNewTextChild(root, NULL, (const xmlChar*)"targets", NULL);

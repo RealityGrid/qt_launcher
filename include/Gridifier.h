@@ -96,10 +96,15 @@ public:
   QString checkPointAndStop(const QString &sgsGSH);
   /** Query the specified registry for details of available SGSs.  Details
       are then inserted in the GSHTagTable. 
-      @param aConfig Pointer to LauncherConfig object holding info on location of registry and certificates etc.
+      @param aConfig Pointer to LauncherConfig object holding info 
+      on location of registry and certificates etc.
       @param aGSHTagTable Pointer to table to update with results */
   void getSGSies(LauncherConfig *aConfig, 
 		 QTable *aGSHTagTable);
+  /// Queries the top-level registry for the Container registry and then
+  /// populates aConfig->mContainerList with the containers in that
+  /// registry.  WSRF only.
+  void getContainerList(LauncherConfig *aConfig);
   /** Query the specified (parent) service for details of its parameters
       so that 'global' parameters can be constructed for the coupled model */
   void getCoupledParamDefs(const QString &gsh, 
