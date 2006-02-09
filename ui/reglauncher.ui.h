@@ -757,7 +757,7 @@ void RegLauncher::commonLaunchCode(){
     }
       
     // Check that the sgs was created properly, if not die
-    if (sgs.length()==0 || !sgs.startsWith("http://")){
+    if (sgs.length()==0 || !sgs.startsWith("http")){
       consoleOutSlot("Failed to create a steering service - is "
 		     "the factory valid?");
       return;
