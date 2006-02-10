@@ -56,6 +56,8 @@
 #include <qmessagebox.h>
 #include <qtextstream.h>
 #include <qtextedit.h>
+#include "ReG_Steer_types.h"
+#include "ReG_Steer_Utils.h"
 
 using namespace std;
 
@@ -672,50 +674,20 @@ bool LauncherConfig::createNewConfigFile(){
 //---------------------------------------------------------------------------
 void LauncherConfig::readSecurityConfig(QString fileName){
 
-  QDomDocument doc( "steererSecurityConfigDocument" );
-  QFile        configFile(fileName);
+  struct reg_security_info sec;
+  QFile configFile(fileName);
 
-  // Parse file
-  if ( !configFile.open( IO_ReadOnly ) ){
-    cout << "Input file " << configFile.name() << " does not exist :-(" <<endl;
+  if(!configFile.exists() || 
+     (Get_security_config(fileName.ascii(), &sec) != REG_SUCCESS) ){
+    QMessageBox::critical( NULL, "Error with security configuration file",
+			   "File "+fileName+" does not exist\n"
+			   "or cannot be parsed.\n\n",
+			   QMessageBox::Ok, 0, 0 );
     return;
   }
-  if ( !doc.setContent( &configFile ) ) {
-    configFile.close();
-    return;
-  }
-  configFile.close();
 
-  // Root element
-  QDomElement docElem = doc.documentElement();
-  if(docElem.tagName().contains("Security_config")){
-
-    mCACertsPath = getElementAttrValue(docElem, "caCertsPath");
-    cout << "Path to dir holding CA certs. is " << mCACertsPath << endl;
-
-    mPrivateKeyCertFile = getElementAttrValue(docElem, "privateKeyCertFile");
-    cout << "Path to file holding user's key and cert. is " <<
-      mPrivateKeyCertFile << endl;
-  }
-  else{
-    cout << "Failed to find Security section in config. file" << endl;
-  }
-}
-
-//----------------------------------------------------------------------
-QString LauncherConfig::getElementAttrValue(QDomElement elem, QString name)
-{
-  QDomNode     tmpNode;
-  QDomNodeList nodeList = elem.elementsByTagName(name);
-
-  if(nodeList.count() != 1){
-    cout << "Failed to find " << name << " in config. file" << endl;
-  }
-  else{
-    tmpNode = nodeList.item(0).attributes().namedItem("value");
-    if(!tmpNode.isNull()){
-      return tmpNode.nodeValue();
-    }
-  }
-  return "";
+  this->mUserDN = QString(sec.userDN);
+  this->mCACertsPath = QString(sec.caCertsPath);
+  this->mPrivateKeyCertFile = QString(sec.myKeyCertFile);
+  return;
 }
