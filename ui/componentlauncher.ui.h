@@ -187,8 +187,14 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
     // as possible
     else if (string == title(page(7))){
 
-      // Find out who we are - could query our certificate at this stage
-      sgsUserNameLineEdit->setText(QString(getenv("USER")));
+      // Find out who we are - use UNIX environment if no Distinguished
+      // Name (read from user's certificate) is available
+      if(mConfig->mUserDN.isEmpty()){
+	sgsUserNameLineEdit->setText(QString(getenv("USER")));
+      }
+      else{
+	sgsUserNameLineEdit->setText(mConfig->mUserDN);
+      }
 
       // Get the current date and time
       QDateTime dt = QDateTime::currentDateTime(Qt::UTC);
