@@ -342,8 +342,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
 
 #else // REG_WSRF is defined
 
-  struct job_details job;
-  char              *chkTree;
+  struct reg_job_details job;
+  char                  *chkTree;
 
   // Initialize job_details struct
   snprintf(job.userName, REG_MAX_STRING_LENGTH,
@@ -375,6 +375,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
   }
   snprintf(job.checkpointAddress, REG_MAX_STRING_LENGTH, chkTree);
 
+  cout << "ARPDBG: container: " << factory << endl;
+  cout << "ARPDBG: registry:  " << config.topLevelRegistryGSH << endl;
   char *EPR = Create_steering_service(&job,
 				      factory.ascii(), 
 				      config.topLevelRegistryGSH.ascii(),
@@ -388,10 +390,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
   }
   else{
     printf("FAILED to create SWS :-(\n");
-    return result;
   }
 
-  // Now register the SWS - ARPDBG
 #endif // ndef REG_WSRF
 
   return result;
@@ -503,7 +503,7 @@ QString Gridifier::makeVizSGS(const QString &factory,
   xmlNodePtr                                 cur;
   struct io_struct                          *ioPtr;
   int                                        i, count;
-  struct job_details                         job;
+  struct reg_job_details                     job;
 
   /* Obtain the IOTypes from the data source */
   soap_init(&mySoap);
@@ -746,12 +746,14 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
   
   if(config.mAppToLaunch->mNumInputs > 0){
     fileText += "REG_SGS_ADDRESS="+config.visualizationGSH.mEPR+"\n";
+    fileText += "REG_PASSPHRASE="+config.visualizationGSH.mPassword+"\n";
   }
   else{
     fileText += "REG_SGS_ADDRESS="+config.simulationGSH.mEPR+"\n";
+    fileText += "REG_PASSPHRASE="+config.simulationGSH.mPassword+"\n";
   }
- 
-  fileText += "export HOST_JOB_MGR CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_TYPE VIZ_PROCESSORS SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH\n\n";
+
+  fileText += "export HOST_JOB_MGR CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_TYPE VIZ_PROCESSORS SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH REG_PASSPHRASE\n\n";
 
   if (config.multicast){
     fileText += "MULTICAST_ADDRESS="+config.multicastAddress+"\n\n";
