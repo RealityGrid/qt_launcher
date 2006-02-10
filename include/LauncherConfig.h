@@ -218,6 +218,8 @@ class LauncherConfig {
   QString mCACertsPath;
   /** Location of the PEM file holding user's private key and certificate */
   QString mPrivateKeyCertFile;
+  /** The user's Distinguished Name as obtained from their certificate */
+  QString mUserDN;
   /** The passphrase for the user's private key */
   QString mKeyPassphrase;
   /// The password to give the job we are in the process of launching
