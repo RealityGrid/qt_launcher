@@ -5,6 +5,7 @@ CONFIG	+= qt warn_on release thread opengl x11
 
 LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer_Utils -lReG_Steer 
 LIBS    += -lcrypto -lssl
+DEFINES += WITH_OPENSSL
 
 INCLUDEPATH	+= include /usr/include/libxml2 ${REG_STEER_HOME}/include
 
