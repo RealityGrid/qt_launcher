@@ -45,11 +45,18 @@
 #include "StatusMessageData.h"
 #define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "soapH.h"
+#include "LauncherConfig.h"
 
 /** @file JobStatusThread.h
     @brief Class for monitoring inital status of job.
   */
 
+class SteeringService;
+
+/// Class for monitoring inital status of job immediately after its
+/// creation by the launcher
+/// @author Mark Riding
+/// @author Andrew Porter
 class JobStatusThread: public QThread {
   public:
     /** Constructor method
@@ -62,6 +69,9 @@ class JobStatusThread: public QThread {
     JobStatusThread(QApplication *aApp, QObject *aMainWindow,
                     const QString &aGSH, const QString &aUsername,
 		    const QString &aPasswd, const QString &scriptsDir);
+    JobStatusThread(QApplication *aApp, QObject *aMainWindow,
+		    const SteeringService *aService,
+		    const QString &scriptsDir);
     ~JobStatusThread();
 
   protected:
@@ -83,6 +93,8 @@ class JobStatusThread: public QThread {
     QString mPassword;
     /** Username used to access secured SWS (i.e. WSRF only) */
     QString mUsername;
+    /// The service we are to poll for status
+    SteeringService mService;
     /** Used to signal when thread should exit */
     bool done;
     /** Lifespan of thread in microseconds - NOT currently used */

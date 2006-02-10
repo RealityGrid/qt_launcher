@@ -51,20 +51,23 @@
 
 using namespace std;
 
+//JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
+//				 const QString &aGSH, const QString &aUsername,
+//				 const QString &aPasswd, const QString &scriptsDir)
 JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
-				 const QString &aGSH, const QString &aUsername,
-				 const QString &aPasswd, const QString &scriptsDir)
-: done(false)
+				 const SteeringService *aService, 
+				 const QString &scriptsDir)
+   : done(false)
 {
   mMainWin = aMainWindow;
-  mGSH = aGSH;
   mApp = aApp;
-  mPassword = aPasswd;
-  mUsername = aUsername;
   mScriptsDir = scriptsDir;
-  
-  int index = mGSH.find("/service", 0, true);
-  mNameSpace = mGSH.left(index);
+  mService.mEPR = aService->mEPR;
+  mService.mUsername = aService->mUsername;
+  mService.mPassword = aService->mPassword;
+
+  int index = mService.mEPR.find("/service", 0, true);
+  mNameSpace = mService.mEPR.left(index);
   index = mNameSpace.findRev("/", index, true);
   mNameSpace = mNameSpace.right(mNameSpace.length() - index - 1);
 
@@ -93,8 +96,8 @@ void JobStatusThread::getJobStatus(){
 #ifndef REG_WSRF
   struct sgs__findServiceDataResponse out;
   QString arg("<ogsi:queryByServiceDataNames names=\"SGS:Application_status\"/>");
-  if(soap_call_sgs__findServiceData(&mSoap, mGSH.latin1(), "", 
-				    (xsd__string)(arg.latin1()),
+  if(soap_call_sgs__findServiceData(&mSoap, mService.mEPR.ascii(), "", 
+				    (xsd__string)(arg.ascii()),
 				    &out)){
     soap_print_fault(&mSoap, stderr);
     done = true;
@@ -104,12 +107,14 @@ void JobStatusThread::getJobStatus(){
 #else
   char *rpOut;
   char *rpName = "applicationStatus";
+  cout << "ARPDBG, calling Get_resource_property..." << endl;
   Get_resource_property (&mSoap,
-			 mGSH.latin1(),
-			 mUsername.ascii(),
-			 mPassword.ascii(),
+			 mService.mEPR.ascii(),
+			 mService.mUsername.ascii(),
+			 mService.mPassword.ascii(),
 			 rpName,
 			 &rpOut);
+  cout << "ARPDBG, ...done calling Get_resource_property" << endl;
   QString results(rpOut);
 #endif // ndef REG_WSRF
 
