@@ -817,11 +817,10 @@ void RegLauncher::commonLaunchCode(){
       }
     }
     
-    JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.simulationGSH.mEPR,
-							    config.simulationGSH.mUsername,
-							    config.simulationGSH.mPassword,
-							    config.mScriptsDirectory);
+    JobStatusThread *aJobStatusThread = 
+                      new JobStatusThread(mApplication, this,
+					  &(config.simulationGSH),
+					  config.mScriptsDirectory);
     aJobStatusThread->start();
   }
   else{
@@ -860,9 +859,7 @@ void RegLauncher::commonLaunchCode(){
     }
 
     JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-                                                            config.visualizationGSH.mEPR,
-							    config.visualizationGSH.mUsername,
-							    config.visualizationGSH.mPassword,
+                                                            &(config.visualizationGSH),
 							    config.mScriptsDirectory);
     aJobStatusThread->start();
   }
@@ -1093,13 +1090,13 @@ void RegLauncher::coupledModelLaunchCode(){
 
 #ifdef REG_WSRF
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-							  parentSWS_EPR,
-							  "", "",
+							  &SteeringService(parentSWS_EPR,
+							  "", ""),
 							  config.mScriptsDirectory);
 #else
   JobStatusThread *aJobStatusThread = new JobStatusThread(mApplication, this,
-							  parentMetaSGS_GSH,
-							  "","",
+							  &SteeringService(parentMetaSGS_GSH,
+							  "",""),
 							  config.mScriptsDirectory);
 #endif // defined REG_WSRF
 
