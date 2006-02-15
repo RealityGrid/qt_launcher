@@ -40,6 +40,11 @@
 # Instead source the GUI generated configuration file
 . $1
 
+# ARPDBG - for teseting at home
+SIM_USER=zzcguap
+export SIM_USER
+#...ARPDBGEND
+
 # Firstly: Get the time to run
 
 TIME_TO_RUN=$2
@@ -65,13 +70,13 @@ export REG_STEER_HOME
 # and also get the path to this file so that we can reconstruct
 # the full paths to each of the necessary files.
 
-IN_FILE=`awk 'BEGIN{FS="="};/^in_file/ {print $2}' $SIM_INFILE`
-IO_FILE=`awk 'BEGIN{FS="="};/^io_file/ {print $2}' $SIM_INFILE`
-MOVIE_FILE=`awk 'BEGIN{FS="="};/^imovie_file/ {print $2}' $SIM_INFILE`
-POT_FILE=`awk 'BEGIN{FS="="};/^ipot_file/ {print $2}' $SIM_INFILE`
-CONS_FILE=`awk 'BEGIN{FS="="};/^icons_file/ {print $2}' $SIM_INFILE`
-CART_FILE=`awk 'BEGIN{FS="="};/^incart_file/ {print $2}' $SIM_INFILE`
-CHK_FILE=`awk 'BEGIN{FS="="};/^icheck_file/ {print $2}' $SIM_INFILE`
+IN_FILE=`awk 'BEGIN{FS="\""};/^in_file/ {print $2}' $SIM_INFILE`
+IO_FILE=`awk 'BEGIN{FS="\""};/^io_file/ {print $2}' $SIM_INFILE`
+MOVIE_FILE=`awk 'BEGIN{FS="\""};/^imovie_file/ {print $2}' $SIM_INFILE`
+POT_FILE=`awk 'BEGIN{FS="\""};/^ipot_file/ {print $2}' $SIM_INFILE`
+CONS_FILE=`awk 'BEGIN{FS="\""};/^icons_file/ {print $2}' $SIM_INFILE`
+CART_FILE=`awk 'BEGIN{FS="\""};/^incart_file/ {print $2}' $SIM_INFILE`
+CHK_FILE=`awk 'BEGIN{FS="\""};/^icheck_file/ {print $2}' $SIM_INFILE`
 
 TMP_PATH=`echo $SIM_INFILE |  awk -F/ '{for(i=1;i<NF;i++){printf("%s/",$i)}}'`
 
@@ -134,7 +139,7 @@ echo "echo \"Working directory is \$REG_WORKING_DIR\"" >> $REG_TMP_FILE
 echo "echo \"Steering directory is \$REG_STEER_DIRECTORY\"" >> $REG_TMP_FILE
 echo "if [ ! -d \$REG_WORKING_DIR ]" >> $REG_TMP_FILE
 echo "then" >> $REG_TMP_FILE
-echo "  mkdir \$REG_WORKING_DIR" >> $REG_TMP_FILE
+echo "  mkdir \$REG_WORKING_DIR" $ReG_LAUNCH>> $REG_TMP_FILE
 echo "fi" >> $REG_TMP_FILE
 echo "cd \$REG_WORKING_DIR" >> $REG_TMP_FILE
 
@@ -229,6 +234,9 @@ case $SIM_HOSTNAME in
       *)
           case $ReG_LAUNCH in
              ssh)
+echo "SIM_INFILE is: " $SIM_INFILE
+echo "SIM_USER is: " $SIM_USER
+echo "SIM_HOSTNAME is: " $SIM_HOSTNAME
                scp $SIM_INFILE $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/.reg.input-file.$$
                scp ${TMP_PATH}${IN_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${IN_FILE}.$$
                scp ${TMP_PATH}${IO_FILE} $SIM_USER@$SIM_HOSTNAME:RealityGrid/scratch/${IO_FILE}.$$
