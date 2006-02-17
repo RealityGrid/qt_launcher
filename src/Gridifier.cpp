@@ -565,15 +565,15 @@ QString Gridifier::makeVizSGS(const QString &factory,
   printf("\n");
   */
   // ARPDBG - temporary hardwire to select first output IOType
-  i = 0;
+  //i = 0;
 
   count = 0; ioPtr = msg->io_def->first_io;
   while(ioPtr){
     if( !xmlStrcmp(ioPtr->direction, (const xmlChar *)"OUT") ){
-      if(count == i){
+      //if(count == i){ ARPDBG - temporary hardwire to select first output IOType
 	strncpy(iodef_label, (char *)(ioPtr->label), 256);
 	break;
-      }
+	//}ARPDBG
       count++;
     }
     ioPtr = ioPtr->next;
