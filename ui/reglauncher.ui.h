@@ -957,7 +957,7 @@ void RegLauncher::coupledModelLaunchCode(){
   // Check that the sws was created properly, if not die
   if (parentSWS_EPR.length()==0 || 
       !parentSWS_EPR.startsWith("http://")){
-    consoleOutSlot("Failed to create parent SWS - is the factory ("+
+    consoleOutSlot("Failed to create parent SWS - is the container ("+
 		   factory+") valid?");
     return;
   }
