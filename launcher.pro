@@ -3,11 +3,45 @@ LANGUAGE	= C++
 
 CONFIG	+= qt warn_on release thread opengl x11
 
-LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer_Utils -lReG_Steer 
-LIBS    += -lcrypto -lssl
-DEFINES += WITH_OPENSSL
+# Check that ReG steering env. is setup
+STEER_HOME = $$(REG_STEER_HOME)
+isEmpty( STEER_HOME ){
+  error("REG_STEER_HOME environment variable not set")
+}
 
-INCLUDEPATH	+= include /usr/include/libxml2 ${REG_STEER_HOME}/include
+LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer 
+# We check for existance of ReG_Steer_Utils library as indication
+# of whether we have version 1.2 or version 2.0+ of steering
+# library
+exists( $$(REG_STEER_HOME)/lib32/libReG_Steer_Utils* ){
+  message("ReG_Steer_Utils library found")
+  DEFINES     += WITH_OPENSSL
+  LIBS        += -lReG_Steer_Utils -lssl -lcrypto
+}
+
+INCLUDEPATH += include /usr/include/libxml2 ${REG_STEER_HOME}/include
+
+# The $$() notation ensures that the environment variable
+# is expanded and used in the qmake expression
+!exists( $$(HOME)/RealityGrid/etc/launcher.conf ){
+  message("launcher.conf isn't already installed")
+  CONF_FILES = conf/launcher.conf
+}
+!exists( $$(HOME)/RealityGrid/etc/security.conf ){
+  message("security.conf isn't already installed")
+  isEmpty(CONF_FILES){
+    CONF_FILES = conf/security.conf
+  }
+  else{
+    CONF_FILES += conf/security.conf
+  }
+}
+!isEmpty( CONF_FILES ){
+  message("Creating install target for config file(s)")
+  config_files.path = ${HOME}/RealityGrid/etc
+  config_files.files = $$join(CONF_FILES, " ", " ")
+  INSTALLS += config_files
+}
 
 HEADERS	+= include/LauncherConfig.h \
 	include/Gridifier.h \
