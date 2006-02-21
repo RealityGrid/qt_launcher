@@ -40,9 +40,9 @@
 # Instead source the GUI generated configuration file
 . $1
 
-# ARPDBG - for teseting at home
-SIM_USER=zzcguap
-export SIM_USER
+# ARPDBG - for testing at home
+#SIM_USER=zzcguap
+#export SIM_USER
 #...ARPDBGEND
 
 # Firstly: Get the time to run
@@ -183,18 +183,15 @@ else
   echo "  exit" >> $REG_TMP_FILE
   echo "fi" >> $REG_TMP_FILE
 
-  echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ." >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/.reg.input-file.$$ ./files.rc" >> $REG_TMP_FILE
 
-  if [ "$CHECKPOINT_GSH" == "" ]
-  then 
-    echo "mv -f \$HOME/RealityGrid/scratch/${IN_FILE}.$$ ./${COORD_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${IO_FILE}.$$ ./${STRUCT_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${MOVIE_FILE}.$$ ./${PARAM_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${POT_FILE}.$$ ./${VECT_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${CONS_FILE}.$$ ./${VEL_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${CART_FILE}.$$ ./${FEP_FILE}" >> $REG_TMP_FILE
-    echo "mv -f \$HOME/RealityGrid/scratch/${CHK_FILE}.$$ ./${FEP_FILE}" >> $REG_TMP_FILE
-  fi
+  echo "mv -f \$HOME/RealityGrid/scratch/${IN_FILE}.$$ ./${IN_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${IO_FILE}.$$ ./${IO_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${MOVIE_FILE}.$$ ./${MOVIE_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${POT_FILE}.$$ ./${POT_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${CONS_FILE}.$$ ./${CONS_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${CART_FILE}.$$ ./${CART_FILE}" >> $REG_TMP_FILE
+  echo "mv -f \$HOME/RealityGrid/scratch/${CHK_FILE}.$$ ./${CHK_FILE}" >> $REG_TMP_FILE
 fi
 
 echo "chmod a+w .reg.input-file.$$" >> $REG_TMP_FILE
@@ -210,8 +207,10 @@ echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
 echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
 echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
+echo "REG_PASSPHRASE=$REG_PASSPHRASE" >> $REG_TMP_FILE
+echo "export REG_PASSPHRASE" >> $REG_TMP_FILE
 echo "echo \"Starting job...\"" >> $REG_TMP_FILE
-echo "\$HOME/RealityGrid/bin/start_penn_md \$GS_INFILE" >> $REG_TMP_FILE
+echo "\$HOME/RealityGrid/bin/runctp" >> $REG_TMP_FILE
 
 if [ $CHECKPOINT_GSH ]
 then
