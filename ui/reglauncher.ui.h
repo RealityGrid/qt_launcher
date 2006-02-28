@@ -828,7 +828,7 @@ void RegLauncher::commonLaunchCode(){
     sgs = gridifier.makeVizSGS(factory, config);
     cout << "Common launch code, sgs = >>" << sgs << "<<" << endl;
     // Check that the sgs was created properly, if not die
-    if (sgs.length()==0 || !sgs.startsWith("http://")){
+    if (sgs.length()==0 || !sgs.startsWith("http")){
       consoleOutSlot("Failed to create a visualization SGS - is the "
 		     "simulation SGS valid and running?");
       consoleOutSlot("Output was:");
@@ -956,7 +956,7 @@ void RegLauncher::coupledModelLaunchCode(){
   parentSWS_EPR = gridifier.makeSteeringService(factory, tmpConfig);
   // Check that the sws was created properly, if not die
   if (parentSWS_EPR.length()==0 || 
-      !parentSWS_EPR.startsWith("http://")){
+      !parentSWS_EPR.startsWith("http")){
     consoleOutSlot("Failed to create parent SWS - is the container ("+
 		   factory+") valid?");
     return;
@@ -968,7 +968,7 @@ void RegLauncher::coupledModelLaunchCode(){
   parentMetaSGS_GSH = gridifier.makeMetaSGS(factory, tmpConfig, "");
   // Check that the sgs was created properly, if not die
   if (parentMetaSGS_GSH.length()==0 || 
-      !parentMetaSGS_GSH.startsWith("http://")){
+      !parentMetaSGS_GSH.startsWith("http")){
     consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
 		   factory+") valid?");
     return;
@@ -981,7 +981,7 @@ void RegLauncher::coupledModelLaunchCode(){
 						parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
   if (firstChildMetaSGS_GSH.length()==0 || 
-      !firstChildMetaSGS_GSH.startsWith("http://")){
+      !firstChildMetaSGS_GSH.startsWith("http")){
     consoleOutSlot("Failed to create parent MetaSGS - is the factory ("+
 		   factory+") valid?");
     gridifier.cleanUp(&SteeringService(parentMetaSGS_GSH,
@@ -998,7 +998,7 @@ void RegLauncher::coupledModelLaunchCode(){
 						    parentSWS_EPR);
   // Check that the sws was created properly, if not die
   if (firstChildSWS_EPR.length()==0 || 
-      !firstChildSWS_EPR.startsWith("http://")){
+      !firstChildSWS_EPR.startsWith("http")){
     consoleOutSlot("Failed to create first child SWS - is the factory ("+
 		   factory+") valid?");
     gridifier.cleanUp(&SteeringService(parentSWS_EPR,
@@ -1017,7 +1017,7 @@ void RegLauncher::coupledModelLaunchCode(){
 						 parentMetaSGS_GSH);
   // Check that the sgs was created properly, if not die
   if (secondChildMetaSGS_GSH.length()==0 || 
-      !secondChildMetaSGS_GSH.startsWith("http://")){
+      !secondChildMetaSGS_GSH.startsWith("http")){
     consoleOutSlot("Failed to create 2nd child MetaSGS - is the factory ("+
 		   factory2+") valid?");
     gridifier.cleanUp(&config);
@@ -1034,7 +1034,7 @@ void RegLauncher::coupledModelLaunchCode(){
 						     parentSWS_EPR);
   // Check that the sws was created properly, if not die
   if (secondChildSWS_EPR.length()==0 || 
-      !secondChildSWS_EPR.startsWith("http://")){
+      !secondChildSWS_EPR.startsWith("http")){
     consoleOutSlot("Failed to create second child SWS - is the factory ("+
 		   factory2+") valid?");
     gridifier.cleanUp(&config);
