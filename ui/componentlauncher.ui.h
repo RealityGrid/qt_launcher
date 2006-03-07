@@ -189,12 +189,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 
       // Find out who we are - use UNIX environment if no Distinguished
       // Name (read from user's certificate) is available
-      if(mConfig->mUserDN.isEmpty()){
-	sgsUserNameLineEdit->setText(QString(getenv("USER")));
-      }
-      else{
-	sgsUserNameLineEdit->setText(mConfig->mUserDN);
-      }
+      sgsUserNameLineEdit->setText(QString(mConfig->registrySecurity.userDN));
 
       // Get the current date and time
       QDateTime dt = QDateTime::currentDateTime(Qt::UTC);
@@ -245,13 +240,7 @@ void ComponentLauncher::pageSelectedSlot(const QString &string)
 void ComponentLauncher::accept(){
 
   if(!mCollectMetaDataOnly){
-    // Store ptr to chosen application
-  /*
-    if(!mConfig->restart && !mConfig->migration){
-      // If this is a restart or migration then the app to launch is already set
-      mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
-    }
-  */
+
     if(!mConfig->mAppToLaunch){
       // If this is a restart or migration then the app to launch is already set
       mConfig->mAppToLaunch = &(mConfig->applicationList[componentComboBox->currentItem()]);
@@ -281,9 +270,6 @@ void ComponentLauncher::accept(){
 
     // Time to run
     mConfig->mTimeToRun = runTimeLineEdit->text().toInt();
-
-    // Container port number
-    //mConfig->containerPortNum = containerPortNumLineEdit->text().toInt();
 
     if(mConfig->mAppToLaunch->mIsViz){
       // Number pipes
@@ -414,11 +400,7 @@ void ComponentLauncher::vizTargetSelectedSlot( QListBoxItem *selectedMachine )
  */
 void ComponentLauncher::containerListBoxSelectedSlot( QListBoxItem *selectedContainer )
 {
-  //    if (selectedContainer != NULL){
-  //	    int containerIndex = containerListBox->index(selectedContainer);
-  //	    int selectedPortNum = mConfig->containerList[containerIndex].mPort;
-  //	    containerPortNumLineEdit->setText(QString::number(selectedPortNum));
-  //    }
+
 }
 
 
@@ -455,7 +437,8 @@ void ComponentLauncher::next()
       else if( !(QFile::exists(simInputLineEdit->text())) ){
 
         QMessageBox::warning(this, "Missing input file",
-                             "The specified input file ("+simInputLineEdit->text()+") cannot be found\n",
+                             "The specified input file ("+
+			     simInputLineEdit->text()+") cannot be found\n",
                              QMessageBox::Ok,
                              QMessageBox::NoButton,
                              QMessageBox::NoButton );
@@ -469,7 +452,10 @@ void ComponentLauncher::next()
 
 void ComponentLauncher::simInputPushButton2_clicked()
 {
-    QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+"/realityGrid/reg_qt_launcher", "Input file (*)", this, "open file dialog" "Choose a file" );
+    QString s = QFileDialog::getOpenFileName(QDir::homeDirPath()+
+					     "/realityGrid/reg_qt_launcher", 
+					     "Input file (*)", this, 
+					     "open file dialog" "Choose a file" );
     simInputLineEdit2->setText(s);
 }
 
@@ -477,8 +463,6 @@ void ComponentLauncher::simInputPushButton2_clicked()
 void ComponentLauncher::coupledModelCheckBox_toggled(bool isOn)
 {
     mConfig->mIsCoupledModel = isOn;
-
-    //setAppropriate(page(1), isOn); // 2nd component for coupled model
 }
 
 void ComponentLauncher::newCheckPtTreeCheckBox_toggled(bool isOn)

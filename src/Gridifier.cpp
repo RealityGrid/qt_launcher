@@ -93,11 +93,14 @@ void Gridifier::setScriptsDirectory(const QString &dir){
  *  run the reg_perl_launcher scripts. Ultimately replace with
  *  code that uses an API to perform the same function programatically.
  */
-QString Gridifier::getSGSFactories(const QString &topLevelRegistry, const QString &desiredContainer,
+QString Gridifier::getSGSFactories(const QString &topLevelRegistry, 
+				   const QString &desiredContainer,
 				   const QString &className){
   QString result;
 
-  QProcess *getSGSFactoriesProcess = new QProcess(QString("./get_" + className + "_factories.pl"));
+  QProcess *getSGSFactoriesProcess = new QProcess(QString("./get_" + 
+							  className + 
+							  "_factories.pl"));
   getSGSFactoriesProcess->setWorkingDirectory(mScriptsDir);
   getSGSFactoriesProcess->addArgument(topLevelRegistry);
 
@@ -176,22 +179,30 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
 
   // Get the passphrase for the user's key if registry is using
   // SSL
-  if( aConfig->topLevelRegistryGSH.startsWith("https") &&
-      aConfig->mKeyPassphrase.isEmpty() ){
-    bool ok;
+  if( !(aConfig->registrySecurity.passphrase[0]) ){
+    bool    ok;
+    QString passphrase;
+    if(aConfig->registrySecurity.use_ssl){
 
-    aConfig->mKeyPassphrase = QInputDialog::getText("RealityGrid Launcher", 
-						    "Enter passphrase for X.509 key:", 
-						    QLineEdit::Password,
-						    QString::null, &ok, NULL );
-    if ( !ok ) return; // Cancel if user didn't press OK
+      passphrase = QInputDialog::getText("RealityGrid Launcher", 
+					 "Enter passphrase for X.509 key:", 
+					 QLineEdit::Password,
+					 QString::null, &ok, NULL );
+      if ( !ok ) return; // Cancel if user didn't press OK
+    }
+    else{
+      passphrase = QInputDialog::getText("RealityGrid Launcher", 
+					 "Enter passphrase for registry:", 
+					 QLineEdit::Password,
+					 QString::null, &ok, NULL );
+      if ( !ok ) return; // Cancel if user didn't press OK
+    }
+    strncpy(aConfig->registrySecurity.passphrase,
+	    passphrase.ascii(), REG_MAX_STRING_LENGTH);
   }
-
 #ifdef REG_WSRF
   if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
-				 aConfig->mKeyPassphrase.ascii(),
-				 aConfig->mPrivateKeyCertFile.ascii(),
-				 aConfig->mCACertsPath.ascii(),
+				 &(aConfig->registrySecurity),
 				 &numEntries,  
 				 &entries) != REG_SUCCESS){
     cout << "Get_registry_entries failed" << endl;
@@ -243,7 +254,7 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
 
 //---------------------------------------------------------------
 void Gridifier::getCoupledParamDefs(const QString &gsh, 
-				    QString *aList){
+				          QString *aList){
   QStringList result;
 
   mFileListPtr = aList;
@@ -342,8 +353,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
 
 #else // REG_WSRF is defined
 
-  struct reg_job_details job;
-  char                  *chkTree;
+  struct reg_job_details   job;
+  char                    *chkTree;
 
   // Initialize job_details struct
   snprintf(job.userName, REG_MAX_STRING_LENGTH,
@@ -380,10 +391,7 @@ QString Gridifier::makeSteeringService(const QString &factory,
   char *EPR = Create_steering_service(&job,
 				      factory.ascii(), 
 				      config.topLevelRegistryGSH.ascii(),
-				      config.mKeyPassphrase.ascii(), 
-				      config.mPrivateKeyCertFile.ascii(),
-				      config.mCACertsPath.ascii());
-
+                                      &(config.registrySecurity));
   result = QString(EPR);
   if(EPR){
     printf("Address of SWS = %s\n", EPR);
@@ -496,7 +504,6 @@ QString Gridifier::makeVizSGS(const QString &factory,
   char                                      *ioTypes;
   struct soap                                mySoap;
   char                                      *EPR;
-  struct wsrp__SetResourcePropertiesResponse response;
   struct msg_struct                         *msg;
   xmlDocPtr                                  doc;
   xmlNsPtr                                   ns;
@@ -509,8 +516,8 @@ QString Gridifier::makeVizSGS(const QString &factory,
   soap_init(&mySoap);
   if( Get_resource_property (&mySoap,
 			     config.simulationGSH.mEPR.ascii(),
-			     config.simulationGSH.mUsername.ascii(),
-			     config.simulationGSH.mPassword.ascii(),
+			     config.simulationGSH.mSecurity.userDN,
+			     config.simulationGSH.mSecurity.passphrase,
 			     "ioTypeDefinitions",
 			     &ioTypes) != REG_SUCCESS ){
 
@@ -593,7 +600,7 @@ QString Gridifier::makeVizSGS(const QString &factory,
 	   config.mInputFileName.ascii());
   job.lifetimeMinutes = config.mTimeToRun;
   snprintf(job.passphrase, REG_MAX_STRING_LENGTH, 
-	   config.simulationGSH.mPassword.ascii());
+	   config.simulationGSH.mSecurity.passphrase);
   snprintf(job.checkpointAddress, REG_MAX_STRING_LENGTH, 
 	   config.currentCheckpointGSH.ascii());
 
@@ -601,9 +608,7 @@ QString Gridifier::makeVizSGS(const QString &factory,
   if( !(EPR = Create_steering_service(&job,
 				      factory.ascii(),
 				      config.topLevelRegistryGSH.ascii(),
-                                      config.mKeyPassphrase.ascii(),
-				      config.mPrivateKeyCertFile.ascii(),
-				      config.mCACertsPath.ascii()) ) ){
+				      &(config.registrySecurity)) ) ){
     cout << "FAILED to create SWS for " << 
       config.mJobData->mSoftwareDescription << " :-(" << endl;
     soap_end(&mySoap);
@@ -617,24 +622,15 @@ QString Gridifier::makeVizSGS(const QString &factory,
 	   "<sourceLabel>%s</sourceLabel></dataSource>",
 	   config.simulationGSH.mEPR.ascii(), iodef_label);
 
-  if( Create_WSSE_header(&mySoap,
-			 config.simulationGSH.mUsername.ascii(),
-			 config.simulationGSH.mPassword.ascii()) !=
-      REG_SUCCESS){
-    cout << "Failed to create WSSE header for call to SetResourceProperties" 
-	 << endl;
-    //ARPDBG - need to destroy SWS here
-    soap_end(&mySoap);
-    soap_done(&mySoap);
-    return result;
-  }
 
-  printf("Calling SetResourceProperties with >>%s<<\n",
+  printf("Calling Set_resource_property with >>%s<<\n",
 	 purpose);
-  if(soap_call_wsrp__SetResourceProperties(&mySoap, EPR, 
-					   "", purpose, &response) != SOAP_OK){
-    cout << "SetResourceProperties failed:" << endl;
-    soap_print_fault(&mySoap, stderr);
+
+  if(Set_resource_property(&mySoap, EPR,
+			   config.simulationGSH.mSecurity.userDN,
+			   config.simulationGSH.mSecurity.passphrase,
+			   purpose) != REG_SUCCESS){
+    cout << "Set_resource_property failed:" << endl;
     soap_end(&mySoap);
     soap_done(&mySoap);
     return result;
@@ -746,11 +742,13 @@ void Gridifier::makeReGScriptConfig(const QString & filename,
   
   if(config.mAppToLaunch->mNumInputs > 0){
     fileText += "REG_SGS_ADDRESS="+config.visualizationGSH.mEPR+"\n";
-    fileText += "REG_PASSPHRASE="+config.visualizationGSH.mPassword+"\n";
+    fileText += "REG_PASSPHRASE="+
+      QString(config.visualizationGSH.mSecurity.passphrase)+"\n";
   }
   else{
     fileText += "REG_SGS_ADDRESS="+config.simulationGSH.mEPR+"\n";
-    fileText += "REG_PASSPHRASE="+config.simulationGSH.mPassword+"\n";
+    fileText += "REG_PASSPHRASE="+
+      QString(config.simulationGSH.mSecurity.passphrase)+"\n";
   }
 
   fileText += "export HOST_JOB_MGR CONTAINER STEER_STD_OUT_FILE STEER_STD_ERR_FILE SIM_STD_OUT_FILE SIM_STD_ERR_FILE CLIENT_DISPLAY GLOBUS_LOCATION SIM_HOSTNAME SIM_PROCESSORS SIM_INFILE VIZ_TYPE VIZ_PROCESSORS SIM_USER FIREWALL REG_SGS_ADDRESS REG_VIZ_GSH REG_PASSPHRASE\n\n";
@@ -1025,13 +1023,11 @@ void Gridifier::cleanUp(LauncherConfig *config){
 #ifdef REG_WSRF
   if(!(config->simulationGSH.mEPR.isEmpty())){
     Destroy_steering_service((char*)config->simulationGSH.mEPR.ascii(),
-			     (char*)config->simulationGSH.mUsername.ascii(),
-			     (char*)config->simulationGSH.mPassword.ascii()); // ReG lib
+			     &(config->simulationGSH.mSecurity)); // ReG lib
   }
   if(!(config->visualizationGSH.mEPR.isEmpty())){
     Destroy_steering_service((char*)config->visualizationGSH.mEPR.ascii(),
-			     (char*)config->visualizationGSH.mUsername.ascii(),
-			     (char*)config->visualizationGSH.mPassword.ascii()); // ReG lib
+			     &(config->visualizationGSH.mSecurity)); // ReG lib
   }
 #endif
 } 
@@ -1040,8 +1036,7 @@ void Gridifier::cleanUp(SteeringService *service){
 #ifdef REG_WSRF
   if(service && !(service->mEPR.isEmpty())){
     Destroy_steering_service((char*)service->mEPR.ascii(),
-			     (char*)service->mUsername.ascii(),
-			     (char*)service->mPassword.ascii()); // ReG lib
+			     &(service->mSecurity)); // ReG lib
   }
 #endif
 } 
@@ -1055,20 +1050,29 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
 
   // Get the passphrase for the user's key if registry is using
   // SSL
-  if( aConfig->topLevelRegistryGSH.startsWith("https") &&
-      aConfig->mKeyPassphrase.isEmpty() ){
+  if( !(aConfig->registrySecurity.passphrase[0]) ){
+    QString passphrase;
+    if( aConfig->registrySecurity.use_ssl){
 
-    aConfig->mKeyPassphrase = QInputDialog::getText("RealityGrid Launcher", 
-						    "Enter passphrase for X.509 key:", 
-						    QLineEdit::Password,
-						    QString::null, &ok, NULL );
-    if ( !ok ) return; // Cancel if user didn't press OK
+      passphrase = QInputDialog::getText("RealityGrid Launcher", 
+					 "Enter passphrase for X.509 key:", 
+					 QLineEdit::Password,
+					 QString::null, &ok, NULL );
+      if ( !ok ) return; // Cancel if user didn't press OK
+    }
+    else{
+
+      passphrase = QInputDialog::getText("RealityGrid Launcher", 
+					 "Enter passphrase for registry:", 
+					 QLineEdit::Password,
+					 QString::null, &ok, NULL );
+      if ( !ok ) return; // Cancel if user didn't press OK
+    }
+    strncpy(aConfig->registrySecurity.passphrase,
+	    passphrase.ascii(), REG_MAX_STRING_LENGTH);
   }
-
   if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
-				 aConfig->mKeyPassphrase.ascii(),
-				 aConfig->mPrivateKeyCertFile.ascii(),
-				 aConfig->mCACertsPath.ascii(),
+				 &(aConfig->registrySecurity),
 				 &numEntries,  
 				 &entries) != REG_SUCCESS){
     cout << "Get_registry_entries_secure failed" << endl;
@@ -1093,9 +1097,7 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
   entries = NULL;
 
   if(Get_registry_entries_secure(containerRegistryEPR.ascii(), 
-				 aConfig->mKeyPassphrase.ascii(),
-				 aConfig->mPrivateKeyCertFile.ascii(),
-				 aConfig->mCACertsPath.ascii(),
+				 &(aConfig->registrySecurity),
 				 &numEntries,  
 				 &entries) != REG_SUCCESS){
     cout << "Get_registry_entries_secure for containers failed" << endl;

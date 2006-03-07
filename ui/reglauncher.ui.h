@@ -87,6 +87,15 @@ void RegLauncher::init(){
   config.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
   config2.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
 
+  if(config.topLevelRegistryGSH.startsWith("https://")){
+    config.registrySecurity.use_ssl = 1;
+    config2.registrySecurity.use_ssl = 1;
+  }
+  else{
+    config.registrySecurity.use_ssl = 0;
+    config2.registrySecurity.use_ssl = 0;
+  }
+
   gridifier.getContainerList(&config);
 }
 
@@ -715,15 +724,10 @@ void RegLauncher::commonLaunchCode(){
 
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory(//"http://"+
-						  config.selectedContainer,
-						  //+":"+
-						  //QString::number(config.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory(config.selectedContainer,
 						  config.topLevelRegistryGSH,
 						  QString("sgs"));
       
-    //    if (posFactory.startsWith("http://"+config.selectedContainer+":"+
-    //			      QString::number(config.containerPortNum)+"/"))
     if (posFactory.startsWith(config.selectedContainer))
       factory = posFactory;
     else{
@@ -765,8 +769,10 @@ void RegLauncher::commonLaunchCode(){
       
     // Copy the value to the config
     config.simulationGSH.mEPR = sgs;
-    config.simulationGSH.mUsername = config.mJobData->mPersonLaunching;
-    config.simulationGSH.mPassword = config.mServicePassword;
+    strncpy(config.simulationGSH.mSecurity.userDN,
+	    config.mJobData->mPersonLaunching.ascii(), REG_MAX_STRING_LENGTH);
+    strncpy(config.simulationGSH.mSecurity.passphrase, 
+	    config.mServicePassword.ascii(), REG_MAX_STRING_LENGTH);
 
     consoleOutSlot(QString("SGS is "+
 			   config.simulationGSH.mEPR).stripWhiteSpace());
@@ -889,10 +895,7 @@ void RegLauncher::coupledModelLaunchCode(){
 			         config.topLevelRegistryGSH,
 			         QString("msgs"));
       
-    if (posFactory.startsWith(//"http://"+
-			      config.selectedContainer
-			      //+":"+QString::number(config.containerPortNum)+"/"
-			      ))
+    if (posFactory.startsWith(config.selectedContainer))
       factory = posFactory;
         
     else{
@@ -903,19 +906,14 @@ void RegLauncher::coupledModelLaunchCode(){
 
   // Second factory for second MetaSGS
   QString factory2 = gridifier.getSGSFactories(config2.topLevelRegistryGSH, 
-					      config2.selectedContainer,
-					      QString("msgs"));
+					       config2.selectedContainer,
+					       QString("msgs"));
   if (factory2.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory(//"http://"+
-						config2.selectedContainer,
-						//+":"+
-						//QString::number(config2.containerPortNum)+"/", 
-						config2.topLevelRegistryGSH,
-						QString("msgs"));
+    QString posFactory = gridifier.makeSGSFactory(config2.selectedContainer,
+						  config2.topLevelRegistryGSH,
+						  QString("msgs"));
       
-    //    if (posFactory.startsWith("http://"+config2.selectedContainer+":"+
-    //			      QString::number(config2.containerPortNum)+"/"))
     if (posFactory.startsWith(config2.selectedContainer))
       factory2 = posFactory;
     else{
@@ -1002,7 +1000,7 @@ void RegLauncher::coupledModelLaunchCode(){
     consoleOutSlot("Failed to create first child SWS - is the factory ("+
 		   factory+") valid?");
     gridifier.cleanUp(&SteeringService(parentSWS_EPR,
-				      "", ""));
+				       "", ""));
     return;
   }
   // Copy the value to the config

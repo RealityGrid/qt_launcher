@@ -53,7 +53,7 @@
 #include "qvaluelist.h"
 #include "jobmetadata.h"
 #include "qdom.h"
-
+#include "ReG_Steer_Common.h"
 #include <iostream>
 
 using namespace std;
@@ -115,16 +115,14 @@ class Machine {
     ~Machine(){}
 };
 
-/** Holds information of a single steering service (either SGS 
+/** Holds information on a single steering service (either SGS 
     or SWS) */
 class SteeringService {
   public:
     /// The address of this steering service 
     QString mEPR;
-    /// The username used to access this steering service (WSRF only)
-    QString mUsername;
-    /// The password used to access this steering service (WSRF only)
-    QString mPassword;
+    /// Holds authentication information for this service
+    struct reg_security_info mSecurity;
 
     SteeringService(){};
     SteeringService(const QString aEPR,
@@ -143,6 +141,8 @@ class LauncherConfig {
   
   /** Grid Service Handle for the top-level registry */
   QString topLevelRegistryGSH;
+  /** Struct holding info. needed to authenticate to registry */
+  struct reg_security_info registrySecurity;
   /** Grid Service Handle for the checkpoint tree factory */
   QString checkPointTreeFactoryGSH;
   /** Grid Service Handle of the registry for factories */
@@ -190,38 +190,29 @@ class LauncherConfig {
   QStringList             mContainerList;
   /// Full address of container we're going to use in the current launch
   QString                 selectedContainer;
-  /** Where globus lives on this machine */
+  /// Where globus lives on this machine
   QString                 globusLocation;
-  /** List of applications that we can launch */
+  /// List of applications that we can launch
   QValueList<Application> applicationList;
-  /** List of machines on which we can launch applications */
+  /// List of machines on which we can launch applications
   QValueList<Machine>     machineList;
-  /** List of visualization machines */
+  /// List of visualization machines
   QValueList<Machine>     vizMachineList;
-  /** Pointer to application that has been chosen for this launch */
+  /// Pointer to application that has been chosen for this launch
   Application            *mAppToLaunch;
-
-  /** Whether we are launching a coupled model or not */
+  /// Whether we are launching a coupled model or not */
   bool    mIsCoupledModel;
-  /** The location of the directory holding the perl scripts for doing SOAP */
+  /** The location of the directory holding the perl scripts for doing SOAP
   QString mScriptsDirectory;
-  /** The location of our scratch directory */
+  /// The location of our scratch directory
   QString mScratchDirectory;
-  /** How to launch remote jobs: one of "globus", "cog" or "ssh" */
+  /// How to launch remote jobs: one of "globus", "cog" or "ssh"
   QString mLaunchMethod; 
   /** The content of the default default.conf file - used to generate a new
       file if it is missing. */
   QString mConfigFileContent;
-  /** Location of the steering client binary */
+  /// Location of the steering client binary
   QString mSteererBinaryLocation;
-  /** Path of directory holding the CA certificates */
-  QString mCACertsPath;
-  /** Location of the PEM file holding user's private key and certificate */
-  QString mPrivateKeyCertFile;
-  /** The user's Distinguished Name as obtained from their certificate */
-  QString mUserDN;
-  /** The passphrase for the user's private key */
-  QString mKeyPassphrase;
   /// The password to give the job we are in the process of launching
   QString mServicePassword;
 

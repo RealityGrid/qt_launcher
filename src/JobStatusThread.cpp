@@ -32,8 +32,6 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
     
 ---------------------------------------------------------------------------*/
 
@@ -47,13 +45,12 @@
 
 /** @file JobStatusThread.cpp
     @brief Implementation of class for monitoring inital status of job.
+    @author Mark Riding
+    @author Andrew Porter
   */
 
 using namespace std;
 
-//JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
-//				 const QString &aGSH, const QString &aUsername,
-//				 const QString &aPasswd, const QString &scriptsDir)
 JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow, 
 				 const SteeringService *aService, 
 				 const QString &scriptsDir)
@@ -63,8 +60,10 @@ JobStatusThread::JobStatusThread(QApplication *aApp, QObject *aMainWindow,
   mApp = aApp;
   mScriptsDir = scriptsDir;
   mService.mEPR = aService->mEPR;
-  mService.mUsername = aService->mUsername;
-  mService.mPassword = aService->mPassword;
+  strncpy(mService.mSecurity.userDN, aService->mSecurity.userDN,
+	  REG_MAX_STRING_LENGTH);
+  strncpy(mService.mSecurity.passphrase, aService->mSecurity.passphrase,
+	  REG_MAX_STRING_LENGTH);
 
   int index = mService.mEPR.find("/service", 0, true);
   mNameSpace = mService.mEPR.left(index);
@@ -110,10 +109,9 @@ void JobStatusThread::getJobStatus(){
   cout << "ARPDBG, calling Get_resource_property..." << endl;
   Get_resource_property (&mSoap,
 			 mService.mEPR.ascii(),
-			 mService.mUsername.ascii(),
-			 mService.mPassword.ascii(),
-			 rpName,
-			 &rpOut);
+			 mService.mSecurity.userDN,
+			 mService.mSecurity.passphrase,
+			 rpName, &rpOut);
   cout << "ARPDBG, ...done calling Get_resource_property" << endl;
   QString results(rpOut);
 #endif // ndef REG_WSRF

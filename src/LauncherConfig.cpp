@@ -33,12 +33,12 @@
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
 
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
 
 /** @file LauncherConfig.cpp
- *  @brief Holds all of the data describing the job to launch */
+ *  @brief Holds all of the data describing the job to launch 
+ *  @author Mark Riding 
+ *  @author Andrew Porter */
 
 /** Important note - libxml was used for this class, but QT does provide
   * its own set of XML classes. I just didn't realise that when I began..*/
@@ -70,6 +70,8 @@ LauncherConfig::LauncherConfig(){
   mTimeToRun      = 30;
   mJobData        = new JobMetaData;
   mIsCoupledModel = false;
+
+  Wipe_security_info(&registrySecurity);
 
   // Hacky way of ensuring we know what default.conf should be
   // in case user hasn't got it in the right place
@@ -212,7 +214,8 @@ void LauncherConfig::readConfig(QString file){
       aGSH = childOfRoot->xmlChildrenNode;
 
       while (aGSH != NULL){
-        // test to see which element we've got, and fill in the appropriate class member variable
+        // test to see which element we've got, 
+	// and fill in the appropriate class member variable
 
         // Top Level Registry
         if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"topLevelRegistry"))) {
@@ -222,7 +225,8 @@ void LauncherConfig::readConfig(QString file){
         }
 
 	// CheckpointTreeFactory address
-        if ((!xmlStrcmp(aGSH->name, (const xmlChar *)"checkPointTreeFactory"))) {
+        if ((!xmlStrcmp(aGSH->name, 
+			(const xmlChar *)"checkPointTreeFactory"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           checkPointTreeFactoryGSH = QString((const char*)key);
 	  xmlFree(key);
@@ -674,20 +678,16 @@ bool LauncherConfig::createNewConfigFile(){
 //---------------------------------------------------------------------------
 void LauncherConfig::readSecurityConfig(QString fileName){
 
-  struct reg_security_info sec;
   QFile configFile(fileName);
 
   if(!configFile.exists() || 
-     (Get_security_config(fileName.ascii(), &sec) != REG_SUCCESS) ){
+     (Get_security_config(fileName.ascii(), &registrySecurity) 
+      != REG_SUCCESS) ){
     QMessageBox::critical( NULL, "Error with security configuration file",
 			   "File "+fileName+" does not exist\n"
 			   "or cannot be parsed.\n\n",
 			   QMessageBox::Ok, 0, 0 );
     return;
   }
-
-  this->mUserDN = QString(sec.userDN);
-  this->mCACertsPath = QString(sec.caCertsPath);
-  this->mPrivateKeyCertFile = QString(sec.myKeyCertFile);
   return;
 }
