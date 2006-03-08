@@ -346,10 +346,6 @@ void LauncherConfig::readConfig(QString file){
       }
     }    
     
-    //if (!xmlStrcmp(childOfRoot->name, (const xmlChar*)"globus")){
-    //  globusLocation = (const char*)xmlGetProp(childOfRoot, (const xmlChar*)"location");
-    //}
-
     if(!xmlStrcmp(childOfRoot->name, (const xmlChar*)"applications")){
 
       applications = childOfRoot->xmlChildrenNode;
