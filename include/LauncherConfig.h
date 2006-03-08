@@ -32,10 +32,13 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
+
+/** @file LauncherConfig.h
+    @brief Defines class holding job description plus Container and Application
+    and Machine classes
+    @author Mark Riding
+    @author Andrew Porter */
 
 #ifndef _LAUNCHERCONFIG_H_
 #define _LAUNCHERCONFIG_H_
@@ -57,11 +60,6 @@
 #include <iostream>
 
 using namespace std;
-
-/** @file LauncherConfig.h
-    @brief Defines class holding job description plus Container and Application
-    and Machine classes.
-*/
 
 // ************************************** //
 // Be aware that only some of the values  //
@@ -200,9 +198,9 @@ class LauncherConfig {
   QValueList<Machine>     vizMachineList;
   /// Pointer to application that has been chosen for this launch
   Application            *mAppToLaunch;
-  /// Whether we are launching a coupled model or not */
+  /// Whether we are launching a coupled model or not
   bool    mIsCoupledModel;
-  /** The location of the directory holding the perl scripts for doing SOAP
+  /// The location of the directory holding the perl scripts for doing SOAP
   QString mScriptsDirectory;
   /// The location of our scratch directory
   QString mScratchDirectory;
