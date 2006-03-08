@@ -1071,7 +1071,7 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
     strncpy(aConfig->registrySecurity.passphrase,
 	    passphrase.ascii(), REG_MAX_STRING_LENGTH);
   }
-  if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
+  if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.ascii(), 
 				 &(aConfig->registrySecurity),
 				 &numEntries,  
 				 &entries) != REG_SUCCESS){
