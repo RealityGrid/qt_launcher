@@ -32,13 +32,11 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
 
 /** @file CheckPointTree.h
     @brief Header file for class for handling the CheckPointTree
+    @author Mark Riding
  */
 
 #ifndef _CHECKPOINTTREE_H_
@@ -64,12 +62,13 @@ class CheckPointTree{
     void run();
 
   private:
-    QString rootAddress;
+    QString    rootAddress;
     QListView *parent;
   
     QStringList getActiveTrees();
 
-    void parse(const QString &xmlDocString, CheckPointTreeItem *parentListViewItem = NULL);
+    void parse(const QString &xmlDocString, 
+	       CheckPointTreeItem *parentListViewItem = NULL);
 };
 
 
