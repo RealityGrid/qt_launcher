@@ -888,10 +888,7 @@ void RegLauncher::coupledModelLaunchCode(){
 					      QString("msgs"));
   if (factory.length() == 0){
     consoleOutSlot("No factories to be had - I'd better make one");
-    QString posFactory = gridifier.makeSGSFactory(//"http://"+
-						  config.selectedContainer,
-				 //+":"+
-                                 //QString::number(config.containerPortNum)+"/", 
+    QString posFactory = gridifier.makeSGSFactory(config.selectedContainer,
 			         config.topLevelRegistryGSH,
 			         QString("msgs"));
       
@@ -1111,9 +1108,11 @@ void RegLauncher::discoverySlot()
   checkPointTreeListView->clearSelection();
   consoleOutSlot("Searching for CheckPoint Trees");
   
-  cpt = new CheckPointTree(checkPointTreeListView, config.checkPointTreeFactoryGSH);
+  cpt = new CheckPointTree(checkPointTreeListView, 
+			   config.checkPointTreeFactoryGSH);
 }
 
+//----------------------------------------------------------------
 QProcess *steerer;
 void RegLauncher::steerSlot()
 {
@@ -1147,6 +1146,7 @@ void RegLauncher::steerSlot()
   }
 }
 
+//----------------------------------------------------------------
 void RegLauncher::readSteerStdoutSlot(){
   // dump this in a file so we don't make the console useless...
   cout << "SLOT: " << QString(steerer->readStdout()) << endl;
@@ -1236,12 +1236,13 @@ void RegLauncher::proxyInfoProcessEnded()
   }
 }
 
-
+//----------------------------------------------------------------
 void RegLauncher::consoleOutSlot(const QString &text)
 {
   textOutTextEdit->insertParagraph(text, -1);
 }
 
+//----------------------------------------------------------------
 void RegLauncher::checkPointListViewExpanded(QListViewItem *item)
 {
   // For each item that's been expanded - call it's getChildData method.
@@ -1290,8 +1291,7 @@ void RegLauncher::checkPointListViewClickedSlot( QListViewItem *selectedItem )
   
 }
 
-
-
+//----------------------------------------------------------------
 void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem,
                                             const QPoint &pnt, int column)
 {
@@ -1307,11 +1307,13 @@ void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem,
   popupMenu.insertItem(QString("View GSH"), 1);
   popupMenu.insertItem(QString("View Input File"), 2);
   popupMenu.insertItem(QString("View CheckPoint Data"), 3);
-  connect(&popupMenu, SIGNAL(activated(int)), this, SLOT(contextMenuItemSelectedSlot(int)));
+  popupMenu.insertItem(QString("Delete node"), 4);
+  connect(&popupMenu, SIGNAL(activated(int)), this, 
+	  SLOT(contextMenuItemSelectedSlot(int)));
   popupMenu.exec(pnt);
 }
 
-
+//----------------------------------------------------------------
 void RegLauncher::contextMenuItemSelectedSlot(int itemId)
 {
 
@@ -1331,17 +1333,24 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
       }
     }
 
-    ChkPtVariableForm *aChkPtVariableForm = new ChkPtVariableForm(&tmp, this, "testDialog");
+    ChkPtVariableForm *aChkPtVariableForm = new ChkPtVariableForm(&tmp, 
+								  this, 
+								  "testDialog");
     aChkPtVariableForm->show();
   }
 
   // or if we've selected to 'View GSH'
   else if (itemId == 1){
+
     if (rightMouseCheckPointTreeItem != NULL)
-      QInputDialog::getText("GSH", "Checkpoint GSH", QLineEdit::Normal, rightMouseCheckPointTreeItem->getCheckPointGSH(), NULL, this);
+      QInputDialog::getText("GSH", "Checkpoint GSH", 
+			    QLineEdit::Normal, 
+			    rightMouseCheckPointTreeItem->getCheckPointGSH(), 
+			    NULL, this);
   }
   // or if we've selected to 'View Input File'
   else if (itemId == 2){
+
     if (rightMouseCheckPointTreeItem != NULL){
       // TODO - subclass QDialog to get a better pop-up window for this
       QString inputFileText = getInputFileFromCheckPoint(rightMouseCheckPointTreeItem->getCheckPointGSH());
@@ -1364,7 +1373,14 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
       textViewDialog->show();
     }
   }
-  
+  // or if we've chosen to delete the node
+  else if(itemId == 4){
+    rightMouseCheckPointTreeItem->destroy();
+
+    // attempt to refresh the display
+    CheckPointTreeItem *aParent = rightMouseCheckPointTreeItem->getParent();
+    if (aParent) aParent->getChildData();
+  }
 }
 
 /** Parse the checkpoint meta-data obtained from a node in the checkpoint
@@ -1407,12 +1423,9 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
           childNodes = childNodes.item(i).toElement().elementsByTagName(QString("file"));
      
           // Extract all of the filenames that are listed
-          //childNodes = fileNode.toElement().elementsByTagName(QString("file"));
-
           for(i=0; i<childNodes.count(); i++){
 
           	if(childNodes.item(i).isElement()){
-		  //cout << "ARPDBG File "<< i << " = " << childNodes.item(i).toElement().text() << endl;
 		  fileNames.append(childNodes.item(i).toElement().text());
 		}
           }
@@ -1423,7 +1436,7 @@ void RegLauncher::parseChkPtMetaData( const QString &chkMetaData,
   }
 }
 
-
+//----------------------------------------------------------------
 void RegLauncher::customEvent( QCustomEvent *e )
 {
   if(e->type() != (QEvent::User+1))return;
@@ -1440,6 +1453,7 @@ void RegLauncher::customEvent( QCustomEvent *e )
   delete msg;
 }
 
+//----------------------------------------------------------------
 void RegLauncher::coupledModelCreateGlobalParamSlot()
 {
   QString selectedGSH;
