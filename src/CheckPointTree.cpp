@@ -32,13 +32,11 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
 
 /** @file CheckPointTree.cpp
     @brief Implements methods for handling the CheckPointTree
+    @author Mark Riding
  */
 #define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "CheckPointTree.h"
@@ -48,16 +46,21 @@
 
 using namespace std;
 
-CheckPointTree::CheckPointTree(QListView *_parent, const QString &_address){
+//----------------------------------------------------------------
+CheckPointTree::CheckPointTree(QListView *_parent, 
+			       const QString &_address){
   rootAddress = _address;
   parent = _parent;
   run();
 }
 
+//----------------------------------------------------------------
 CheckPointTree::~CheckPointTree(){
 }
 
+//----------------------------------------------------------------
 void CheckPointTree::run(){
+
   QStringList t = getActiveTrees();
 
   for (unsigned int i=0; i<t.count(); i++){
@@ -66,25 +69,34 @@ void CheckPointTree::run(){
 
 }
 
-
+//----------------------------------------------------------------
 QStringList CheckPointTree::getActiveTrees(){
-  struct soap soap;
+  struct soap                  soap;
+  rgtf__getActiveTreesResponse out;
+  QStringList                  activeTrees;
+
   soap_init(&soap);
 
-  rgtf__getActiveTreesResponse out;
+  if( rootAddress.isNull() ){
+    cout << "getActiveTrees - rootAddress is NULL!" << endl;
+    return activeTrees;
+  }
 
-  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress, "", NULL, &out ))
+  if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress.ascii(), "", 
+				       NULL, &out ))
     soap_print_fault(&soap, stderr);
 
-  QStringList activeTrees;
   parse(out._getActiveTreesReturn);
 
   soap_end(&soap);
+  soap_done(&soap);
+
   return activeTrees;
 }
 
-
-void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t){
+//----------------------------------------------------------------
+void CheckPointTree::getChildNodes(const QString &handle, 
+				   CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
   rgt__getChildNodesResponse out;
@@ -92,16 +104,19 @@ void CheckPointTree::getChildNodes(const QString &handle, CheckPointTreeItem *t)
   if (soap_call_rgt__getChildNodes(&soap, handle, "", NULL, &out))
     soap_print_fault(&soap, stderr);
 
-  // and then parse for children and data nodes, fill in list view as appropriate.....
-
+  // and then parse for children and data nodes, 
+  // fill in list view as appropriate.....
   parse(QString(out._getChildNodesReturn), t);
 
+  soap_end(&soap);
+  soap_done(&soap);
+
   parent->triggerUpdate();
-  
 }
 
-
-void CheckPointTree::getNodeData(const QString &handle, CheckPointTreeItem *t){
+//----------------------------------------------------------------
+void CheckPointTree::getNodeData(const QString &handle, 
+				 CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
 
@@ -110,11 +125,14 @@ void CheckPointTree::getNodeData(const QString &handle, CheckPointTreeItem *t){
     soap_print_fault(&soap, stderr);
 
   parse(QString(out._getCheckPointDataReturn), t);
+
+  soap_end(&soap);
+  soap_done(&soap);
 }
 
-
-
-void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *parentListViewItem){
+//----------------------------------------------------------------
+void CheckPointTree::parse(const QString &xmlDocString, 
+			   CheckPointTreeItem *parentListViewItem){
   
   QString xmlResultsDoc = xmlDocString;
 
@@ -153,7 +171,8 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
           // we need the "SEQUENCE_NUM" & "TIMESTAMP" values
           QDomNode Checkpoint_node_data = ee.firstChild();
           
-          if (Checkpoint_node_data.toElement().tagName() == "Checkpoint_node_data"){
+          if (Checkpoint_node_data.toElement().tagName() == 
+	      "Checkpoint_node_data"){
 
             QDomNode Param_LevelNode = Checkpoint_node_data.firstChild();
 
@@ -174,7 +193,9 @@ void CheckPointTree::parse(const QString &xmlDocString, CheckPointTreeItem *pare
                 visibleTag = value.toElement().text();
               }
 
-              CheckPointParams tmp(label.toElement().text().stripWhiteSpace(), handle.toElement().text().stripWhiteSpace(), value.toElement().text().stripWhiteSpace());
+              CheckPointParams tmp(label.toElement().text().stripWhiteSpace(), 
+				   handle.toElement().text().stripWhiteSpace(),
+				   value.toElement().text().stripWhiteSpace());
               paramsList += tmp;
 
               Param_LevelNode = Param_LevelNode.nextSibling();
