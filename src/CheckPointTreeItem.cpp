@@ -1,7 +1,4 @@
 /*----------------------------------------------------------------------------
-    Application Class for QT launcher GUI.
-    Implementation
-
     (C)Copyright 2003 The University of Manchester, United Kingdom,
     all rights reserved.
 
@@ -32,15 +29,23 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
 
+/** @file
+    @author Mark Riding
+    @author Andrew Porter
+    @brief Application Class for QT launcher GUI.
+*/
+
 #include "CheckPointTreeItem.h"
+#include "soapH.h"
 
+using namespace std;
 
-CheckPointTreeItem::CheckPointTreeItem(QListView *parent, const QString &checkPointTreeHandle, CheckPointTree *creator)
+//----------------------------------------------------------------
+CheckPointTreeItem::CheckPointTreeItem(QListView *parent, 
+				       const QString &checkPointTreeHandle, 
+				       CheckPointTree *creator)
 : QListViewItem(parent) {
 
   // set a reference to the creating thread, so we can call its
@@ -63,7 +68,9 @@ CheckPointTreeItem::CheckPointTreeItem(QListView *parent, const QString &checkPo
  *
  *  We want each constructor to then go away and check for the gsi-ftp files....
  */
-CheckPointTreeItem::CheckPointTreeItem(CheckPointTreeItem *_parent, const QString &checkPointTreeHandle, CheckPointTree *creator)
+CheckPointTreeItem::CheckPointTreeItem(CheckPointTreeItem *_parent, 
+				       const QString &checkPointTreeHandle, 
+				       CheckPointTree *creator)
 : QListViewItem(_parent) {
   // set a reference to the creating thread, so we can call its
   // method later when we come to expand the tree
@@ -81,12 +88,11 @@ CheckPointTreeItem::CheckPointTreeItem(CheckPointTreeItem *_parent, const QStrin
 }
 
 
-
-
+//----------------------------------------------------------------
 CheckPointTreeItem::~CheckPointTreeItem(){
 }
 
-
+//----------------------------------------------------------------
 void CheckPointTreeItem::getChildData(){
 
   // Clear everything below
@@ -97,25 +103,50 @@ void CheckPointTreeItem::getChildData(){
   }
 
   if (creatorThread != NULL){
-    // find the current node's data
-    //creatorThread->getNodeData(checkPointGSH, this);
-  
     // and find any children
     creatorThread->getChildNodes(checkPointGSH, this);
   }
 }
 
-
+//----------------------------------------------------------------
 QString CheckPointTreeItem::getCheckPointGSH(){
   return checkPointGSH;
 }
 
+//----------------------------------------------------------------
 void CheckPointTreeItem::setParamsList(const CheckPointParamsList &pParamsList){
   mParamsList = pParamsList;
 }
 
+//----------------------------------------------------------------
 CheckPointParamsList CheckPointTreeItem::getParamsList(){
   return mParamsList;
 }
 
+//----------------------------------------------------------------
+void CheckPointTreeItem::destroy(){
 
+  rgt__destroyResponse out;
+  struct soap soap;
+
+  cout << "destroy: gsh = " << checkPointGSH << endl;
+
+  soap_init(&soap);
+
+  if (soap_call_rgt__destroy(&soap, checkPointGSH, "", NULL, &out)){
+    cout << "CheckPointTreeItem::destroy - failed:" << endl;
+    soap_print_fault(&soap, stderr);
+  }
+  else{
+    cout << "CheckPointTreeItem::destroy - destroyed node with GSH = " <<
+      checkPointGSH << endl;
+  }
+
+  soap_end(&soap);
+  soap_done(&soap);
+}
+
+//----------------------------------------------------------------
+CheckPointTreeItem  *CheckPointTreeItem::getParent(){
+  return parent;
+}
