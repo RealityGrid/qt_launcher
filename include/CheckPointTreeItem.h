@@ -1,7 +1,4 @@
 /*----------------------------------------------------------------------------
-    Application Class for QT launcher GUI.
-    Header
-
     (C)Copyright 2003 The University of Manchester, United Kingdom,
     all rights reserved.
 
@@ -32,17 +29,19 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 29.09.2003
-    
 ---------------------------------------------------------------------------*/
+
+/** @file CheckPointTreeItem.h
+    @author Mark Riding
+    @author Andrew Porter
+    @brief Application Class for QT launcher GUI.
+*/
 
 #ifndef _CHECKPOINTTREEITEM_H_
 #define _CHECKPOINTTREEITEM_H_
 
 #include "qlistview.h"
 #include "qstring.h"
-//#include "qthread.h"
 
 /** CheckPointTreeItem class
  *
@@ -58,13 +57,12 @@
  *
  *  Therefore, whilst the CheckPointTree can be created directly, it will
  *  be best practice to use a builder object that inherits QThread, so
- *  that we GUI doesn't block when the tree is being built.
+ *  that the GUI doesn't block when the tree is being built.
  *
  *  We'll call this builder CheckPointTree - hopefully not too confusing..
  */
 
 #include "CheckPointTree.h"
-
 #include "qvaluelist.h"
 
 class CheckPointParams {
@@ -78,7 +76,9 @@ class CheckPointParams {
       mHandle = "";
       mValue = "";
     }
-    CheckPointParams(const QString &pLabel, const QString &pHandle, const QString &pValue){
+    CheckPointParams(const QString &pLabel, 
+		     const QString &pHandle, 
+		     const QString &pValue){
       mLabel = pLabel;
       mHandle = pHandle;
       mValue = pValue;
@@ -92,34 +92,42 @@ class CheckPointTreeItem: public QListViewItem {
   private:
     CheckPointTree *creatorThread;
 
-    int regSeqNum;
-    QString timestamp;
-    QStringList checkPointData;
-    QString tagForInput;
-    QString checkPointGSH;
+    int             regSeqNum;
+    QString         timestamp;
+    QStringList     checkPointData;
+    QString         tagForInput;
+    QString         checkPointGSH;
 
     CheckPointTreeItem *parent;
     CheckPointTreeItem *children;
-    int numChildren;
+    int                 numChildren;
 
     CheckPointParamsList mParamsList;
     
-    
   public:
-    // Use this constructor at the very top level only: this is
-    // not a full checkpoint tree node, but a place holder for the
-    // whole tree itself
-    CheckPointTreeItem(QListView *parent, const QString &checkPointTreeHandle, CheckPointTree *creator);
-    // Standard constructor
-    CheckPointTreeItem(CheckPointTreeItem *parent, const QString &checkPointTreeHandle, CheckPointTree *creator);
+    /// Use this constructor at the very top level only: this is
+    /// not a full checkpoint tree node, but a place holder for the
+    /// whole tree itself
+    CheckPointTreeItem(QListView *parent, 
+		       const QString &checkPointTreeHandle, 
+		       CheckPointTree *creator);
+    /// Standard constructor
+    CheckPointTreeItem(CheckPointTreeItem *parent, 
+		       const QString &checkPointTreeHandle, 
+		       CheckPointTree *creator);
     
     ~CheckPointTreeItem();
 
-    void getChildData();
-    QString getCheckPointGSH();
-
-    void setParamsList(const CheckPointParamsList &pParamsList);
+    void                 getChildData();
+    QString              getCheckPointGSH();
+    void                 setParamsList(const CheckPointParamsList &pParamsList);
     CheckPointParamsList getParamsList();
+    /// Method to remove a single node from within a tree - calls the node's
+    /// destroy method which updates the node's children with its logged
+    /// steering commands and the identity of its parent, moves them into
+    /// the ServiceGroup of its parent and finally, deletes it.
+    void                 destroy();
+    CheckPointTreeItem  *getParent();
 };
 
 #endif
