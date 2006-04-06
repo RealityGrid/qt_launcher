@@ -1107,9 +1107,21 @@ void RegLauncher::discoverySlot()
   checkPointTreeListView->clear();
   checkPointTreeListView->clearSelection();
   consoleOutSlot("Searching for CheckPoint Trees");
-  
+
+#ifdef REG_WSRF
+  if(config.checkPointTreeEPR.isEmpty()){
+    cpt = new CheckPointTree(checkPointTreeListView, 
+			     config.checkPointTreeFactoryGSH);
+  }
+  else{
+    cpt = new CheckPointTree(checkPointTreeListView, 
+			     config.checkPointTreeEPR);
+  }
+
+#else  
   cpt = new CheckPointTree(checkPointTreeListView, 
 			   config.checkPointTreeFactoryGSH);
+#endif // defined REG_WSRF
 }
 
 //----------------------------------------------------------------

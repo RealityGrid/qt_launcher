@@ -1,7 +1,4 @@
 /*----------------------------------------------------------------------------
-    Application Class for QT launcher GUI.
-    Implementation
-
     (C)Copyright 2003 The University of Manchester, United Kingdom,
     all rights reserved.
 
@@ -41,6 +38,8 @@
 #define WITH_CDATA // ensure that gSoap retains CDATA in xml strings
 #include "CheckPointTree.h"
 #include "CheckPointTreeItem.h"
+#include "ReG_Steer_Steerside_WSRF.h"
+#include "ReG_Steer_Browser.h"
 #include "soapH.h"
 #include "qdom.h"
 
@@ -72,7 +71,6 @@ void CheckPointTree::run(){
 //----------------------------------------------------------------
 QStringList CheckPointTree::getActiveTrees(){
   struct soap                  soap;
-  rgtf__getActiveTreesResponse out;
   QStringList                  activeTrees;
 
   soap_init(&soap);
@@ -82,11 +80,51 @@ QStringList CheckPointTree::getActiveTrees(){
     return activeTrees;
   }
 
+#ifdef REG_WSRF
+  QString                epr;
+  int                    numTrees;
+  struct registry_entry *entries = NULL;
+  struct reg_security_info sec;
+
+  if(rootAddress.contains("RealityGridTree")){
+    QStringList myList = QStringList::split( QString("RealityGridTree"), 
+					     rootAddress);
+    epr = myList.first() + QString("CheckPointTree/CheckPointTree");
+  }
+  else{
+    epr = rootAddress;
+  }
+
+  Wipe_security_info(&sec);
+  Get_registry_entries_secure(epr.ascii(),
+			      &sec,
+			      &numTrees,
+			      &entries);
+  cout << "Found " << numTrees << " checkpoint trees..." << endl;
+
+  for(int i=0; i<numTrees; i++){
+
+    QString nodeGSH = QString(entries[i].gsh);
+    cout << "GSH of node = " <<  nodeGSH << endl;
+    cout << "parent of node = " << parent << endl;
+
+    // create a new node for the top of the tree
+    CheckPointTreeItem *cpti = new CheckPointTreeItem(parent, 
+						      nodeGSH, 
+						      this);
+    cpti->setText(0, entries[i].job_description);
+  }
+
+  free(entries);
+#else
+  rgtf__getActiveTreesResponse out;
+
   if (soap_call_rgtf__getActiveTrees ( &soap, rootAddress.ascii(), "", 
 				       NULL, &out ))
     soap_print_fault(&soap, stderr);
 
   parse(out._getActiveTreesReturn);
+#endif
 
   soap_end(&soap);
   soap_done(&soap);
@@ -99,6 +137,86 @@ void CheckPointTree::getChildNodes(const QString &handle,
 				   CheckPointTreeItem *t){
   struct soap soap;
   soap_init(&soap);
+
+#ifdef REG_WSRF
+  int                      numTrees;
+  struct registry_entry   *entries = NULL;
+  struct reg_security_info sec;
+  CheckPointParamsList     paramsList;
+  QString                  visibleTag = "";
+  QString                  seqNum = "";
+
+  Wipe_security_info(&sec);
+  cout << "ARPDBGl getChildNodes, handle = " << handle << endl;
+  Get_registry_entries_secure(handle.ascii(),
+			      &sec,
+			      &numTrees,
+			      &entries);
+  cout << "Got " << numTrees << " children..." << endl;
+  CheckPointTreeItem *cpti;
+  for(int i=0; i<numTrees; i++){
+
+   // <Param>
+   // <Label>myString</Label>
+   // <Handle>67</Handle>
+   // <Value>hello</Value>
+   // </Param>
+
+    // Parse parameter values
+    QStringList params = QStringList::split("<Param>", entries[i].job_description);
+    for ( QStringList::Iterator it = params.begin(); it != params.end(); ++it ) {
+        cout << *it << ":";
+	QString tmpStr = *it;
+	tmpStr = tmpStr.section("<Label>",1);
+	QString label = tmpStr.section("</Label>",0);
+	cout << "Param label is " << label << endl;
+	tmpStr = *it;
+	tmpStr = tmpStr.section("<Handle>",1);
+	QString handle = tmpStr.section("</Handle>",0);
+	cout << "Param handle is " << handle << endl;
+	tmpStr = *it;
+	tmpStr = tmpStr.section("<Value>",1);
+	QString value = tmpStr.section("</Value>",0);
+	cout << "Param value is " << value << endl;	
+                            
+	if (label == QString("SEQUENCE_NUM")){
+	  seqNum = value;
+	}
+	else if (label == QString("TIMESTAMP")){
+	  visibleTag = value;
+	}
+
+	CheckPointParams tmp(label, handle, value);
+	paramsList += tmp;    
+    }
+
+    // create a new node for each child
+    QString nodeGSH = QString(entries[i].gsh);
+    cout << "GSH of node = " <<  nodeGSH << endl;
+    cpti = new CheckPointTreeItem(t, nodeGSH, this);
+    cpti->setParamsList(paramsList);
+
+    // Need to remove newline characters from the tag string
+    int findNewLines = visibleTag.find("\n");
+    while (findNewLines>=0){
+      usleep(1000);
+      int len = visibleTag.length();
+      QString left = visibleTag.left(findNewLines);
+      QString right = visibleTag.right(len-findNewLines-1);
+      
+      visibleTag = left+right;
+
+      findNewLines = visibleTag.find("\n");
+    }
+
+    // set the tag text
+    cpti->setText(0, visibleTag);
+    cpti->setText(1, seqNum);
+  }
+
+  free(entries);
+
+#else
   rgt__getChildNodesResponse out;
 
   if (soap_call_rgt__getChildNodes(&soap, handle, "", NULL, &out))
@@ -107,6 +225,7 @@ void CheckPointTree::getChildNodes(const QString &handle,
   // and then parse for children and data nodes, 
   // fill in list view as appropriate.....
   parse(QString(out._getChildNodesReturn), t);
+#endif
 
   soap_end(&soap);
   soap_done(&soap);
@@ -258,7 +377,6 @@ void CheckPointTree::parse(const QString &xmlDocString,
       }
           
     }
-
     else if (e.tagName() == "Checkpoint_data"){
     }
 
