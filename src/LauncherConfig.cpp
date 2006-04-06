@@ -224,11 +224,19 @@ void LauncherConfig::readConfig(QString file){
 	  xmlFree(key);
         }
 
-	// CheckpointTreeFactory address
+	// RealityGridTreeFactory address - OGSI
         if ((!xmlStrcmp(aGSH->name, 
 			(const xmlChar *)"checkPointTreeFactory"))) {
           xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
           checkPointTreeFactoryGSH = QString((const char*)key);
+	  xmlFree(key);
+        }
+
+	// CheckPointTree address - WSRF
+        if ((!xmlStrcmp(aGSH->name, 
+			(const xmlChar *)"checkPointTree"))) {
+          xmlChar *key = xmlGetProp(aGSH, (xmlChar*)"value");
+          checkPointTreeEPR = QString((const char*)key);
 	  xmlFree(key);
         }
 

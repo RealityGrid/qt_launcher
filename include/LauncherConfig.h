@@ -141,8 +141,10 @@ class LauncherConfig {
   QString topLevelRegistryGSH;
   /** Struct holding info. needed to authenticate to registry */
   struct reg_security_info registrySecurity;
-  /** Grid Service Handle for the checkpoint tree factory */
+  /** Grid Service Handle for the checkpoint tree factory - OGSI */
   QString checkPointTreeFactoryGSH;
+  /** EPR for the CheckPointTree - WSRF */
+  QString checkPointTreeEPR;
   /** Grid Service Handle of the registry for factories */
   QString registryOfFactoriesGSH;
   /** Grid Service Handle of the SGS Factory */
