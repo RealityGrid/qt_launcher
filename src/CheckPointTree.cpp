@@ -161,12 +161,17 @@ void CheckPointTree::getChildNodes(const QString &handle,
    // <Handle>67</Handle>
    // <Value>hello</Value>
    // </Param>
+    QString tmpStr = QString(entries[i].job_description);
+    cout << i << ": description : " << tmpStr << endl;
 
     // Parse parameter values
-    QStringList params = QStringList::split("<Param>", entries[i].job_description);
-    for ( QStringList::Iterator it = params.begin(); it != params.end(); ++it ) {
+    if(tmpStr.contains("<Param>")){
+      QStringList params = QStringList::split("<Param>", 
+					      entries[i].job_description);
+      for ( QStringList::Iterator it = params.begin(); 
+	    it != params.end(); ++it ) {
         cout << *it << ":";
-	QString tmpStr = *it;
+	tmpStr = *it;
 	tmpStr = tmpStr.section("<Label>",1);
 	QString label = tmpStr.section("</Label>",0);
 	cout << "Param label is " << label << endl;
@@ -188,6 +193,7 @@ void CheckPointTree::getChildNodes(const QString &handle,
 
 	CheckPointParams tmp(label, handle, value);
 	paramsList += tmp;    
+      }
     }
 
     // create a new node for each child
