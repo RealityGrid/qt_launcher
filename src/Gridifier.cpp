@@ -209,7 +209,7 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
     return;
   }
 #else
-  if(Get_registry_entries(aConfig->topLevelRegistry.latin1(), 
+  if(Get_registry_entries(aConfig->topLevelRegistryGSH.latin1(), 
 			  &numEntries,  
 			  &entries) != REG_SUCCESS){
     cout << "Get_registry_entries failed" << endl;
