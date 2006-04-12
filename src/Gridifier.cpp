@@ -162,10 +162,9 @@ QString Gridifier::getSGSFactories(const QString &topLevelRegistry,
 void Gridifier::getSGSies(LauncherConfig *aConfig, 
 			  QTable *aGSHTagTable){
 
-  QStringList            result;
-  int                    numEntries;
-  struct registry_entry *entries;
-  int                    i;
+  QStringList              result;
+  struct registry_contents content;
+  int                      i;
 
   mGSHTagTable = aGSHTagTable;
   if (mGSHTagTable == NULL)
@@ -203,22 +202,21 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
 #ifdef REG_WSRF
   if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.latin1(), 
 				 &(aConfig->registrySecurity),
-				 &numEntries,  
-				 &entries) != REG_SUCCESS){
+				 &content) != REG_SUCCESS){
     cout << "Get_registry_entries failed" << endl;
     return;
   }
 #else
   if(Get_registry_entries(aConfig->topLevelRegistryGSH.latin1(), 
-			  &numEntries,  
-			  &entries) != REG_SUCCESS){
+			  &content) != REG_SUCCESS){
     cout << "Get_registry_entries failed" << endl;
     return;
   }
 #endif
 
-  cout << "ARPDBG, got "<< numEntries << " entries from registry" << endl;
-  if(numEntries == 0)return;
+  cout << "ARPDBG, got "<< content.numEntries << " entries from registry" 
+       << endl;
+  if(content.numEntries == 0)return;
 
   // check we've got a reference to the gshTagTable
   if (mGSHTagTable == NULL){
@@ -231,23 +229,22 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
     mGSHTagTable->removeRow(0);
   }
 
-  for (i=0; i<numEntries; i++){
-    if(!strcmp(entries[i].service_type, "SWS") ||
-       !strcmp(entries[i].service_type, "SGS")){
+  for (i=0; i<content.numEntries; i++){
+    if(!strcmp(content.entries[i].service_type, "SWS") ||
+       !strcmp(content.entries[i].service_type, "SGS")){
       mGSHTagTable->insertRows(mGSHTagTable->numRows(), 1);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 0, 
-			    QString(entries[i].gsh));
-      QString tag(entries[i].user);
-      tag += QString(" ") + QString(entries[i].application) +
-	QString(" ") + QString(entries[i].job_description) +
-	QString(" ") + QString(entries[i].start_date_time);
+			    QString(content.entries[i].gsh));
+      QString tag(content.entries[i].user);
+      tag += QString(" ") + QString(content.entries[i].application) +
+	QString(" ") + QString(content.entries[i].job_description) +
+	QString(" ") + QString(content.entries[i].start_date_time);
       mGSHTagTable->setText(mGSHTagTable->numRows()-1, 1, 
 			    tag);
     }
   }
 
-  free(entries);
-  entries = NULL;
+  Delete_registry_table(&content);
 
   return;
 }
@@ -1043,10 +1040,10 @@ void Gridifier::cleanUp(SteeringService *service){
 
 void Gridifier::getContainerList(LauncherConfig *aConfig){
 #ifdef REG_WSRF
-  bool                   ok;
-  int                    i;
-  int                    numEntries;
-  struct registry_entry *entries;
+  bool                     ok;
+  int                      i;
+  int                      numEntries;
+  struct registry_contents content;
 
   // Get the passphrase for the user's key if registry is using
   // SSL
@@ -1073,17 +1070,16 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
   }
   if(Get_registry_entries_secure(aConfig->topLevelRegistryGSH.ascii(), 
 				 &(aConfig->registrySecurity),
-				 &numEntries,  
-				 &entries) != REG_SUCCESS){
+				 &content) != REG_SUCCESS){
     cout << "Get_registry_entries_secure failed" << endl;
     return;
   }
-  if(numEntries == 0)return;
+  if(content.numEntries == 0)return;
 
   ok = false;
-  for(i=0; i<numEntries; i++){
-    if(!strcmp(entries[i].service_type, "ServiceGroup") &&
-       !strcmp(entries[i].job_description, "Container registry")){
+  for(i=0; i<content.numEntries; i++){
+    if(!strcmp(content.entries[i].service_type, "ServiceGroup") &&
+       !strcmp(content.entries[i].job_description, "Container registry")){
       ok = true;
       break;
     }
@@ -1092,29 +1088,26 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
     cout << "ERROR, registry of containers not found" << endl;
     return;
   }
-  QString containerRegistryEPR = QString(entries[i].gsh);
-  free(entries);
-  entries = NULL;
+  QString containerRegistryEPR = QString(content.entries[i].gsh);
+  Delete_registry_table(&content);
 
   if(Get_registry_entries_secure(containerRegistryEPR.ascii(), 
 				 &(aConfig->registrySecurity),
-				 &numEntries,  
-				 &entries) != REG_SUCCESS){
+				 &content) != REG_SUCCESS){
     cout << "Get_registry_entries_secure for containers failed" << endl;
     return;
   }
-  if(numEntries == 0){
+  if(content.numEntries == 0){
     cout << "No containers found in registry" << endl;
     return;
   }
   aConfig->mContainerList.clear();
-  for(i=0; i<numEntries; i++){
-    if(!strcmp(entries[i].service_type, "Container")){
-      aConfig->mContainerList.append(QString(entries[i].gsh));
+  for(i=0; i<content.numEntries; i++){
+    if(!strcmp(content.entries[i].service_type, "Container")){
+      aConfig->mContainerList.append(QString(content.entries[i].gsh));
       cout << "Container "<< i << ": " << aConfig->mContainerList.last() << endl;
     }
   }
-  free(entries);
-  entries = NULL;
+  Delete_registry_table(&content);
 #endif // def REG_WSRF
 } 

@@ -82,8 +82,7 @@ QStringList CheckPointTree::getActiveTrees(){
 
 #ifdef REG_WSRF
   QString                epr;
-  int                    numTrees;
-  struct registry_entry *entries = NULL;
+  struct registry_contents content;
   struct reg_security_info sec;
 
   if(rootAddress.contains("RealityGridTree")){
@@ -98,24 +97,20 @@ QStringList CheckPointTree::getActiveTrees(){
   Wipe_security_info(&sec);
   Get_registry_entries_secure(epr.ascii(),
 			      &sec,
-			      &numTrees,
-			      &entries);
-  cout << "Found " << numTrees << " checkpoint trees..." << endl;
+			      &content);
+  cout << "Found " << content.numEntries << " checkpoint trees..." << endl;
 
-  for(int i=0; i<numTrees; i++){
+  for(int i=0; i<content.numEntries; i++){
 
-    QString nodeGSH = QString(entries[i].gsh);
-    cout << "GSH of node = " <<  nodeGSH << endl;
-    cout << "parent of node = " << parent << endl;
-
+    QString nodeGSH = QString(content.entries[i].gsh);
     // create a new node for the top of the tree
     CheckPointTreeItem *cpti = new CheckPointTreeItem(parent, 
 						      nodeGSH, 
 						      this);
-    cpti->setText(0, entries[i].job_description);
+    cpti->setText(0, content.entries[i].job_description);
   }
 
-  free(entries);
+  Delete_registry_table(&content);
 #else
   rgtf__getActiveTreesResponse out;
 
@@ -139,49 +134,45 @@ void CheckPointTree::getChildNodes(const QString &handle,
   soap_init(&soap);
 
 #ifdef REG_WSRF
-  int                      numTrees;
-  struct registry_entry   *entries = NULL;
+  struct registry_contents content;
   struct reg_security_info sec;
   CheckPointParamsList     paramsList;
   QString                  visibleTag = "";
   QString                  seqNum = "";
 
   Wipe_security_info(&sec);
-  cout << "ARPDBGl getChildNodes, handle = " << handle << endl;
   Get_registry_entries_secure(handle.ascii(),
 			      &sec,
-			      &numTrees,
-			      &entries);
-  cout << "Got " << numTrees << " children..." << endl;
-  CheckPointTreeItem *cpti;
-  for(int i=0; i<numTrees; i++){
+			      &content);
 
-   // <Param>
-   // <Label>myString</Label>
-   // <Handle>67</Handle>
-   // <Value>hello</Value>
-   // </Param>
-    QString tmpStr = QString(entries[i].job_description);
+  CheckPointTreeItem *cpti;
+  for(int i=0; i<content.numEntries; i++){
+
+    // <Param>
+    // <Handle>67</Handle>
+    // <Label>myString</Label>
+    // <Value>hello</Value>
+    // </Param>
+    QString tmpStr = QString(content.entries[i].job_description);
     cout << i << ": description : " << tmpStr << endl;
 
     // Parse parameter values
     if(tmpStr.contains("<Param>")){
       QStringList params = QStringList::split("<Param>", 
-					      entries[i].job_description);
+					      content.entries[i].job_description);
       for ( QStringList::Iterator it = params.begin(); 
 	    it != params.end(); ++it ) {
-        cout << *it << ":";
 	tmpStr = *it;
-	tmpStr = tmpStr.section("<Label>",1);
-	QString label = tmpStr.section("</Label>",0);
+	tmpStr = tmpStr.section("<Label>",1,1);
+	QString label = tmpStr.section("</Label>",0,0);
 	cout << "Param label is " << label << endl;
 	tmpStr = *it;
-	tmpStr = tmpStr.section("<Handle>",1);
-	QString handle = tmpStr.section("</Handle>",0);
+	tmpStr = tmpStr.section("<Handle>",1,1);
+	QString handle = tmpStr.section("</Handle>",0,0);
 	cout << "Param handle is " << handle << endl;
 	tmpStr = *it;
-	tmpStr = tmpStr.section("<Value>",1);
-	QString value = tmpStr.section("</Value>",0);
+	tmpStr = tmpStr.section("<Value>",1,1);
+	QString value = tmpStr.section("</Value>",0,0);
 	cout << "Param value is " << value << endl;	
                             
 	if (label == QString("SEQUENCE_NUM")){
@@ -197,7 +188,7 @@ void CheckPointTree::getChildNodes(const QString &handle,
     }
 
     // create a new node for each child
-    QString nodeGSH = QString(entries[i].gsh);
+    QString nodeGSH = QString(content.entries[i].gsh);
     cout << "GSH of node = " <<  nodeGSH << endl;
     cpti = new CheckPointTreeItem(t, nodeGSH, this);
     cpti->setParamsList(paramsList);
@@ -220,7 +211,7 @@ void CheckPointTree::getChildNodes(const QString &handle,
     cpti->setText(1, seqNum);
   }
 
-  free(entries);
+  Delete_registry_table(&content);
 
 #else
   rgt__getChildNodesResponse out;
