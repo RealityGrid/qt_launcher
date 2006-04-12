@@ -121,6 +121,8 @@ echo "SIM_STD_ERR_FILE=$SIM_STD_ERR_FILE" >> $REG_TMP_FILE
 echo "export SIM_STD_ERR_FILE" >> $REG_TMP_FILE
 echo "SIM_STD_OUT_FILE=$SIM_STD_OUT_FILE" >> $REG_TMP_FILE
 echo "export SIM_STD_OUT_FILE" >> $REG_TMP_FILE
+echo "REG_PASSPHRASE=$REG_PASSPHRASE" >> $REG_TMP_FILE
+echo "export REG_PASSPHRASE" >> $REG_TMP_FILE
 echo "REG_SGS_ADDRESS=$REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 echo "echo \"Starting mini_app_para job...\"" >> $REG_TMP_FILE
