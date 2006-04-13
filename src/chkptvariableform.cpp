@@ -33,17 +33,14 @@
     email:  sve@man.ac.uk
     Tel:    +44 161 275 6095
     Fax:    +44 161 275 6800    
-
-    Initial version by: M Riding, 09.06.2003
-    
 ---------------------------------------------------------------------------*/
 
+/** @file chkptvariableform.cpp
+    @brief Implementation of dialog for displaying parameter values 
+    @author Mark Riding
+*/
  
 #include "chkptvariableform.h"
-//#include "utility.h"
-//#include "types.h"
-//#include "debug.h"
-
 #include <qapplication.h>
 #include <qhbox.h>
 #include <qtable.h>
@@ -56,7 +53,7 @@
 #include <qtooltip.h>
 #include <qvbox.h>
 
-
+using namespace std;
 
 
 ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
@@ -65,7 +62,7 @@ ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
   : QDialog( parent, name, modal, f ), mCancelButton(NULL)
 {
 
-//  DBGCON("ChkPtVariableForm");
+  cout << "ARPDBG - constructor for ChkPtVariableForm" << endl;
 
     this->setCaption( "CheckPoint Parameters Table" );
     resize( 350, 350 );
@@ -112,6 +109,7 @@ ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
     
     lFormLayout->addLayout(lTableLayout);
     lFormLayout->addLayout(lButtonLayout);
+  cout << "ARPDBG - END of constructor for ChkPtVariableForm" << endl;
 
 }
 
