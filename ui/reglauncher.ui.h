@@ -1340,6 +1340,8 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
 
       tmp.num_param = (int)cpParamList.size();
       for (unsigned int i=0; i<cpParamList.size(); i++){
+	printf("%d: %s = %s\n", i, cpParamList[i].mLabel.ascii(),
+	       cpParamList[i].mValue.ascii());
         strcpy(tmp.param_labels[i], cpParamList[i].mLabel);
         strcpy(tmp.param_values[i], cpParamList[i].mValue);
       }
