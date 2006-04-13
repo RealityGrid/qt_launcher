@@ -158,22 +158,27 @@ void CheckPointTree::getChildNodes(const QString &handle,
 
     // Parse parameter values
     if(tmpStr.contains("<Param>")){
-      QStringList params = QStringList::split("<Param>", 
-					      content.entries[i].job_description);
-      for ( QStringList::Iterator it = params.begin(); 
-	    it != params.end(); ++it ) {
+      QStringList params = QStringList::split("<Param>", tmpStr);
+      // Skip the first element in list since is before
+      // first <Param> tag
+      QStringList::Iterator it = params.begin(); 
+      while(++it != params.end()){
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Label>",1,1);
 	QString label = tmpStr.section("</Label>",0,0);
-	cout << "Param label is " << label << endl;
+	printf("Param label >>%s<<\n", label.ascii());
+	//cout << "Param label is >>" << label << "<<" << endl;
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Handle>",1,1);
 	QString handle = tmpStr.section("</Handle>",0,0);
-	cout << "Param handle is " << handle << endl;
+	printf("Param handle >>%s<<\n", handle.ascii());
+	//cout << "Param handle is >>" << handle << "<<" << endl;
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Value>",1,1);
 	QString value = tmpStr.section("</Value>",0,0);
-	cout << "Param value is " << value << endl;	
+	printf("Param value >>%s<<\n", value.ascii());
+	printf("--------------------\n");
+	//cout << "Param value is >>" << value << "<<" << endl;	
                             
 	if (label == QString("SEQUENCE_NUM")){
 	  seqNum = value;
