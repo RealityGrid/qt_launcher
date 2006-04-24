@@ -844,6 +844,10 @@ void RegLauncher::commonLaunchCode(){
 
     // Copy the value to the config
     config.visualizationGSH.mEPR = sgs;
+    strncpy(config.visualizationGSH.mSecurity.userDN,
+	    config.mJobData->mPersonLaunching.ascii(), REG_MAX_STRING_LENGTH);
+    strncpy(config.visualizationGSH.mSecurity.passphrase, 
+	    config.mServicePassword.ascii(), REG_MAX_STRING_LENGTH);
 
     consoleOutSlot(QString("Viz SGS is "+
 			   config.visualizationGSH.mEPR).stripWhiteSpace());
