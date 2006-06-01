@@ -136,7 +136,7 @@ void CheckPointTree::getChildNodes(const QString &handle,
 #ifdef REG_WSRF
   struct registry_contents content;
   struct reg_security_info sec;
-  CheckPointParamsList     paramsList;
+  CheckPointParamsList    *paramsList;
   QString                  visibleTag = "";
   QString                  seqNum = "";
 
@@ -156,8 +156,16 @@ void CheckPointTree::getChildNodes(const QString &handle,
     QString tmpStr = QString(content.entries[i].job_description);
     cout << i << ": description : " << tmpStr << endl;
 
-    // Parse parameter values
+    // create a new node for each child
+    QString nodeGSH = QString(content.entries[i].gsh);
+    cout << "GSH of node = " <<  nodeGSH << endl;
+    cpti = new CheckPointTreeItem(t, nodeGSH, this);
+
+   // Parse parameter values
     if(tmpStr.contains("<Param>")){
+
+      paramsList = new CheckPointParamsList();
+
       QStringList params = QStringList::split("<Param>", tmpStr);
       // Skip the first element in list since is before
       // first <Param> tag
@@ -178,7 +186,6 @@ void CheckPointTree::getChildNodes(const QString &handle,
 	QString value = tmpStr.section("</Value>",0,0);
 	printf("Param value >>%s<<\n", value.ascii());
 	printf("--------------------\n");
-	//cout << "Param value is >>" << value << "<<" << endl;	
                             
 	if (label == QString("SEQUENCE_NUM")){
 	  seqNum = value;
@@ -188,15 +195,11 @@ void CheckPointTree::getChildNodes(const QString &handle,
 	}
 
 	CheckPointParams tmp(label, handle, value);
-	paramsList += tmp;    
+	*paramsList += tmp;    
       }
+      // Pass list of parameter values to this node
+      cpti->setParamsList(paramsList);
     }
-
-    // create a new node for each child
-    QString nodeGSH = QString(content.entries[i].gsh);
-    cout << "GSH of node = " <<  nodeGSH << endl;
-    cpti = new CheckPointTreeItem(t, nodeGSH, this);
-    cpti->setParamsList(paramsList);
 
     // Need to remove newline characters from the tag string
     int findNewLines = visibleTag.find("\n");
@@ -265,7 +268,8 @@ void CheckPointTree::parse(const QString &xmlDocString,
   while( !topLevelNode.isNull() ) {
     CheckPointParamsList paramsList;
 
-    QDomElement e = topLevelNode.toElement(); // try to convert the node to an element.
+    // try to convert the node to an element.
+    QDomElement e = topLevelNode.toElement(); 
 
     if (e.tagName() == "ogsi:entry"){
       // possible variables
@@ -354,8 +358,9 @@ void CheckPointTree::parse(const QString &xmlDocString,
         // true for the queried node, but at present the web-service returns this for children
         // only. This needs to be fixed server side first.
         if (isMainNode){
-          cpti = new CheckPointTreeItem(parentListViewItem, memberServiceLocatorHandle, this);
-          cpti->setParamsList(paramsList);
+          cpti = new CheckPointTreeItem(parentListViewItem, 
+					memberServiceLocatorHandle, this);
+          cpti->setParamsList(&paramsList);
 
           // Need to remove newline characters from the tag string
           int findNewLines = visibleTag.find("\n");

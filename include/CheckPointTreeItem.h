@@ -120,7 +120,7 @@ class CheckPointTreeItem: public QListViewItem {
 
     void                 getChildData();
     QString              getCheckPointGSH();
-    void                 setParamsList(const CheckPointParamsList &pParamsList);
+    void                 setParamsList(const CheckPointParamsList *pParamsList);
     CheckPointParamsList getParamsList();
     /// Method to remove a single node from within a tree - calls the node's
     /// destroy method which updates the node's children with its logged

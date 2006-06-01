@@ -114,8 +114,8 @@ QString CheckPointTreeItem::getCheckPointGSH(){
 }
 
 //----------------------------------------------------------------
-void CheckPointTreeItem::setParamsList(const CheckPointParamsList &pParamsList){
-  mParamsList = pParamsList;
+void CheckPointTreeItem::setParamsList(const CheckPointParamsList *pParamsList){
+  mParamsList = *pParamsList;
 }
 
 //----------------------------------------------------------------

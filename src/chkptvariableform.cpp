@@ -61,16 +61,16 @@ ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
 		     bool modal, WFlags f)
   : QDialog( parent, name, modal, f ), mCancelButton(NULL)
 {
-
-  cout << "ARPDBG - constructor for ChkPtVariableForm" << endl;
-
     this->setCaption( "CheckPoint Parameters Table" );
     resize( 350, 350 );
     
     // create the layouts for the form
-    QHBoxLayout *lFormLayout = new QHBoxLayout(this, 10, 10, "chkptvariableformlayout");
-    QVBoxLayout *lTableLayout = new QVBoxLayout(6, "chkptvariabletablelayout");
-    QVBoxLayout *lButtonLayout = new QVBoxLayout(6, "chkptvariablebuttonlayout");
+    QHBoxLayout *lFormLayout = new QHBoxLayout(this, 10, 10, 
+					       "chkptvariableformlayout");
+    QVBoxLayout *lTableLayout = new QVBoxLayout(6, 
+						"chkptvariabletablelayout");
+    QVBoxLayout *lButtonLayout = new QVBoxLayout(6, 
+						 "chkptvariablebuttonlayout");
     
     lTableLayout->addWidget(new QLabel("CheckPoint Parameters", this));
     mTable = new QTable(0,2,this);
@@ -85,8 +85,10 @@ ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
     QTableItem *lTableItem2 = NULL;
     for (int i=0; i<outputLogStruct->num_param; i++)
     {      
-      lTableItem = new ChkPtVarTableItem(mTable, QTableItem::Never, QString(outputLogStruct->param_labels[i]));
-      lTableItem2 = new ChkPtVarTableItem(mTable, QTableItem::Never, QString(outputLogStruct->param_values[i]));
+      lTableItem = new ChkPtVarTableItem(mTable, QTableItem::Never, 
+					 QString(outputLogStruct->param_labels[i]));
+      lTableItem2 = new ChkPtVarTableItem(mTable, QTableItem::Never, 
+					  QString(outputLogStruct->param_values[i]));
       mTable->insertRows(mTable->numRows());
       mTable->setItem(mTable->numRows()-1, 0, lTableItem );
       mTable->setItem(mTable->numRows()-1, 1, lTableItem2 );
@@ -109,13 +111,11 @@ ChkPtVariableForm::ChkPtVariableForm(const Output_log_struct *outputLogStruct,
     
     lFormLayout->addLayout(lTableLayout);
     lFormLayout->addLayout(lButtonLayout);
-  cout << "ARPDBG - END of constructor for ChkPtVariableForm" << endl;
 
 }
 
 ChkPtVariableForm::~ChkPtVariableForm()
 {
-//  DBGDST("ChkVariablePtForm");
   cleanUp();
 }
 
