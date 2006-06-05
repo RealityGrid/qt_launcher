@@ -39,6 +39,7 @@
 
 #include "CheckPointTreeItem.h"
 #include "soapH.h"
+#include <qregexp.h>
 
 using namespace std;
 
@@ -51,22 +52,23 @@ CheckPointTreeItem::CheckPointTreeItem(QListView *parent,
   // set a reference to the creating thread, so we can call its
   // method later when we come to expand the tree
   creatorThread = creator;
-
+  mIsRootNode = true;
   parent = NULL;
   children = NULL;
   numChildren = 0;
 
-  // then set the text and make expandable
-  //setText(0, checkPointTreeHandle);
+  // make expandable
   setExpandable(true);
 
   checkPointGSH = checkPointTreeHandle;
+  cout << "CheckPointTreeItem(): ROOT node, handle = " << checkPointGSH << endl;
+  cout << "Parent = " << parent << endl;
+  cout << "this is "<< this << endl;
 }
 
 
 /** Constructor for a  tree item member.
  *
- *  We want each constructor to then go away and check for the gsi-ftp files....
  */
 CheckPointTreeItem::CheckPointTreeItem(CheckPointTreeItem *_parent, 
 				       const QString &checkPointTreeHandle, 
@@ -75,13 +77,12 @@ CheckPointTreeItem::CheckPointTreeItem(CheckPointTreeItem *_parent,
   // set a reference to the creating thread, so we can call its
   // method later when we come to expand the tree
   creatorThread = creator;
-
+  mIsRootNode = false;
   parent = _parent;
   children = NULL;
   numChildren = 0;
 
-  // then set the text and make expandable
-  //setText(0, checkPointTreeHandle);
+  // make expandable
   setExpandable(true);
 
   checkPointGSH = checkPointTreeHandle;
@@ -126,20 +127,39 @@ CheckPointParamsList CheckPointTreeItem::getParamsList(){
 //----------------------------------------------------------------
 void CheckPointTreeItem::destroy(){
 
-  rgt__destroyResponse out;
   struct soap soap;
 
-  cout << "destroy: gsh = " << checkPointGSH << endl;
+  cout << "CheckPointTreeItem::destroy: gsh = " << checkPointGSH << endl;
 
   soap_init(&soap);
 
-  if (soap_call_rgt__destroy(&soap, checkPointGSH, "", NULL, &out)){
-    cout << "CheckPointTreeItem::destroy - failed:" << endl;
-    soap_print_fault(&soap, stderr);
+  if(!mIsRootNode){
+    cptn__destroyResponse out;
+
+    if (soap_call_cptn__Destroy(&soap, checkPointGSH, "", NULL, &out)){
+      cout << "CheckPointTreeItem::destroy - failed:" << endl;
+      soap_print_fault(&soap, stderr);
+    }
+    else{
+      cout << "CheckPointTreeItem::destroy - destroyed node with GSH = " <<
+	checkPointGSH << endl;
+    }
   }
   else{
-    cout << "CheckPointTreeItem::destroy - destroyed node with GSH = " <<
-      checkPointGSH << endl;
+    cpt__destroyResponse out;
+
+    cout << "CheckPointTreeItem::destroy - this is a ROOT node" << endl;
+    QString epr = checkPointGSH;
+    epr.replace(QRegExp("Node"), "");
+    cout << "arpdbg: epr for call to destroy is " << epr << endl;
+    if (soap_call_cpt__Destroy(&soap, epr, "", NULL, &out)){
+      cout << "CheckPointTreeItem::destroy - failed:" << endl;
+      soap_print_fault(&soap, stderr);
+    }
+    else{
+      cout << "CheckPointTreeItem::destroy - destroyed tree with root GSH = " <<
+	checkPointGSH << endl;
+    }
   }
 
   soap_end(&soap);
@@ -149,4 +169,10 @@ void CheckPointTreeItem::destroy(){
 //----------------------------------------------------------------
 CheckPointTreeItem  *CheckPointTreeItem::getParent(){
   return parent;
+}
+
+//----------------------------------------------------------------
+bool CheckPointTreeItem::isRootNode(){
+
+  return mIsRootNode;
 }

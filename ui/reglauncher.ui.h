@@ -1396,8 +1396,10 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
     rightMouseCheckPointTreeItem->destroy();
 
     // attempt to refresh the display
-    CheckPointTreeItem *aParent = rightMouseCheckPointTreeItem->getParent();
-    if (aParent) aParent->getChildData();
+    if( !(rightMouseCheckPointTreeItem->isRootNode()) ){
+      CheckPointTreeItem *aParent = rightMouseCheckPointTreeItem->getParent();
+      if (aParent) aParent->getChildData();
+    }
   }
 }
 

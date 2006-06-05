@@ -98,10 +98,14 @@ class CheckPointTreeItem: public QListViewItem {
     QString         tagForInput;
     QString         checkPointGSH;
 
-    CheckPointTreeItem *parent;
-    CheckPointTreeItem *children;
-    int                 numChildren;
-
+    /// Pointer to parent of this node
+    CheckPointTreeItem  *parent;
+    CheckPointTreeItem  *children;
+    /// The no. of children this node has
+    int                  numChildren;
+    /// Whether or not this node is the root of a checkpoint tree
+    bool                 mIsRootNode;
+    /// The parameters associated with this node
     CheckPointParamsList mParamsList;
     
   public:
@@ -128,6 +132,7 @@ class CheckPointTreeItem: public QListViewItem {
     /// the ServiceGroup of its parent and finally, deletes it.
     void                 destroy();
     CheckPointTreeItem  *getParent();
+    bool                 isRootNode();
 };
 
 #endif

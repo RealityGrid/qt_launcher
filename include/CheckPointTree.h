@@ -65,7 +65,7 @@ class CheckPointTree{
     QString    rootAddress;
     QListView *parent;
   
-    QStringList getActiveTrees();
+    void getActiveTrees();
 
     void parse(const QString &xmlDocString, 
 	       CheckPointTreeItem *parentListViewItem = NULL);

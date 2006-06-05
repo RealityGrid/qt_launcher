@@ -60,24 +60,18 @@ CheckPointTree::~CheckPointTree(){
 //----------------------------------------------------------------
 void CheckPointTree::run(){
 
-  QStringList t = getActiveTrees();
-
-  for (unsigned int i=0; i<t.count(); i++){
-    CheckPointTreeItem *tmp = new CheckPointTreeItem(parent, t[i], this);
-  }
-
+  getActiveTrees();
 }
 
 //----------------------------------------------------------------
-QStringList CheckPointTree::getActiveTrees(){
+void CheckPointTree::getActiveTrees(){
   struct soap                  soap;
-  QStringList                  activeTrees;
 
   soap_init(&soap);
 
   if( rootAddress.isNull() ){
     cout << "getActiveTrees - rootAddress is NULL!" << endl;
-    return activeTrees;
+    return;
   }
 
 #ifdef REG_WSRF
@@ -124,7 +118,7 @@ QStringList CheckPointTree::getActiveTrees(){
   soap_end(&soap);
   soap_done(&soap);
 
-  return activeTrees;
+  return;
 }
 
 //----------------------------------------------------------------
@@ -355,8 +349,8 @@ void CheckPointTree::parse(const QString &xmlDocString,
 
         // test to see if we're the top node... (?)
         // at present we check to see if we've meta-data in the node - this should only be
-        // true for the queried node, but at present the web-service returns this for children
-        // only. This needs to be fixed server side first.
+        // true for the queried node, but at present the web-service 
+	// returns this for children only. This needs to be fixed server side first.
         if (isMainNode){
           cpti = new CheckPointTreeItem(parentListViewItem, 
 					memberServiceLocatorHandle, this);
@@ -391,6 +385,4 @@ void CheckPointTree::parse(const QString &xmlDocString,
   }   
 
 }
-
-
 
