@@ -47,8 +47,8 @@ int checkPointTreeListViewPreviousSelection = -1;
   */
 void RegLauncher::init(){
   QString homeDir = QString(getenv("HOME"));
-  config.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
-  config2.readConfig(homeDir + "/RealityGrid/etc/launcher.conf");
+  config.readConfig(homeDir + "/.realitygrid/launcher.conf");
+  config2.readConfig(homeDir + "/.realitygrid/launcher.conf");
 
   checkPointTreeListView->setRootIsDecorated(true);
 
@@ -57,7 +57,7 @@ void RegLauncher::init(){
     QMessageBox::critical(this, "Configuration error",
 			  "Cannot read from the scripts directory\n("
 			  +config.mScriptsDirectory+")\n specified "
-			  "in ~/RealityGrid/etc/launcher.conf - launching will "
+			  "in ~/.realitygrid/launcher.conf - launching will "
 			  "NOT work.",  QMessageBox::Ok, 0, 0);
   }
 
@@ -66,7 +66,7 @@ void RegLauncher::init(){
     QMessageBox::critical(this, "Configuration error",
 			  "Cannot read from the scratch directory\n("
 			  +config.mScratchDirectory+")\n specified "
-			  "in ~/RealityGrid/etc/launcher.conf - launching will "
+			  "in ~/.realitygrid/launcher.conf - launching will "
 			  "NOT work.",  QMessageBox::Ok, 0, 0);
   }
 
@@ -75,7 +75,7 @@ void RegLauncher::init(){
     QMessageBox::warning( NULL, "Configuration error",
 			  "Steerer binary is not in the location \n("
 			  +config.mSteererBinaryLocation+")\n specified in "
-			  "~/RealityGrid/etc/launcher.conf.  Firing-up the\n"
+			  "~/.realitygrid/launcher.conf.  Firing-up the\n"
 			  "steering client from within the Launcher will not "
 			  "be possible\n\n",
 			  QMessageBox::Ok, 0, 0 );
@@ -84,8 +84,8 @@ void RegLauncher::init(){
   gridifier.setScriptsDirectory(config.mScriptsDirectory);
 
   // Read in security configuration
-  config.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
-  config2.readSecurityConfig(homeDir + "/RealityGrid/etc/security.conf");
+  config.readSecurityConfig(homeDir + "/.realitygrid/security.conf");
+  config2.readSecurityConfig(homeDir + "/.realitygrid/security.conf");
 
   if(config.topLevelRegistryGSH.startsWith("https://")){
     config.registrySecurity.use_ssl = 1;

@@ -637,28 +637,28 @@ bool LauncherConfig::createNewConfigFile(){
 
   QString homePath = QDir::homeDirPath();
   cout << "Home directory = " << homePath << endl;
-  QDir testDir = QDir(homePath+"/RealityGrid/etc");
+  QDir testDir = QDir(homePath+"/.realitygrid");
   if(!testDir.exists()){
-    if(!testDir.mkdir(homePath+"/RealityGrid/etc")){
+    if(!testDir.mkdir(homePath+"/.realitygrid")){
       QMessageBox::critical( NULL, "Error with configuration file",
-			     "File ~/RealityGrid/etc/launcher.conf does not exist\n"
-			     "and I cannot create the ~/RealityGrid/etc directory.\n\n",
+			     "File ~/.realitygrid/launcher.conf does not exist\n"
+			     "and I cannot create the ~/.realitygrid directory.\n\n",
 			     QMessageBox::Ok, 0, 0 );
       return false;
     }
   }
 
-  QFile configFile(homePath+"/RealityGrid/etc/launcher.conf");
+  QFile configFile(homePath+"/.realitygrid/launcher.conf");
   if(!configFile.open(IO_WriteOnly)){
       QMessageBox::critical( NULL, "Error with configuration file",
-			     "File ~/RealityGrid/etc/launcher.conf does not exist\n"
+			     "File ~/.realitygrid/launcher.conf does not exist\n"
 			     "and I cannot create it.\n\n",
 			     QMessageBox::Ok, 0, 0 );
       return false;
   }
 
   QMessageBox::warning( NULL, "New configuration file",
-			"The configuration file ~/RealityGrid/etc/launcher.conf was missing\n"
+			"The configuration file ~/.realitygrid/launcher.conf was missing\n"
 			"so I will create one for you but you'll need to edit it.\n\n",
 			QMessageBox::Ok, 0, 0 );
 
