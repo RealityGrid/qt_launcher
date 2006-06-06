@@ -1323,7 +1323,12 @@ void RegLauncher::contextMenuRequestedSlot( QListViewItem *listViewItem,
   popupMenu.insertItem(QString("View GSH"), 1);
   popupMenu.insertItem(QString("View Input File"), 2);
   popupMenu.insertItem(QString("View CheckPoint Data"), 3);
-  popupMenu.insertItem(QString("Delete node"), 4);
+  if(rightMouseCheckPointTreeItem->isRootNode()){
+    popupMenu.insertItem(QString("Delete tree"), 4);
+  }
+  else{
+    popupMenu.insertItem(QString("Delete node"), 4);
+  }
   connect(&popupMenu, SIGNAL(activated(int)), this, 
 	  SLOT(contextMenuItemSelectedSlot(int)));
   popupMenu.exec(pnt);
@@ -1340,7 +1345,8 @@ void RegLauncher::contextMenuItemSelectedSlot(int itemId)
 
     // Get a copy of the parameters that we want
     if (rightMouseCheckPointTreeItem != NULL){
-      CheckPointParamsList cpParamList = rightMouseCheckPointTreeItem->getParamsList();
+      CheckPointParamsList cpParamList = 
+	rightMouseCheckPointTreeItem->getParamsList();
 
       tmp.num_param = (int)cpParamList.size();
       for (unsigned int i=0; i<cpParamList.size(); i++){

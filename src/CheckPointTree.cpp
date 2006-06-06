@@ -92,7 +92,7 @@ void CheckPointTree::getActiveTrees(){
   Get_registry_entries_secure(epr.ascii(),
 			      &sec,
 			      &content);
-  cout << "Found " << content.numEntries << " checkpoint trees..." << endl;
+  //cout << "Found " << content.numEntries << " checkpoint trees..." << endl;
 
   for(int i=0; i<content.numEntries; i++){
 
@@ -148,11 +148,11 @@ void CheckPointTree::getChildNodes(const QString &handle,
     // <Value>hello</Value>
     // </Param>
     QString tmpStr = QString(content.entries[i].job_description);
-    cout << i << ": description : " << tmpStr << endl;
+    //cout << i << ": description : " << tmpStr << endl;
 
     // create a new node for each child
     QString nodeGSH = QString(content.entries[i].gsh);
-    cout << "GSH of node = " <<  nodeGSH << endl;
+    //cout << "GSH of node = " <<  nodeGSH << endl;
     cpti = new CheckPointTreeItem(t, nodeGSH, this);
 
    // Parse parameter values
@@ -168,18 +168,16 @@ void CheckPointTree::getChildNodes(const QString &handle,
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Label>",1,1);
 	QString label = tmpStr.section("</Label>",0,0);
-	printf("Param label >>%s<<\n", label.ascii());
-	//cout << "Param label is >>" << label << "<<" << endl;
+	//printf("Param label >>%s<<\n", label.ascii());
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Handle>",1,1);
 	QString handle = tmpStr.section("</Handle>",0,0);
-	printf("Param handle >>%s<<\n", handle.ascii());
-	//cout << "Param handle is >>" << handle << "<<" << endl;
+	//printf("Param handle >>%s<<\n", handle.ascii());
 	tmpStr = *it;
 	tmpStr = tmpStr.section("<Value>",1,1);
 	QString value = tmpStr.section("</Value>",0,0);
-	printf("Param value >>%s<<\n", value.ascii());
-	printf("--------------------\n");
+	//printf("Param value >>%s<<\n", value.ascii());
+	//printf("--------------------\n");
                             
 	if (label == QString("SEQUENCE_NUM")){
 	  seqNum = value;

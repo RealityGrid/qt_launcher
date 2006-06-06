@@ -39,6 +39,8 @@
 
 #include "CheckPointTreeItem.h"
 #include "soapH.h"
+#include "ReG_Steer_Common.h"
+#include "ReG_Steer_Utils.h"
 #include <qregexp.h>
 
 using namespace std;
@@ -61,9 +63,6 @@ CheckPointTreeItem::CheckPointTreeItem(QListView *parent,
   setExpandable(true);
 
   checkPointGSH = checkPointTreeHandle;
-  cout << "CheckPointTreeItem(): ROOT node, handle = " << checkPointGSH << endl;
-  cout << "Parent = " << parent << endl;
-  cout << "this is "<< this << endl;
 }
 
 
@@ -127,43 +126,29 @@ CheckPointParamsList CheckPointTreeItem::getParamsList(){
 //----------------------------------------------------------------
 void CheckPointTreeItem::destroy(){
 
-  struct soap soap;
+  struct reg_security_info sec;
+  Wipe_security_info(&sec);
+  strncpy(sec.userDN, getenv("USER"), REG_MAX_STRING_LENGTH);
+  sec.use_ssl = 0;
 
   cout << "CheckPointTreeItem::destroy: gsh = " << checkPointGSH << endl;
 
-  soap_init(&soap);
-
   if(!mIsRootNode){
-    cptn__destroyResponse out;
 
-    if (soap_call_cptn__Destroy(&soap, checkPointGSH, "", NULL, &out)){
-      cout << "CheckPointTreeItem::destroy - failed:" << endl;
-      soap_print_fault(&soap, stderr);
-    }
-    else{
-      cout << "CheckPointTreeItem::destroy - destroyed node with GSH = " <<
+    if(Destroy_steering_service(checkPointGSH.ascii(), &sec) != REG_SUCCESS){
+      cout << "CheckPointTreeItem::destroy - failed to destroy " << 
 	checkPointGSH << endl;
     }
   }
   else{
-    cpt__destroyResponse out;
-
     cout << "CheckPointTreeItem::destroy - this is a ROOT node" << endl;
     QString epr = checkPointGSH;
     epr.replace(QRegExp("Node"), "");
     cout << "arpdbg: epr for call to destroy is " << epr << endl;
-    if (soap_call_cpt__Destroy(&soap, epr, "", NULL, &out)){
-      cout << "CheckPointTreeItem::destroy - failed:" << endl;
-      soap_print_fault(&soap, stderr);
-    }
-    else{
-      cout << "CheckPointTreeItem::destroy - destroyed tree with root GSH = " <<
-	checkPointGSH << endl;
+    if(Destroy_steering_service(epr.ascii(), &sec) != REG_SUCCESS){
+      cout << "CheckPointTreeItem::destroy - failed to destroy " << epr << endl;
     }
   }
-
-  soap_end(&soap);
-  soap_done(&soap);
 }
 
 //----------------------------------------------------------------

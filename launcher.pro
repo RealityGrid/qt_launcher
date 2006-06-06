@@ -9,7 +9,7 @@ isEmpty( STEER_HOME ){
   error("REG_STEER_HOME environment variable not set")
 }
 
-LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32 -lReG_Steer 
+LIBS	+= -lxml2 -L${REG_STEER_HOME}/lib32
 # We check for existance of ReG_Steer_Utils library as indication
 # of whether we have version 1.2 or version 2.0+ of steering
 # library
@@ -18,6 +18,7 @@ exists( $$(REG_STEER_HOME)/lib32/libReG_Steer_Utils* ){
   DEFINES     += WITH_OPENSSL
   LIBS        += -lReG_Steer_Utils -lssl -lcrypto
 }
+LIBS += -lReG_Steer
 
 INCLUDEPATH += include /usr/include/libxml2 ${REG_STEER_HOME}/include
 
