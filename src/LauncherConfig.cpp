@@ -270,7 +270,6 @@ void LauncherConfig::readConfig(QString file){
     if ((!xmlStrcmp(childOfRoot->name, (const xmlChar*)"containers"))){
       containers = childOfRoot->xmlChildrenNode;
 
-      cout << "ARPDBG Containers from launcher.conf:" << endl;
       while (containers != NULL){
         
         if (!xmlStrcmp(containers->name, (const xmlChar*)"container")){
@@ -278,7 +277,6 @@ void LauncherConfig::readConfig(QString file){
           xmlChar *port = xmlGetProp(containers, (const xmlChar*)"port");
 	  mContainerList += "http://"+QString((char*)containerName)+":"+
 	    QString((char*)port) + "/";
-	  cout << "  ARPDBG Container: " << mContainerList.last() << endl;
           xmlFree(containerName);
           xmlFree(port);
         }
