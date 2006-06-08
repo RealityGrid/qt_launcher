@@ -23,6 +23,7 @@
 #include "LauncherConfig.h"
 #include "JobStatusThread.h"
 #include "ProgressBarThread.h"
+#include "ReG_Steer_Steerside_WSRF.h"
 
 // Reuse this from reg_qt_steerer
 #include "chkptvariableform.h"
@@ -291,9 +292,24 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
 QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
 {
   QString result;
-  
+  char    *rp;
   struct soap soap;
   soap_init(&soap);
+  
+#ifdef REG_WSRF
+
+  if( Get_resource_property(&soap,
+			    checkPointGSH.ascii(),
+			    "", "",
+			    "checkPointData", &rp) == REG_SUCCESS){
+    result = QString(rp);
+    //result.replace(QRegExp("(<\/?reg:checkPointData>)(>| *xmlns=\".*\">)"), "");
+    result.replace(QRegExp("^.*<Checkpoint_data"), "<Checkpoint_data");
+    // . doesn't match a newline in regexp
+    result.replace(QRegExp("<\/Checkpoint_data>(\n|.)*$"), "<\/Checkpoint_data>");
+  }
+
+#else
 
   rgt__getCheckPointDataResponse chkptDataResponse;
   if (soap_call_rgt__getCheckPointData(&soap, checkPointGSH, "", 
@@ -303,8 +319,11 @@ QString RegLauncher::getDataFileFromCheckPoint(const QString &checkPointGSH)
     result = chkptDataResponse._getCheckPointDataReturn;
   }
 
-  // ARPDBG - should call soap_end here but will that trash the
-  // contents of result??
+#endif // def REG_WSRF
+
+  soap_end(&soap);
+  soap_done(&soap);
+
   return result;
 }
 
