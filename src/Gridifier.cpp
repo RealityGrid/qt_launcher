@@ -383,13 +383,33 @@ QString Gridifier::makeSteeringService(const QString &factory,
   }
   snprintf(job.checkpointAddress, REG_MAX_STRING_LENGTH, chkTree);
 
-  cout << "ARPDBG: container: " << factory << endl;
-  cout << "ARPDBG: registry:  " << config.topLevelRegistryGSH << endl;
   char *EPR = Create_steering_service(&job,
 				      factory.ascii(), 
 				      config.topLevelRegistryGSH.ascii(),
                                       &(config.registrySecurity));
   result = QString(EPR);
+
+  // Put contents of input deck (if any) into the RP doc of the SWS
+  if( EPR && !(config.mInputFileName.isEmpty()) ){
+
+    QFile *inputFile = new QFile(config.mInputFileName);
+    inputFile->open( IO_ReadOnly );
+    QByteArray fileData = inputFile->readAll();
+    inputFile->close();
+
+    struct soap mySoap;
+    soap_init(&mySoap);
+
+    if(Set_resource_property(&mySoap, EPR, job.userName, 
+			     job.passphrase, fileData.data() ) != REG_SUCCESS){
+      cout << "Gridifier::makeSteeringService: WARNING - failed to store "
+	"job input file on SWS." << endl;
+    }
+
+    soap_end(&mySoap);
+    soap_done(&mySoap);
+  }
+
   if(EPR){
     printf("Address of SWS = %s\n", EPR);
   }
@@ -1042,7 +1062,6 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
 #ifdef REG_WSRF
   bool                     ok;
   int                      i;
-  int                      numEntries;
   struct registry_contents content;
 
   // Get the passphrase for the user's key if registry is using
