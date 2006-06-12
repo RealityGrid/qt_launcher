@@ -273,8 +273,26 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
   
   struct soap soap;
   soap_init(&soap);
-  
+
+#ifdef REG_WSRF
+  char    *rp;
+
+  if( Get_resource_property(&soap,
+			    checkPointGSH.ascii(),
+			    "", "",
+			    "inputFileContent", &rp) == REG_SUCCESS){
+    result = QString(rp);
+    // Strip off first and last xml tags
+    int index = result.find("><");
+    index++;
+    int last = result.findRev("><");
+    last++;
+    result = result.mid(index, last-index);
+  }
+
+#else
   rgt__getInputFileResponse inputFileResponse;
+
   if (soap_call_rgt__getInputFile(&soap, checkPointGSH, "", NULL,
 				  &inputFileResponse))
     soap_print_fault(&soap, stderr);
@@ -282,8 +300,11 @@ QString RegLauncher::getInputFileFromCheckPoint(const QString &checkPointGSH)
     result = inputFileResponse._getInputFileReturn;
   }
 
-  // ARPDBG - should call soap_end here but will that trash the
-  // contents of result??
+#endif
+
+  soap_end(&soap);
+  soap_done(&soap);
+
   return result;
 }
 
@@ -778,7 +799,7 @@ void RegLauncher::commonLaunchCode(){
       config.treeTag = "";
       sgs = gridifier.makeSteeringService(factory, config);
     }
-      
+
     // Check that the sgs was created properly, if not die
     if (sgs.length()==0 || !sgs.startsWith("http")){
       consoleOutSlot("Failed to create a steering service - is "
@@ -792,7 +813,7 @@ void RegLauncher::commonLaunchCode(){
 	    config.mJobData->mPersonLaunching.ascii(), REG_MAX_STRING_LENGTH);
     strncpy(config.simulationGSH.mSecurity.passphrase, 
 	    config.mServicePassword.ascii(), REG_MAX_STRING_LENGTH);
-
+      
     consoleOutSlot(QString("SGS is "+
 			   config.simulationGSH.mEPR).stripWhiteSpace());
 
