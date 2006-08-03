@@ -1,5 +1,7 @@
 TEMPLATE	= app
 LANGUAGE	= C++
+TARGETDEPS += ${REG_STEER_HOME}/lib32/libReG_Steer.a
+TARGETDEPS += ${REG_STEER_HOME}/lib32/libReG_Steer_Utils.a
 
 CONFIG	+= qt warn_on release thread opengl x11
 
