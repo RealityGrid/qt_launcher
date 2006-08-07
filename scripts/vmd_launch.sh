@@ -87,7 +87,7 @@ esac
 case $ReG_LAUNCH in
     globus|cog)
     $GLOBUS_BIN_PATH/grid-proxy-info -exists
-     if [ $? -ne "0" ]
+     if [ $? != "0" ]
      then
        echo "No grid proxy, please invoke grid-proxy-init"
        exit
@@ -95,13 +95,21 @@ case $ReG_LAUNCH in
     ;;
 esac
 
-if [ $SIM_HOSTNAME -ne "localhost" ]
+echo "-----------------------------------"
+echo $SIM_HOSTNAME
+echo "-----------------------------------"
+
+if [ $SIM_HOSTNAME != "localhost" ]
 then
    xhost + $SIM_HOSTNAME
 else
    if [ $DISPLAY = ":0" ]
    then
        CLIENT_DISPLAY=":0"
+   fi
+   if [ $DISPLAY = ":0.0" ]
+   then
+       CLIENT_DISPLAY=":0.0"
    fi
 fi
 
@@ -149,7 +157,7 @@ echo "export REG_SGS_ADDRESS" >> $REG_TMP_FILE
 # Really hacky bit to shift GLOBUS_TCP_PORT_RANGE if running on
 # local host.  This prevents sockets from self-connecting which
 # results in the connection back from vmd to namd failing.
-if [ "$SIM_HOSTNAME" == "localhost" ]
+if [ "$SIM_HOSTNAME" = "localhost" ]
 then
   # Check that GLOBUS_TCP_PORT_RANGE is defined
   echo "if [ -z \"\$GLOBUS_TCP_PORT_RANGE\" ]" >> $REG_TMP_FILE
