@@ -2,6 +2,7 @@ TEMPLATE	= app
 LANGUAGE	= C++
 TARGETDEPS += ${REG_STEER_HOME}/lib32/libReG_Steer.a
 TARGETDEPS += ${REG_STEER_HOME}/lib32/libReG_Steer_Utils.a
+TARGETDEPS += ${REG_STEER_HOME}/lib32/libReG_Steer_SOAP.a
 
 CONFIG	+= qt warn_on release thread opengl x11
 
@@ -20,7 +21,13 @@ exists( $$(REG_STEER_HOME)/lib32/libReG_Steer_Utils* ){
   DEFINES     += WITH_OPENSSL
   LIBS        += -lReG_Steer_Utils -lssl -lcrypto
 }
+
 LIBS += -lReG_Steer
+
+exists( $$(REG_STEER_HOME)/lib32/libReG_Steer_SOAP* ){
+  message("ReG_Steer_SOAP library found")
+  LIBS += -lReG_Steer_SOAP
+}
 
 INCLUDEPATH += include /usr/include/libxml2 ${REG_STEER_HOME}/include
 
