@@ -517,6 +517,8 @@ QString Gridifier::makeVizSGS(const QString &factory,
 #else // REG_WSRF is defined
 
   char                                       purpose[1024];
+  char                                       proxyAddress[1024];
+  int                                        proxyPort;
   char                                       iodef_label[256];
   char                                      *ioTypes;
   struct soap                                mySoap;
@@ -633,13 +635,66 @@ QString Gridifier::makeVizSGS(const QString &factory,
     return result;
   }
 
-  /* Finally, set it up with information on the data source*/
+  // Finally, set it up with information on the data source
 
-  snprintf(purpose, 1024, "<dataSource><sourceEPR>%s</sourceEPR>"
-	   "<sourceLabel>%s</sourceLabel></dataSource>",
-	   config.simulationGSH.mEPR.ascii(), iodef_label);
+  // Check to see whether or not an ioProxy is being used
+  if( Get_resource_property (&mySoap,
+			     config.simulationGSH.mEPR.ascii(),
+			     config.simulationGSH.mSecurity.userDN,
+			     config.simulationGSH.mSecurity.passphrase,
+			     "dataSink",
+			     &ioTypes) != REG_SUCCESS ){
 
+    cout << "Call to get dataSink ResourceProperty on "<< 
+      config.simulationGSH.mEPR << " failed" << endl;
+    return result;
+  }
 
+  // <sws:dataSink xmlns:sws="http://www.sve.man.ac.uk/SWS">
+  //   <Proxy>
+  //     <address>methuselah.mvc.mcc.ac.uk</address>
+  //     <port>50010</port>
+  //   </Proxy>
+  // </sws:dataSink>
+
+  cout << "ARPDBG: Got dataSink >>" << ioTypes << "<<" << endl;
+  char *ptr, *ptr0, *ptr1;
+  proxyPort = 0;
+  proxyAddress[0] = '\0';
+
+  if( ptr0 = strstr(ioTypes, "<Proxy>") ){
+    // An ioProxy IS being used by the simulation
+
+    ptr1 = NULL;
+    ptr = strstr(ptr0, "<address");
+    if(ptr)ptr = strstr(ptr, ">");
+    if(ptr)ptr++;
+    if(ptr)ptr1 = strstr(ptr, "</address>");
+    if(ptr1)*ptr1 = '\0';
+    if(ptr1)strncpy(proxyAddress, ptr, 1024);
+    if(ptr1)*ptr1 = '<';
+
+    ptr = strstr(ptr0, "<port");
+    if(ptr)ptr = strstr(ptr, ">");
+    if(ptr)ptr++;
+    if(ptr)ptr1 = strstr(ptr, "</port>");
+    if(ptr1)*ptr1 = '\0';
+    if(ptr1)proxyPort = atoi(ptr);
+    
+    int idx = snprintf(purpose, 1024, "<dataSink><Proxy><address>%s</address>"
+		       "<port>%d</port></Proxy></dataSink>",
+		       proxyAddress, proxyPort);
+    snprintf(&(purpose[idx]), 1024, "<dataSource><Proxy><address>%s"
+	     "</address><port>%d</port></Proxy><sourceLabel>%s"
+	     "</sourceLabel></dataSource>",
+	     proxyAddress, proxyPort, iodef_label);
+  }
+  else{
+    snprintf(purpose, 1024, "<dataSource><sourceEPR>%s</sourceEPR>"
+	     "<sourceLabel>%s</sourceLabel></dataSource>",
+	     config.simulationGSH.mEPR.ascii(), iodef_label);
+  }
+     
   printf("Calling Set_resource_property with >>%s<<\n",
 	 purpose);
 
