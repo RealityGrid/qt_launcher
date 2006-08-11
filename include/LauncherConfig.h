@@ -215,6 +215,12 @@ class LauncherConfig {
   QString mSteererBinaryLocation;
   /// The password to give the job we are in the process of launching
   QString mServicePassword;
+  /// The port on which the ioProxy (to use for indirect sockets IO)
+  /// is listening (zero if no ioProxy)
+  int     mIOProxyPort;
+  /// The address on which the ioProxy (to use for indirect sockets IO)
+  /// is listening (empty if no ioProxy)
+  QString mIOProxyAddress;
 
   // Methods
 

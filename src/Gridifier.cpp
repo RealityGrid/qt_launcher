@@ -389,6 +389,9 @@ QString Gridifier::makeSteeringService(const QString &factory,
                                       &(config.registrySecurity));
   result = QString(EPR);
 
+  struct soap mySoap;
+  soap_init(&mySoap);
+
   // Put contents of input deck (if any) into the RP doc of the SWS
   if( EPR && !(config.mInputFileName.isEmpty()) ){
 
@@ -397,18 +400,35 @@ QString Gridifier::makeSteeringService(const QString &factory,
     QByteArray fileData = inputFile->readAll();
     inputFile->close();
 
-    struct soap mySoap;
-    soap_init(&mySoap);
-
     if(Set_resource_property(&mySoap, EPR, job.userName, 
 			     job.passphrase, fileData.data() ) != REG_SUCCESS){
       cout << "Gridifier::makeSteeringService: WARNING - failed to store "
 	"job input file on SWS." << endl;
     }
-
-    soap_end(&mySoap);
-    soap_done(&mySoap);
   }
+
+  if(EPR && config.mIOProxyPort){
+
+    QString resourceProp("<dataSink><Proxy><address>");
+    resourceProp.append(config.mIOProxyAddress);
+    resourceProp.append("</address><port>");
+    resourceProp.append(QString::number(config.mIOProxyPort, 10));
+    resourceProp.append("</port></Proxy></dataSink>");
+     
+    cout << "Gridifier::makeSteeringService: Calling Set_resource_property "
+      "with >>" << resourceProp << "<<" << endl;
+
+    if(Set_resource_property(&mySoap, EPR,
+			     config.simulationGSH.mSecurity.userDN,
+			     config.simulationGSH.mSecurity.passphrase,
+			     (char *)(resourceProp.ascii())) != REG_SUCCESS){
+      cout << "Gridifier::makeSteeringService: WARNING - failed to set "
+	"details of ioProxy on the SWS" << endl;
+    }
+  }
+
+  soap_end(&mySoap);
+  soap_done(&mySoap);
 
   if(EPR){
     printf("Address of SWS = %s\n", EPR);

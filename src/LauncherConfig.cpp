@@ -70,6 +70,8 @@ LauncherConfig::LauncherConfig(){
   mTimeToRun      = 30;
   mJobData        = new JobMetaData;
   mIsCoupledModel = false;
+  mIOProxyPort    = 50010;
+  mIOProxyAddress = QString("methuselah.mvc.mcc.ac.uk");
 
   Wipe_security_info(&registrySecurity);
 
