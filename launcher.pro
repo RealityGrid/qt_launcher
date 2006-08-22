@@ -33,11 +33,11 @@ INCLUDEPATH += include /usr/include/libxml2 ${REG_STEER_HOME}/include
 
 # The $$() notation ensures that the environment variable
 # is expanded and used in the qmake expression
-!exists( $$(HOME)/RealityGrid/etc/launcher.conf ){
+!exists( $$(HOME)/.realitygrid/launcher.conf ){
   message("launcher.conf isn't already installed")
   CONF_FILES = conf/launcher.conf
 }
-!exists( $$(HOME)/RealityGrid/etc/security.conf ){
+!exists( $$(HOME)/.realitygrid/security.conf ){
   message("security.conf isn't already installed")
   isEmpty(CONF_FILES){
     CONF_FILES = conf/security.conf
@@ -48,7 +48,7 @@ INCLUDEPATH += include /usr/include/libxml2 ${REG_STEER_HOME}/include
 }
 !isEmpty( CONF_FILES ){
   message("Creating install target for config file(s)")
-  config_files.path = ${HOME}/RealityGrid/etc
+  config_files.path = ${HOME}/.realitygrid
   config_files.files = $$join(CONF_FILES, " ", " ")
   INSTALLS += config_files
 }
