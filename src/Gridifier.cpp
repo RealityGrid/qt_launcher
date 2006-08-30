@@ -401,7 +401,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
     inputFile->close();
 
     if(Set_resource_property(&mySoap, EPR, job.userName, 
-			     job.passphrase, fileData.data() ) != REG_SUCCESS){
+			     job.passphrase, 
+			     fileData.data() ) != REG_SUCCESS){
       cout << "Gridifier::makeSteeringService: WARNING - failed to store "
 	"job input file on SWS." << endl;
     }
@@ -419,8 +420,8 @@ QString Gridifier::makeSteeringService(const QString &factory,
       "with >>" << resourceProp << "<<" << endl;
 
     if(Set_resource_property(&mySoap, EPR,
-			     config.simulationGSH.mSecurity.userDN,
-			     config.simulationGSH.mSecurity.passphrase,
+			     job.userName, //config.simulationGSH.mSecurity.userDN,
+			     job.passphrase,//config.simulationGSH.mSecurity.passphrase,
 			     (char *)(resourceProp.ascii())) != REG_SUCCESS){
       cout << "Gridifier::makeSteeringService: WARNING - failed to set "
 	"details of ioProxy on the SWS" << endl;
