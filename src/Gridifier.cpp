@@ -399,10 +399,12 @@ QString Gridifier::makeSteeringService(const QString &factory,
     inputFile->open( IO_ReadOnly );
     QByteArray fileData = inputFile->readAll();
     inputFile->close();
-
+    QString fileRP("<inputFileContent><![CDATA[");
+    fileRP.append(fileData.data());
+    fileRP.append("]]></inputFileContent>");
     if(Set_resource_property(&mySoap, EPR, job.userName, 
 			     job.passphrase, 
-			     fileData.data() ) != REG_SUCCESS){
+			     (char *)(fileRP.ascii()) ) != REG_SUCCESS){
       cout << "Gridifier::makeSteeringService: WARNING - failed to store "
 	"job input file on SWS." << endl;
     }
@@ -416,12 +418,12 @@ QString Gridifier::makeSteeringService(const QString &factory,
     resourceProp.append(QString::number(config.mIOProxyPort, 10));
     resourceProp.append("</port></Proxy></dataSink>");
      
-    cout << "Gridifier::makeSteeringService: Calling Set_resource_property "
-      "with >>" << resourceProp << "<<" << endl;
+    //cout << "Gridifier::makeSteeringService: Calling Set_resource_property "
+    //  "with >>" << resourceProp << "<<" << endl;
 
     if(Set_resource_property(&mySoap, EPR,
-			     job.userName, //config.simulationGSH.mSecurity.userDN,
-			     job.passphrase,//config.simulationGSH.mSecurity.passphrase,
+			     job.userName,
+			     job.passphrase,
 			     (char *)(resourceProp.ascii())) != REG_SUCCESS){
       cout << "Gridifier::makeSteeringService: WARNING - failed to set "
 	"details of ioProxy on the SWS" << endl;
@@ -432,10 +434,10 @@ QString Gridifier::makeSteeringService(const QString &factory,
   soap_done(&mySoap);
 
   if(EPR){
-    printf("Address of SWS = %s\n", EPR);
+    cout << "Address of SWS = " << EPR << endl;
   }
   else{
-    printf("FAILED to create SWS :-(\n");
+    cout << "FAILED to create SWS :-(" << endl;
   }
 
 #endif // ndef REG_WSRF
