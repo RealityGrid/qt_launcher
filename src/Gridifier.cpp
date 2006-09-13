@@ -181,7 +181,7 @@ void Gridifier::getSGSies(LauncherConfig *aConfig,
   if( !(aConfig->registrySecurity.passphrase[0]) ){
     bool    ok;
     QString passphrase;
-    if(aConfig->registrySecurity.use_ssl){
+    if(aConfig->registrySecurity.use_ssl == REG_TRUE){
 
       passphrase = QInputDialog::getText("RealityGrid Launcher", 
 					 "Enter passphrase for X.509 key:", 
@@ -1146,7 +1146,7 @@ void Gridifier::getContainerList(LauncherConfig *aConfig){
   // SSL
   if( !(aConfig->registrySecurity.passphrase[0]) ){
     QString passphrase;
-    if( aConfig->registrySecurity.use_ssl){
+    if( aConfig->registrySecurity.use_ssl == REG_TRUE){
 
       passphrase = QInputDialog::getText("RealityGrid Launcher", 
 					 "Enter passphrase for X.509 key:", 

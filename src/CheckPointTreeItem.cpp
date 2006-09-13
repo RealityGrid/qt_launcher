@@ -129,7 +129,7 @@ void CheckPointTreeItem::destroy(){
   struct reg_security_info sec;
   Wipe_security_info(&sec);
   strncpy(sec.userDN, getenv("USER"), REG_MAX_STRING_LENGTH);
-  sec.use_ssl = 0;
+  sec.use_ssl = REG_FALSE;
 
   cout << "CheckPointTreeItem::destroy: gsh = " << checkPointGSH << endl;
 

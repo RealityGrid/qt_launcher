@@ -89,12 +89,12 @@ void RegLauncher::init(){
   config2.readSecurityConfig(homeDir + "/.realitygrid/security.conf");
 
   if(config.topLevelRegistryGSH.startsWith("https://")){
-    config.registrySecurity.use_ssl = 1;
-    config2.registrySecurity.use_ssl = 1;
+    config.registrySecurity.use_ssl = REG_TRUE;
+    config2.registrySecurity.use_ssl = REG_TRUE;
   }
   else{
-    config.registrySecurity.use_ssl = 0;
-    config2.registrySecurity.use_ssl = 0;
+    config.registrySecurity.use_ssl = REG_FALSE;
+    config2.registrySecurity.use_ssl = REG_FALSE;
   }
 
   gridifier.getContainerList(&config);
